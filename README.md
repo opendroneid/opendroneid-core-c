@@ -8,7 +8,11 @@ just type: make
 
 It will do a test encode/decode, then continuously generate sample messages.
 
-The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in opendroneid.h these are non-encoded forms:
+The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in opendroneid.h 
+
+![alt text](img/core-arch.png "Core SDK Scope")
+
+These are nominal (non-encoded) strutures:
 
 ```
 ODID_BasicID_data
@@ -18,7 +22,7 @@ ODID_SelfID_data
 ODID_System_data
 ```
 
-The SDK functions will encode the structures above into the following:
+The SDK functions will encode to (or decode from) the following structures:
 
 ```
 ODID_BasicID_encoded
