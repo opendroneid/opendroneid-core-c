@@ -14,6 +14,7 @@ gabriel.c.cox@intel.com
 #define _OPENDRONEID_H_
 
 #include <stdint.h>
+#include <string.h>
 #define ODID_MESSAGE_SIZE 25
 #define ODID_ID_SIZE 20
 #define ODID_STR_SIZE 23
@@ -457,6 +458,102 @@ float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy);
 float decodeVerticalAccuracy(ODID_Vertical_accuracy_t Accuracy);
 float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy);
 float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
+
+// OpenDroneID WiFi functions
+
+/**
+ * drone_export_gps_data - prints drone information to json style string,
+ * according to odid message specification
+ * @UAS_Data: general drone status information
+ *
+ * Returns pointer to gps_data string on success, otherwise returns NULL
+ */
+char *drone_export_gps_data(ODID_UAS_Data *UAS_Data);
+
+/**
+ * odid_message_encode_pack - encodes the messages in the odid pack
+ * @UAS_Data: general drone status information
+ * @pack: buffer space to write to
+ * @buflen: maximum length of buffer space
+ *
+ * Returns length on success, < 0 on failure. @buf only contains a valid message
+ * if the return code is >0
+ */
+int odid_message_encode_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen);
+
+/* odid_wifi_build_message_pack_nan_action_frame - creates a message pack
+ * with each type of message from the drone information into an NAN action fram
+ * @UAS_Data: general drone status information
+ * @mac: mac address of the wifi adapter where the NAN frame will be sent
+ * @send_counter: sequence number, to be increase for each call of this function
+ * @buf: pointer to buffer space where the NAN will be written to
+ * @buf_size: maximum size of the buffer
+ *
+ * Returns the packet length on success, or < 0 on error.
+ */
+int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
+						  uint8_t send_counter,
+						  uint8_t *buf, size_t buf_size);
+
+/* odid_message_decode_pack - decodes the messages from the odid mesasge pack
+ * @UAS_Data: general drone status information
+ * @pack: buffer space to read from
+ * @buflen: length of buffer space
+ *
+ * Returns 0 on success
+ */
+int odid_message_decode_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen);
+
+/* odid_wifi_receive_message_pack_nan_action_frame - processes a received message pack
+ * with each type of message from the drone information into an NAN action frame
+ * @UAS_Data: general drone status information
+ * @mac: mac address of the wifi adapter where the NAN frame will be sent
+ * @buf: pointer to buffer space where the NAN is stored
+ * @buf_size: maximum size of the buffer
+ *
+ * Returns 0 on success, or < 0 on error. Will fill 6 bytes into @mac.
+ */
+int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
+						    char *mac, uint8_t *buf, size_t buf_size);
+
+/**
+* IEEE 802.11 structs to build management action frame
+*/
+struct __attribute__((__packed__)) ieee80211_mgmt {
+	uint16_t frame_control;
+	uint16_t duration;
+	uint8_t da[6];
+	uint8_t sa[6];
+	uint8_t bssid[6];
+	uint16_t seq_ctrl;
+};
+
+struct __attribute__((__packed__)) nan_service_discovery {
+	uint8_t category;
+	uint8_t action_code;
+	uint8_t oui[3];
+	uint8_t oui_type;
+};
+
+struct __attribute__((__packed__)) nan_attribute_header {
+	uint8_t attribute_id;
+	uint16_t length;
+};
+
+struct __attribute__((__packed__)) nan_service_descriptor_attribute {
+	uint8_t attribute_id;
+	uint16_t length;
+	uint8_t service_id[6];
+	uint8_t instance_id;
+	uint8_t requestor_instance_id;
+	uint8_t service_control;
+	uint8_t service_info_length;
+};
+
+struct __attribute__((__packed__)) ODID_service_info {
+	uint8_t message_counter;
+	ODID_MessagePack_encoded odid_message_pack[];
+};
 
 #ifndef ODID_DISABLE_PRINTF
 void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
