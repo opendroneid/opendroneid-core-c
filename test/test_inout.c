@@ -12,7 +12,7 @@ gabriel.c.cox@intel.com
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "opendroneid.h"
+#include <opendroneid.h>
 
 ODID_BasicID_encoded BasicID_enc;
 ODID_BasicID_data BasicID;
