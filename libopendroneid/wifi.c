@@ -187,7 +187,9 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 						  uint8_t send_counter,
 						  uint8_t *buf, size_t buf_size)
 {
-	uint8_t broadcast_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+	/* Neighbor Awareness Networking Specification v3.0 in section 2.8.1
+	 * NAN Network ID calls for the destination mac to be 51-6F-9A-01-00-00 */
+	uint8_t target_addr[6] = { 0x51, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
 	/* "org.opendroneid.remoteid" hash */
 	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
 	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
@@ -206,7 +208,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_ACTION);
 	mgmt->duration = 0;
 	memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
-	memcpy(mgmt->da, broadcast_addr, sizeof(mgmt->da));
+	memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
 	memcpy(mgmt->bssid, mac, sizeof(mgmt->bssid));
 	mgmt->seq_ctrl = 0;
 
