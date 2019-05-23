@@ -111,19 +111,19 @@ typedef enum ODID_idtype {
     ODID_IDTYPE_UTM_ASSIGNED_ID = 3,
 } ODID_idtype_t;
 
-typedef enum ODID_uavtype {
-    ODID_UAVTYPE_NONE = 0,
-    ODID_UAVTYPE_FIXED_WING_POWERED = 1,
-    ODID_UAVTYPE_ROTORCRAFT_MULTIROTOR = 2,
-    ODID_UAVTYPE_LTA_POWERED = 3,    /* Lighter Than Air (such as a Blimp) */
-    ODID_UAVTYPE_LTA_UNPOWERED = 4,  /* example: Balloon */
-    ODID_UAVTYPE_VTOL = 5,           /* Fixed wing aircraft that can take off vertically) */
-    ODID_UAVTYPE_FREE_FALL = 6,      /* example: Parachute */
-    ODID_UAVTYPE_ROCKET = 7,
-    ODID_UAVTYPE_GLIDER = 8,
-    ODID_UAVTYPE_OTHER = 9,
+typedef enum ODID_uastype {
+    ODID_UASTYPE_NONE = 0,
+    ODID_UASTYPE_FIXED_WING_POWERED = 1,
+    ODID_UASTYPE_ROTORCRAFT_MULTIROTOR = 2,
+    ODID_UASTYPE_LTA_POWERED = 3,    /* Lighter Than Air (such as a Blimp) */
+    ODID_UASTYPE_LTA_UNPOWERED = 4,  /* example: Balloon */
+    ODID_UASTYPE_VTOL = 5,           /* Fixed wing aircraft that can take off vertically) */
+    ODID_UASTYPE_FREE_FALL = 6,      /* example: Parachute */
+    ODID_UASTYPE_ROCKET = 7,
+    ODID_UASTYPE_GLIDER = 8,
+    ODID_UASTYPE_OTHER = 9,
     // 10 to 15 reserved
-} ODID_uavtype_t;
+} ODID_uastype_t;
 
 typedef enum ODID_status {
     ODID_STATUS_UNDECLARED = 0,
@@ -176,7 +176,7 @@ typedef enum ODID_Speed_accuracy {
  * let the encoders put the data into encoded form.
  */
 typedef struct {
-    ODID_uavtype_t UASType;
+    ODID_uastype_t UASType;
     ODID_idtype_t IDType;
     char UASID[ODID_ID_SIZE+1];
 } ODID_BasicID_data;

@@ -564,7 +564,7 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
         return 0;
     } else {
         outData->IDType = (ODID_idtype_t) inEncoded->IDType;
-        outData->UASType = (ODID_uavtype_t) inEncoded->UASType;
+        outData->UASType = (ODID_uastype_t) inEncoded->UASType;
         safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
         return 1;
     }
