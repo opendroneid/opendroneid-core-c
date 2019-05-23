@@ -299,7 +299,7 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
 */
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 {
-    if (!inData || !intInRange(inData->AuthType,0,15) || !outEncoded) {
+    if (!inData || !intInRange(inData->AuthType, 0, 1) || !outEncoded) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_AUTH;
@@ -609,11 +609,11 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 */
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->AuthType,0,15) || !outData) {
+    if (!inEncoded || !intInRange(inEncoded->AuthType, 0, 1) || !outData) {
         return 0;
     } else {
         // TODO: Implement Multi-page support (for now, this will handle a single DataPage)
-        outData->AuthType = inEncoded->AuthType;
+        outData->AuthType = (ODID_authtype_t) inEncoded->AuthType;
         outData->DataPage = 0;
         safe_dec_copyfill(outData->AuthData, inEncoded->AuthData, sizeof(outData->AuthData));
         return 1;

@@ -62,7 +62,7 @@ void test_InOut()
     printLocation_data(Location);
     encodeLocationMessage(&Location_enc, &Location);
 
-    Auth.AuthType = 1;
+    Auth.AuthType = ODID_AUTHENTICATION_MPUID;
     Auth.DataPage = 0;
     safe_copyfill(Auth.AuthData, "1234567890123456789012", ODID_STR_SIZE);
     printf("\nAuth\n--------------\n");

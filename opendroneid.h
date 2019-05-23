@@ -169,6 +169,12 @@ typedef enum ODID_Speed_accuracy {
     // 5 to 15 reserved
 } ODID_Speed_accuracy_t;
 
+typedef enum ODID_authtype {
+    ODID_AUTHENTICATION_NONE = 0,
+    ODID_AUTHENTICATION_MPUID = 1, // Manufacturer Programmed Unique ID
+    // 2 to 15 reserved
+} ODID_authtype_t;
+
  /*
  * @name ODID_DataStructs
  * ODID Data Structures in their normative (non-packed) form.
@@ -200,7 +206,7 @@ typedef struct {
 
 typedef struct {
     uint8_t DataPage;
-    uint8_t AuthType;
+    ODID_authtype_t AuthType;
     char AuthData[ODID_STR_SIZE+1];  // additional byte to allow for null term in normative form
 } ODID_Auth_data;
 
