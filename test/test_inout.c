@@ -62,20 +62,20 @@ void test_InOut()
     printLocation_data(Location);
     encodeLocationMessage(&Location_enc, &Location);
 
-    Auth.AuthType = ODID_AUTHENTICATION_MPUID;
+    Auth.AuthType = ODID_AUTH_MPUID;
     Auth.DataPage = 0;
     safe_copyfill(Auth.AuthData, "1234567890123456789012", ODID_STR_SIZE);
     printf("\nAuth\n--------------\n");
     printAuth_data(Auth);
     encodeAuthMessage(&Auth_enc, &Auth);
 
-    SelfID.DescType = 0;
+    SelfID.DescType = ODID_DESC_TYPE_TEXT;
     safe_copyfill(SelfID.Desc,"DronesRUS: Real Estate",sizeof(SelfID.Desc));
     printf("\nSelfID\n------\n");
     printSelfID_data(SelfID);
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
 
-    System_data.LocationSource = 0;
+    System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
     System_data.Latitude = Location.Latitude + 0.00001;
     System_data.Longitude = Location.Longitude + 0.00001;
     System_data.GroupCount = 0;

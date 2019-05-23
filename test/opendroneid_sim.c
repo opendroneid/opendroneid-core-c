@@ -123,7 +123,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 2:
-            auth_data.AuthType = ODID_AUTHENTICATION_MPUID;
+            auth_data.AuthType = ODID_AUTH_MPUID;
             auth_data.DataPage = 0;
             safe_copyfill(auth_data.AuthData, "030a0cd033a3",sizeof(auth_data.AuthData));
 
@@ -132,14 +132,14 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 3:
-            selfID_data.DescType = 0;
+            selfID_data.DescType = ODID_DESC_TYPE_TEXT;
             safe_copyfill(selfID_data.Desc, "Real Estate Photos", sizeof(selfID_data.Desc));
             encodeSelfIDMessage(&selfID_enc, &selfID_data);
             memcpy(message, &selfID_enc, ODID_MESSAGE_SIZE);
             break;
 
         case 4:
-            system_data.LocationSource = 0; // 0 = Takeoff Point
+            system_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
             system_data.Latitude = simGndLat;
             system_data.Longitude = simGndLon;
             system_data.GroupCount = 0;

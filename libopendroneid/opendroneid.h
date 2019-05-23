@@ -17,85 +17,6 @@ gabriel.c.cox@intel.com
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.64.3
 
-/*
-ENUMERATION NOTES
-----------------------------------------------------
-  MSG Type
-    0: Basic ID
-    1: Location/Vector
-    2: Auth
-    3: Self ID
-    4: Operator
-
-  UAS ID Type:
-    1: Serial Number to CTA-2063 PSN
-    2: Civil aviation authority assigned ID
-    3: UTM Assigned ID
-
-  UAS Type:
-    0: None
-    1: Fixed Wing Powered
-    2: Rotorcraft/Multirotor
-    3: LTA (Lighter than Air) Powered
-    4: LTA Unpowered (Balloon)
-    5: VTOL (Fixed wing aircraft that can take off vertically)
-    6: Free Fall/Parachute
-    7: Rocket
-    8: Glider
-    9: Other
-    10-15: Reserved
-
-  UAS Status Type:
-    0: Undeclared
-    1: Ground,
-    2: Airborne (manual control)
-    3-15: Reserved
-
-  Horizontal Accuracy Level:
-    0:  = 18.52 km (10NM)  Unknown accuracy
-    1:  < 18.52 km (10NM)
-    2:  < 7.408 km (4NM)
-    3:  < 3.704 km (2NM)
-    4:  < 1 852 m (1NM)
-    5:  < 926 m (0.5NM)
-    6:  < 555.6 m (0.3NM
-    7:  < 185.2 m (0.1NM
-    8:  < 92.6 m (0.05NM)
-    9:  < 30 m
-    10:  < 10 m
-    11:  < 3 m
-    12:  < 1m
-    13-15: Reserved
-
-  Vertical Accuracy Level:
-    0:  >150m  Unknown
-    1:  <150m
-    2:  <45m
-    3:  <25m
-    4:  <10m
-    5:  <3m
-    6:  <1m
-    7:  Reserved
-
-  Speed Accuracy
-    0:  >10m/s or Unknown
-    1:  <10m/s
-    2:  <3m/s
-    3:  <1m/s
-    4:  <0.3m/s
-
-  Auth Type:
-    0:  None
-    1:  MFG Programmed Unique ID (MPIUD)
-    2-9:  Reserved for Open Drone ID
-    10-15: Available for Private Use
-
-  Location Source:
-    0: Takeoff Location
-    1: Live GNSS
----------------------------------------------------------
-*/
-
 typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_BASIC_ID = 0,
     ODID_MESSAGETYPE_LOCATION = 1,
@@ -109,6 +30,7 @@ typedef enum ODID_idtype {
     ODID_IDTYPE_SERIAL_NUMBER = 1,
     ODID_IDTYPE_CAA_ASSIGNED_ID = 2,
     ODID_IDTYPE_UTM_ASSIGNED_ID = 3,
+    // 4 to 15 reserved
 } ODID_idtype_t;
 
 typedef enum ODID_uastype {
@@ -170,10 +92,21 @@ typedef enum ODID_Speed_accuracy {
 } ODID_Speed_accuracy_t;
 
 typedef enum ODID_authtype {
-    ODID_AUTHENTICATION_NONE = 0,
-    ODID_AUTHENTICATION_MPUID = 1, // Manufacturer Programmed Unique ID
-    // 2 to 15 reserved
+    ODID_AUTH_NONE = 0,
+    ODID_AUTH_MPUID = 1, // Manufacturer Programmed Unique ID
+    // 2 to 9 reserved. 0xA to 0xF reserved for private use
 } ODID_authtype_t;
+
+typedef enum ODID_desctype {
+    ODID_DESC_TYPE_TEXT = 0,
+    // 1 to 255 reserved
+} ODID_desctype_t;
+
+typedef enum ODID_location_source {
+    ODID_LOCATION_SRC_TAKEOFF = 0,
+    ODID_LOCATION_SRC_LIVE_GNSS = 1,
+    // 2 to 255 reserved
+} ODID_location_source_t;
 
  /*
  * @name ODID_DataStructs
