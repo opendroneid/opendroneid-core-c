@@ -213,8 +213,8 @@ typedef struct {
     uint8_t LocationSource;
     double Latitude;
     double Longitude;
-    int16_t GroupCount;
-    int16_t GroupRadius;      // meter
+    uint16_t GroupCount;
+    uint16_t GroupRadius;     // meter
     float GroupCeiling;       // meter
 } ODID_System_data;
 
@@ -322,9 +322,9 @@ typedef struct __attribute__((__packed__)) {
     int32_t Longitude;
 
     // Byte 10-14
-    int16_t GroupCount;
-    int8_t  GroupRadius;
-    int16_t GroupCeiling;
+    uint16_t GroupCount;
+    uint8_t  GroupRadius;
+    uint16_t GroupCeiling;
 
     // Byte 15-24
     char Reserved2[10];
