@@ -123,7 +123,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 2:
-            auth_data.AuthType = 1;
+            auth_data.AuthType = ODID_AUTHENTICATION_MPUID;
             auth_data.DataPage = 0;
             safe_copyfill(auth_data.AuthData, "030a0cd033a3",sizeof(auth_data.AuthData));
 
