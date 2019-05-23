@@ -241,7 +241,9 @@ static uint16_t encodeGroupRadius(uint16_t Radius)
 */
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData)
 {
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData ||
+        !intInRange(inData->IDType, 0, 3) ||
+        !intInRange(inData->UASType, 0, 9)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_BASIC_ID;
@@ -263,7 +265,8 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData)
 {
     uint8_t multflag = 0;
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData ||
+        !intInRange(inData->Status, 0, 2)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
@@ -299,7 +302,7 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
 */
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 {
-    if (!inData || !intInRange(inData->AuthType, 0, 1) || !outEncoded) {
+    if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 1)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_AUTH;
@@ -321,7 +324,7 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 */
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData)
 {
-    if (!inData || !intInRange(inData->DescType,0,UINT8_MAX) || !outEncoded) {
+    if (!outEncoded || !inData || !intInRange(inData->DescType, 0, 0)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
@@ -341,7 +344,7 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
 */
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
 {
-    if (!inData || !intInRange(inData->LocationSource,0,15) || !outEncoded) {
+    if (!outEncoded || !inData || !intInRange(inData->LocationSource, 0, 1)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
@@ -560,7 +563,9 @@ static uint16_t decodeGroupRadius(uint8_t Radius_enc)
 */
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded ||
+        !intInRange(inEncoded->IDType, 0, 3) ||
+        !intInRange(inEncoded->UASType, 0, 9)) {
         return 0;
     } else {
         outData->IDType = (ODID_idtype_t) inEncoded->IDType;
@@ -579,7 +584,8 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
 */
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded ||
+        !intInRange(inEncoded->Status, 0, 2)) {
         return 0;
     } else {
         outData->Status = (ODID_status_t) inEncoded->Status;
@@ -609,7 +615,7 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 */
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->AuthType, 0, 1) || !outData) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->AuthType, 0, 1)) {
         return 0;
     } else {
         // TODO: Implement Multi-page support (for now, this will handle a single DataPage)
@@ -629,7 +635,7 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 */
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->DescType,0,UINT8_MAX) || !outData) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->DescType, 0, 0)) {
         return 0;
     } else {
         outData->DescType = inEncoded->DescType;
@@ -647,7 +653,7 @@ int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncode
 */
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->LocationSource,0,15) || !outData) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->LocationSource, 0, 1)) {
         return 0;
     } else {
         outData->LocationSource = inEncoded->LocationSource;
