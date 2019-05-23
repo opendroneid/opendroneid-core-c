@@ -93,7 +93,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
     switch (msgType) {
         case 0:
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
-            basicID_data.UASType = ODID_UAVTYPE_ROTORCRAFT_MULTIROTOR;
+            basicID_data.UASType = ODID_UASTYPE_ROTORCRAFT_MULTIROTOR;
             // 4 chr mfg code, 1chr Len, 15chr serial
             safe_copyfill(basicID_data.UASID, "INTCE123456789012345", sizeof(basicID_data.UASID));
 
