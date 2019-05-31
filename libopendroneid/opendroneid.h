@@ -99,7 +99,8 @@ typedef enum ODID_authtype {
 
 typedef enum ODID_desctype {
     ODID_DESC_TYPE_TEXT = 0,
-    // 1 to 255 reserved
+    ODID_DESC_TYPE_REMOTE_PILOT_ID = 1,
+    // 2 to 255 reserved
 } ODID_desctype_t;
 
 typedef enum ODID_location_source {
