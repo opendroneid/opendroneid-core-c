@@ -33,19 +33,19 @@ typedef enum ODID_idtype {
     // 4 to 15 reserved
 } ODID_idtype_t;
 
-typedef enum ODID_uastype {
-    ODID_UASTYPE_NONE = 0,
-    ODID_UASTYPE_FIXED_WING_POWERED = 1,
-    ODID_UASTYPE_ROTORCRAFT_MULTIROTOR = 2,
-    ODID_UASTYPE_LTA_POWERED = 3,    /* Lighter Than Air (such as a Blimp) */
-    ODID_UASTYPE_LTA_UNPOWERED = 4,  /* example: Balloon */
-    ODID_UASTYPE_VTOL = 5,           /* Fixed wing aircraft that can take off vertically) */
-    ODID_UASTYPE_FREE_FALL = 6,      /* example: Parachute */
-    ODID_UASTYPE_ROCKET = 7,
-    ODID_UASTYPE_GLIDER = 8,
-    ODID_UASTYPE_OTHER = 9,
+typedef enum ODID_uatype {
+    ODID_UATYPE_NONE = 0,
+    ODID_UATYPE_FIXED_WING_POWERED = 1,
+    ODID_UATYPE_ROTORCRAFT_MULTIROTOR = 2,
+    ODID_UATYPE_LTA_POWERED = 3,   /* Lighter Than Air (such as a Blimp) */
+    ODID_UATYPE_LTA_UNPOWERED = 4, /* example: Balloon */
+    ODID_UATYPE_VTOL = 5,          /* Fixed wing aircraft that can take off vertically) */
+    ODID_UATYPE_FREE_FALL = 6,     /* example: Parachute */
+    ODID_UATYPE_ROCKET = 7,
+    ODID_UATYPE_GLIDER = 8,
+    ODID_UATYPE_OTHER = 9,
     // 10 to 15 reserved
-} ODID_uastype_t;
+} ODID_uatype_t;
 
 typedef enum ODID_status {
     ODID_STATUS_UNDECLARED = 0,
@@ -115,7 +115,7 @@ typedef enum ODID_location_source {
  * let the encoders put the data into encoded form.
  */
 typedef struct {
-    ODID_uastype_t UASType;
+    ODID_uatype_t UAType;
     ODID_idtype_t IDType;
     char UASID[ODID_ID_SIZE+1];
 } ODID_BasicID_data;
@@ -176,8 +176,8 @@ typedef struct __attribute__((__packed__)) {
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
 
-    // Byte 1 [IDType][UASType]  -- must define LSb first
-    uint8_t UASType: 4;
+    // Byte 1 [IDType][UAType]  -- must define LSb first
+    uint8_t UAType: 4;
     uint8_t IDType: 4;
 
     // Bytes 2-21

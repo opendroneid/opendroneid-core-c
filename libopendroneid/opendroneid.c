@@ -243,13 +243,13 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
 {
     if (!outEncoded || !inData ||
         !intInRange(inData->IDType, 0, 15) ||
-        !intInRange(inData->UASType, 0, 15)) {
+        !intInRange(inData->UAType, 0, 15)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_BASIC_ID;
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->IDType = inData->IDType;
-        outEncoded->UASType = inData->UASType;
+        outEncoded->UAType = inData->UAType;
         safe_copyfill(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
         return 1;
     }
@@ -564,11 +564,11 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
 {
     if (!outData || !inEncoded ||
         !intInRange(inEncoded->IDType, 0, 15) ||
-        !intInRange(inEncoded->UASType, 0, 15)) {
+        !intInRange(inEncoded->UAType, 0, 15)) {
         return 0;
     } else {
         outData->IDType = (ODID_idtype_t) inEncoded->IDType;
-        outData->UASType = (ODID_uastype_t) inEncoded->UASType;
+        outData->UAType = (ODID_uatype_t) inEncoded->UAType;
         safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
         return 1;
     }
@@ -763,8 +763,8 @@ void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced)
 */
 void printBasicID_data(ODID_BasicID_data BasicID)
 {
-    const char ODID_BasicID_data_format[] = "UASType: %d\nIDType: %d\nUASID: %s\n";
-    printf(ODID_BasicID_data_format, BasicID.IDType, BasicID.UASType, BasicID.UASID);
+    const char ODID_BasicID_data_format[] = "UAType: %d\nIDType: %d\nUASID: %s\n";
+    printf(ODID_BasicID_data_format, BasicID.IDType, BasicID.UAType, BasicID.UASID);
 }
 
 /**
