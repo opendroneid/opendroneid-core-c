@@ -76,8 +76,8 @@ void test_InOut()
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
 
     System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
-    System_data.Latitude = Location.Latitude + 0.00001;
-    System_data.Longitude = Location.Longitude + 0.00001;
+    System_data.remotePilotLatitude = Location.Latitude + 0.00001;
+    System_data.remotePilotLongitude = Location.Longitude + 0.00001;
     System_data.GroupCount = 0;
     System_data.GroupRadius = 0;
     System_data.GroupCeiling = 0;

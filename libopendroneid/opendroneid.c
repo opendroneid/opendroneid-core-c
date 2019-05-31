@@ -350,8 +350,8 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->Reserved = 0;
         outEncoded->LocationSource = inData->LocationSource;
-        outEncoded->Latitude = encodeLatLon(inData->Latitude);
-        outEncoded->Longitude = encodeLatLon(inData->Longitude);
+        outEncoded->remotePilotLatitude = encodeLatLon(inData->remotePilotLatitude);
+        outEncoded->remotePilotLongitude = encodeLatLon(inData->remotePilotLongitude);
         outEncoded->GroupCount = inData->GroupCount;
         outEncoded->GroupRadius = encodeGroupRadius(inData->GroupRadius);
         outEncoded->GroupCeiling = encodeAltitude(inData->GroupCeiling);
@@ -655,8 +655,8 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
         return 0;
     } else {
         outData->LocationSource = inEncoded->LocationSource;
-        outData->Latitude = decodeLatLon(inEncoded->Latitude);
-        outData->Longitude = decodeLatLon(inEncoded->Longitude);
+        outData->remotePilotLatitude = decodeLatLon(inEncoded->remotePilotLatitude);
+        outData->remotePilotLongitude = decodeLatLon(inEncoded->remotePilotLongitude);
         outData->GroupCount = inEncoded->GroupCount;
         outData->GroupRadius = decodeGroupRadius(inEncoded->GroupRadius);
         outData->GroupCeiling = decodeAltitude(inEncoded->GroupCeiling);
@@ -811,7 +811,7 @@ void printSelfID_data(ODID_SelfID_data SelfID)
 void printSystem_data(ODID_System_data System_data)
 {
     const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: %.7f, %.7f\nGroup Count, Radius, Ceiling: %d, %d, %.2f\n";
-    printf(ODID_System_data_format, System_data.LocationSource, System_data.Latitude, System_data.Longitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling);
+    printf(ODID_System_data_format, System_data.LocationSource, System_data.remotePilotLatitude, System_data.remotePilotLongitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling);
 }
 
 #endif // ODID_DISABLE_PRINTF

@@ -151,8 +151,8 @@ typedef struct {
 
 typedef struct {
     uint8_t LocationSource;
-    double Latitude;
-    double Longitude;
+    double remotePilotLatitude;
+    double remotePilotLongitude;
     uint16_t GroupCount;
     uint16_t GroupRadius;     // meter
     float GroupCeiling;       // meter
@@ -258,8 +258,8 @@ typedef struct __attribute__((__packed__)) {
     uint8_t LocationSource: 1;
 
     // Byte 2-9
-    int32_t Latitude;
-    int32_t Longitude;
+    int32_t remotePilotLatitude;
+    int32_t remotePilotLongitude;
 
     // Byte 10-14
     uint16_t GroupCount;

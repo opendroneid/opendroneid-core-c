@@ -140,8 +140,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 
         case 4:
             system_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
-            system_data.Latitude = simGndLat;
-            system_data.Longitude = simGndLon;
+            system_data.remotePilotLatitude = simGndLat;
+            system_data.remotePilotLongitude = simGndLon;
             system_data.GroupCount = 0;
             system_data.GroupRadius = 0;
             system_data.GroupCeiling = 0;
