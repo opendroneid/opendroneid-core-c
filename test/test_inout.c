@@ -53,10 +53,10 @@ void test_InOut()
     Location.AltitudeBaro = 100;
     Location.AltitudeGeo = 110;
     Location.HeightAboveTakeoff = 80;
-    Location.HorizAccuracy = 2.5f;
-    Location.VertAccuracy = 0.5f;
-    Location.SpeedAccuracy = 0.5f;
-    Location.TSAccuracy = 0.2f;
+    Location.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
+    Location.VertAccuracy = createEnumVerticalAccuracy(0.5f);
+    Location.TSAccuracy = createEnumSpeedAccuracy(0.5f);
+    Location.SpeedAccuracy = createEnumTimestampAccuracy(0.2f);
     Location.TimeStamp = 3600.52;
     printf("\nLocation\n--------\n");
     printLocation_data(Location);

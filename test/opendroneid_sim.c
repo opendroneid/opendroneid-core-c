@@ -112,10 +112,10 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             location_data.AltitudeBaro = 100;
             location_data.AltitudeGeo = 100;
             location_data.HeightAboveTakeoff = 50;
-            location_data.HorizAccuracy = 2.5f;
-            location_data.VertAccuracy = 2.5f;
-            location_data.TSAccuracy = 0.2f;
-            location_data.SpeedAccuracy = 0.5f;
+            location_data.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
+            location_data.VertAccuracy = createEnumVerticalAccuracy(2.5f);
+            location_data.TSAccuracy = createEnumSpeedAccuracy(0.2f);
+            location_data.SpeedAccuracy = createEnumTimestampAccuracy(0.5f);
             location_data.TimeStamp = 60;
 
             encodeLocationMessage(&location_enc, &location_data);

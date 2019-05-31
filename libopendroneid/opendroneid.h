@@ -56,7 +56,7 @@ typedef enum ODID_status {
 
 typedef enum ODID_Horizontal_accuracy {
     ODID_HOR_ACC_UNKNOWN = 0,
-    ODID_HOR_ACC_10NM = 1,
+    ODID_HOR_ACC_10NM = 1, // Nautical Miles
     ODID_HOR_ACC_4NM = 2,
     ODID_HOR_ACC_2NM = 3,
     ODID_HOR_ACC_1NM = 4,
@@ -90,6 +90,25 @@ typedef enum ODID_Speed_accuracy {
     ODID_SPEED_ACC_0_3_METERS_SECOND = 4,
     // 5 to 15 reserved
 } ODID_Speed_accuracy_t;
+
+typedef enum ODID_Timestamp_accuracy {
+    ODID_TIME_ACC_UNKNOWN = 0,
+    ODID_TIME_ACC_0_1_SECONDS = 1,
+    ODID_TIME_ACC_0_2_SECONDS = 2,
+    ODID_TIME_ACC_0_3_SECONDS = 3,
+    ODID_TIME_ACC_0_4_SECONDS = 4,
+    ODID_TIME_ACC_0_5_SECONDS = 5,
+    ODID_TIME_ACC_0_6_SECONDS = 6,
+    ODID_TIME_ACC_0_7_SECONDS = 7,
+    ODID_TIME_ACC_0_8_SECONDS = 8,
+    ODID_TIME_ACC_0_9_SECONDS = 9,
+    ODID_TIME_ACC_1_0_SECONDS = 10,
+    ODID_TIME_ACC_1_1_SECONDS = 11,
+    ODID_TIME_ACC_1_2_SECONDS = 12,
+    ODID_TIME_ACC_1_3_SECONDS = 13,
+    ODID_TIME_ACC_1_4_SECONDS = 14,
+    ODID_TIME_ACC_1_5_SECONDS = 15,
+} ODID_Timestamp_accuracy_t;
 
 typedef enum ODID_authtype {
     ODID_AUTH_NONE = 0,
@@ -131,10 +150,10 @@ typedef struct {
     float AltitudeBaro;       // meter
     float AltitudeGeo;        // meter
     float HeightAboveTakeoff; // meter
-    float HorizAccuracy;      // meter
-    float VertAccuracy;       // meter
-    float SpeedAccuracy;      // m/s
-    float TSAccuracy;         // seconds
+    ODID_Horizontal_accuracy_t HorizAccuracy;
+    ODID_Vertical_accuracy_t VertAccuracy;
+    ODID_Speed_accuracy_t SpeedAccuracy;
+    ODID_Timestamp_accuracy_t TSAccuracy;
     float TimeStamp;          // seconds after the full hour
 } ODID_Location_data;
 
@@ -303,6 +322,16 @@ char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize);
 char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize);
 int intRangeMax(int64_t inValue, int startRange, int endRange);
 int intInRange(int inValue, int startRange, int endRange);
+
+ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy);
+ODID_Vertical_accuracy_t createEnumVerticalAccuracy(float Accuracy);
+ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy);
+ODID_Timestamp_accuracy_t createEnumTimestampAccuracy(float Accuracy);
+
+float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy);
+float decodeVerticalAccuracy(ODID_Vertical_accuracy_t Accuracy);
+float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy);
+float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
 
 #ifndef ODID_DISABLE_PRINTF
 void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
