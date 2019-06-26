@@ -14,7 +14,7 @@ gabriel.c.cox@intel.com
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
-#include "opendroneid.h"
+#include <opendroneid.h>
 #define SLEEPMS 1000000 //ns
 
 ODID_BasicID_encoded basicID_enc;
