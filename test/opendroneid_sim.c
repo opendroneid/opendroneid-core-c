@@ -93,7 +93,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
     switch (msgType) {
         case 0:
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
-            basicID_data.UASType = ODID_UAVTYPE_ROTORCRAFT_MULTIROTOR;
+            basicID_data.UAType = ODID_UATYPE_ROTORCRAFT_MULTIROTOR;
             // 4 chr mfg code, 1chr Len, 15chr serial
             safe_copyfill(basicID_data.UASID, "INTCE123456789012345", sizeof(basicID_data.UASID));
 
@@ -112,10 +112,10 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             location_data.AltitudeBaro = 100;
             location_data.AltitudeGeo = 100;
             location_data.HeightAboveTakeoff = 50;
-            location_data.HorizAccuracy = 2.5f;
-            location_data.VertAccuracy = 2.5f;
-            location_data.TSAccuracy = 0.2f;
-            location_data.SpeedAccuracy = 0.5f;
+            location_data.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
+            location_data.VertAccuracy = createEnumVerticalAccuracy(2.5f);
+            location_data.TSAccuracy = createEnumSpeedAccuracy(0.2f);
+            location_data.SpeedAccuracy = createEnumTimestampAccuracy(0.5f);
             location_data.TimeStamp = 60;
 
             encodeLocationMessage(&location_enc, &location_data);
@@ -123,7 +123,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 2:
-            auth_data.AuthType = 1;
+            auth_data.AuthType = ODID_AUTH_MPUID;
             auth_data.DataPage = 0;
             safe_copyfill(auth_data.AuthData, "030a0cd033a3",sizeof(auth_data.AuthData));
 
@@ -132,16 +132,16 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 3:
-            selfID_data.DescType = 0;
+            selfID_data.DescType = ODID_DESC_TYPE_TEXT;
             safe_copyfill(selfID_data.Desc, "Real Estate Photos", sizeof(selfID_data.Desc));
             encodeSelfIDMessage(&selfID_enc, &selfID_data);
             memcpy(message, &selfID_enc, ODID_MESSAGE_SIZE);
             break;
 
         case 4:
-            system_data.LocationSource = 0; // 0 = Takeoff Point
-            system_data.Latitude = simGndLat;
-            system_data.Longitude = simGndLon;
+            system_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
+            system_data.remotePilotLatitude = simGndLat;
+            system_data.remotePilotLongitude = simGndLon;
             system_data.GroupCount = 0;
             system_data.GroupRadius = 0;
             system_data.GroupCeiling = 0;

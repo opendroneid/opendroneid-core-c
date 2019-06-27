@@ -17,85 +17,6 @@ gabriel.c.cox@intel.com
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.64.3
 
-/*
-ENUMERATION NOTES
-----------------------------------------------------
-  MSG Type
-    0: Basic ID
-    1: Location/Vector
-    2: Auth
-    3: Self ID
-    4: Operator
-
-  UAS ID Type:
-    1: Serial Number to CTA-2063 PSN
-    2: Civil aviation authority assigned ID
-    3: UTM Assigned ID
-
-  UAS Type:
-    0: None
-    1: Fixed Wing Powered
-    2: Rotorcraft/Multirotor
-    3: LTA (Lighter than Air) Powered
-    4: LTA Unpowered (Balloon)
-    5: VTOL (Fixed wing aircraft that can take off vertically)
-    6: Free Fall/Parachute
-    7: Rocket
-    8: Glider
-    9: Other
-    10-15: Reserved
-
-  UAS Status Type:
-    0: Undeclared
-    1: Ground,
-    2: Airborne (manual control)
-    3-15: Reserved
-
-  Horizontal Accuracy Level:
-    0:  = 18.52 km (10NM)  Unknown accuracy
-    1:  < 18.52 km (10NM)
-    2:  < 7.408 km (4NM)
-    3:  < 3.704 km (2NM)
-    4:  < 1 852 m (1NM)
-    5:  < 926 m (0.5NM)
-    6:  < 555.6 m (0.3NM
-    7:  < 185.2 m (0.1NM
-    8:  < 92.6 m (0.05NM)
-    9:  < 30 m
-    10:  < 10 m
-    11:  < 3 m
-    12:  < 1m
-    13-15: Reserved
-
-  Vertical Accuracy Level:
-    0:  >150m  Unknown
-    1:  <150m
-    2:  <45m
-    3:  <25m
-    4:  <10m
-    5:  <3m
-    6:  <1m
-    7:  Reserved
-
-  Speed Accuracy
-    0:  >10m/s or Unknown
-    1:  <10m/s
-    2:  <3m/s
-    3:  <1m/s
-    4:  <0.3m/s
-
-  Auth Type:
-    0:  None
-    1:  MFG Programmed Unique ID (MPIUD)
-    2-9:  Reserved for Open Drone ID
-    10-15: Available for Private Use
-
-  Location Source:
-    0: Takeoff Location
-    1: Live GNSS
----------------------------------------------------------
-*/
-
 typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_BASIC_ID = 0,
     ODID_MESSAGETYPE_LOCATION = 1,
@@ -109,21 +30,22 @@ typedef enum ODID_idtype {
     ODID_IDTYPE_SERIAL_NUMBER = 1,
     ODID_IDTYPE_CAA_ASSIGNED_ID = 2,
     ODID_IDTYPE_UTM_ASSIGNED_ID = 3,
+    // 4 to 15 reserved
 } ODID_idtype_t;
 
-typedef enum ODID_uavtype {
-    ODID_UAVTYPE_NONE = 0,
-    ODID_UAVTYPE_FIXED_WING_POWERED = 1,
-    ODID_UAVTYPE_ROTORCRAFT_MULTIROTOR = 2,
-    ODID_UAVTYPE_LTA_POWERED = 3,    /* Lighter Than Air (such as a Blimp) */
-    ODID_UAVTYPE_LTA_UNPOWERED = 4,  /* example: Balloon */
-    ODID_UAVTYPE_VTOL = 5,           /* Fixed wing aircraft that can take off vertically) */
-    ODID_UAVTYPE_FREE_FALL = 6,      /* example: Parachute */
-    ODID_UAVTYPE_ROCKET = 7,
-    ODID_UAVTYPE_GLIDER = 8,
-    ODID_UAVTYPE_OTHER = 9,
+typedef enum ODID_uatype {
+    ODID_UATYPE_NONE = 0,
+    ODID_UATYPE_FIXED_WING_POWERED = 1,
+    ODID_UATYPE_ROTORCRAFT_MULTIROTOR = 2,
+    ODID_UATYPE_LTA_POWERED = 3,   /* Lighter Than Air (such as a Blimp) */
+    ODID_UATYPE_LTA_UNPOWERED = 4, /* example: Balloon */
+    ODID_UATYPE_VTOL = 5,          /* Fixed wing aircraft that can take off vertically) */
+    ODID_UATYPE_FREE_FALL = 6,     /* example: Parachute */
+    ODID_UATYPE_ROCKET = 7,
+    ODID_UATYPE_GLIDER = 8,
+    ODID_UATYPE_OTHER = 9,
     // 10 to 15 reserved
-} ODID_uavtype_t;
+} ODID_uatype_t;
 
 typedef enum ODID_status {
     ODID_STATUS_UNDECLARED = 0,
@@ -134,7 +56,7 @@ typedef enum ODID_status {
 
 typedef enum ODID_Horizontal_accuracy {
     ODID_HOR_ACC_UNKNOWN = 0,
-    ODID_HOR_ACC_10NM = 1,
+    ODID_HOR_ACC_10NM = 1, // Nautical Miles
     ODID_HOR_ACC_4NM = 2,
     ODID_HOR_ACC_2NM = 3,
     ODID_HOR_ACC_1NM = 4,
@@ -169,6 +91,43 @@ typedef enum ODID_Speed_accuracy {
     // 5 to 15 reserved
 } ODID_Speed_accuracy_t;
 
+typedef enum ODID_Timestamp_accuracy {
+    ODID_TIME_ACC_UNKNOWN = 0,
+    ODID_TIME_ACC_0_1_SECONDS = 1,
+    ODID_TIME_ACC_0_2_SECONDS = 2,
+    ODID_TIME_ACC_0_3_SECONDS = 3,
+    ODID_TIME_ACC_0_4_SECONDS = 4,
+    ODID_TIME_ACC_0_5_SECONDS = 5,
+    ODID_TIME_ACC_0_6_SECONDS = 6,
+    ODID_TIME_ACC_0_7_SECONDS = 7,
+    ODID_TIME_ACC_0_8_SECONDS = 8,
+    ODID_TIME_ACC_0_9_SECONDS = 9,
+    ODID_TIME_ACC_1_0_SECONDS = 10,
+    ODID_TIME_ACC_1_1_SECONDS = 11,
+    ODID_TIME_ACC_1_2_SECONDS = 12,
+    ODID_TIME_ACC_1_3_SECONDS = 13,
+    ODID_TIME_ACC_1_4_SECONDS = 14,
+    ODID_TIME_ACC_1_5_SECONDS = 15,
+} ODID_Timestamp_accuracy_t;
+
+typedef enum ODID_authtype {
+    ODID_AUTH_NONE = 0,
+    ODID_AUTH_MPUID = 1, // Manufacturer Programmed Unique ID
+    // 2 to 9 reserved. 0xA to 0xF reserved for private use
+} ODID_authtype_t;
+
+typedef enum ODID_desctype {
+    ODID_DESC_TYPE_TEXT = 0,
+    ODID_DESC_TYPE_REMOTE_PILOT_ID = 1,
+    // 2 to 255 reserved
+} ODID_desctype_t;
+
+typedef enum ODID_location_source {
+    ODID_LOCATION_SRC_TAKEOFF = 0,
+    ODID_LOCATION_SRC_LIVE_GNSS = 1,
+    // 2 to 255 reserved
+} ODID_location_source_t;
+
  /*
  * @name ODID_DataStructs
  * ODID Data Structures in their normative (non-packed) form.
@@ -176,7 +135,7 @@ typedef enum ODID_Speed_accuracy {
  * let the encoders put the data into encoded form.
  */
 typedef struct {
-    ODID_uavtype_t UASType;
+    ODID_uatype_t UAType;
     ODID_idtype_t IDType;
     char UASID[ODID_ID_SIZE+1];
 } ODID_BasicID_data;
@@ -191,16 +150,16 @@ typedef struct {
     float AltitudeBaro;       // meter
     float AltitudeGeo;        // meter
     float HeightAboveTakeoff; // meter
-    float HorizAccuracy;      // meter
-    float VertAccuracy;       // meter
-    float SpeedAccuracy;      // m/s
-    float TSAccuracy;         // seconds
+    ODID_Horizontal_accuracy_t HorizAccuracy;
+    ODID_Vertical_accuracy_t VertAccuracy;
+    ODID_Speed_accuracy_t SpeedAccuracy;
+    ODID_Timestamp_accuracy_t TSAccuracy;
     float TimeStamp;          // seconds after the full hour
 } ODID_Location_data;
 
 typedef struct {
     uint8_t DataPage;
-    uint8_t AuthType;
+    ODID_authtype_t AuthType;
     char AuthData[ODID_STR_SIZE+1];  // additional byte to allow for null term in normative form
 } ODID_Auth_data;
 
@@ -211,10 +170,10 @@ typedef struct {
 
 typedef struct {
     uint8_t LocationSource;
-    double Latitude;
-    double Longitude;
-    int16_t GroupCount;
-    int16_t GroupRadius;      // meter
+    double remotePilotLatitude;
+    double remotePilotLongitude;
+    uint16_t GroupCount;
+    uint16_t GroupRadius;     // meter
     float GroupCeiling;       // meter
 } ODID_System_data;
 
@@ -237,8 +196,8 @@ typedef struct __attribute__((__packed__)) {
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
 
-    // Byte 1 [IDType][UASType]  -- must define LSb first
-    uint8_t UASType: 4;
+    // Byte 1 [IDType][UAType]  -- must define LSb first
+    uint8_t UAType: 4;
     uint8_t IDType: 4;
 
     // Bytes 2-21
@@ -318,13 +277,13 @@ typedef struct __attribute__((__packed__)) {
     uint8_t LocationSource: 1;
 
     // Byte 2-9
-    int32_t Latitude;
-    int32_t Longitude;
+    int32_t remotePilotLatitude;
+    int32_t remotePilotLongitude;
 
     // Byte 10-14
-    int16_t GroupCount;
-    int8_t  GroupRadius;
-    int16_t GroupCeiling;
+    uint16_t GroupCount;
+    uint8_t  GroupRadius;
+    uint16_t GroupCeiling;
 
     // Byte 15-24
     char Reserved2[10];
@@ -363,6 +322,16 @@ char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize);
 char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize);
 int intRangeMax(int64_t inValue, int startRange, int endRange);
 int intInRange(int inValue, int startRange, int endRange);
+
+ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy);
+ODID_Vertical_accuracy_t createEnumVerticalAccuracy(float Accuracy);
+ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy);
+ODID_Timestamp_accuracy_t createEnumTimestampAccuracy(float Accuracy);
+
+float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy);
+float decodeVerticalAccuracy(ODID_Vertical_accuracy_t Accuracy);
+float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy);
+float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
 
 #ifndef ODID_DISABLE_PRINTF
 void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);

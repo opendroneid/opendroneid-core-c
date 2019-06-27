@@ -99,112 +99,6 @@ static int16_t encodeAltitude(float Alt_data)
 }
 
 /**
-* Encode horizontal accuracy in ODID format
-*
-* This encodes a horizontal accuracy value to the corresponding enum
-*
-* @param Accuracy The horizontal accuracy in meters
-* @return Enum value representing the accuracy
-*/
-static ODID_Horizontal_accuracy_t encodeHorizontalAccuracy(float Accuracy)
-{
-    if (Accuracy >= 18520)
-        return ODID_HOR_ACC_UNKNOWN;
-    else if (Accuracy > 7408)
-        return ODID_HOR_ACC_10NM;
-    else if (Accuracy > 3704)
-        return ODID_HOR_ACC_4NM;
-    else if (Accuracy > 1852)
-        return ODID_HOR_ACC_2NM;
-    else if (Accuracy > 926)
-        return ODID_HOR_ACC_1NM;
-    else if (Accuracy > 555.6f)
-        return ODID_HOR_ACC_0_5NM;
-    else if (Accuracy > 185.2f)
-        return ODID_HOR_ACC_0_3NM;
-    else if (Accuracy > 92.6f)
-        return ODID_HOR_ACC_0_1NM;
-    else if (Accuracy > 30)
-        return ODID_HOR_ACC_0_05NM;
-    else if (Accuracy > 10)
-        return ODID_HOR_ACC_30_METER;
-    else if (Accuracy > 3)
-        return ODID_HOR_ACC_10_METER;
-    else if (Accuracy > 1)
-        return ODID_HOR_ACC_3_METER;
-    else if (Accuracy > 0)
-        return ODID_HOR_ACC_1_METER;
-    else
-        return ODID_HOR_ACC_UNKNOWN;
-}
-
-/**
-* Encode vertical accuracy in ODID format
-*
-* This encodes a vertical accuracy value to the corresponding enum
-*
-* @param Accuracy The vertical accuracy in meters
-* @return Enum value representing the accuracy
-*/
-static ODID_Vertical_accuracy_t encodeVerticalAccuracy(float Accuracy)
-{
-    if (Accuracy >= 150)
-        return ODID_VER_ACC_UNKNOWN;
-    else if (Accuracy > 45)
-        return ODID_VER_ACC_150_METER;
-    else if (Accuracy > 25)
-        return ODID_VER_ACC_45_METER;
-    else if (Accuracy > 10)
-        return ODID_VER_ACC_25_METER;
-    else if (Accuracy > 3)
-        return ODID_VER_ACC_10_METER;
-    else if (Accuracy > 1)
-        return ODID_VER_ACC_3_METER;
-    else if (Accuracy > 0)
-        return ODID_VER_ACC_1_METER;
-    else
-        return ODID_VER_ACC_UNKNOWN;
-}
-
-/**
-* Encode speed accuracy in ODID format
-*
-* This encodes a speed accuracy value to the corresponding enum
-*
-* @param Accuracy The speed accuracy in m/s
-* @return Enum value representing the accuracy
-*/
-static ODID_Speed_accuracy_t encodeSpeedAccuracy(float Accuracy)
-{
-    if (Accuracy >= 10)
-        return ODID_SPEED_ACC_UNKNOWN;
-    else if (Accuracy > 3)
-        return ODID_SPEED_ACC_10_METERS_SECOND;
-    else if (Accuracy > 1)
-        return ODID_SPEED_ACC_3_METERS_SECOND;
-    else if (Accuracy > 0.3f)
-        return ODID_SPEED_ACC_1_METERS_SECOND;
-    else if (Accuracy > 0)
-        return ODID_SPEED_ACC_0_3_METERS_SECOND;
-    else
-        return ODID_SPEED_ACC_UNKNOWN;
-}
-
-/**
-* Encode timestamp accuracy in ODID format
-*
-* This encodes a fractional seconds value into 1 byte
-* and clamps it the range 0.1s - 1.5s
-*
-* @param Accuracy The timestamp accuracy in seconds
-* @return Encoded timestamp accuracy (Tenths of seconds)
-*/
-static uint16_t encodeTimeStampAccuracy(float Accuracy)
-{
-    return (uint8_t) intRangeMax(round(Accuracy*10), 1, 15);
-}
-
-/**
 * Encode timestamp data in ODID format
 *
 * This encodes a fractional seconds value into a 2 byte int16
@@ -241,13 +135,15 @@ static uint16_t encodeGroupRadius(uint16_t Radius)
 */
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData)
 {
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData ||
+        !intInRange(inData->IDType, 0, 15) ||
+        !intInRange(inData->UAType, 0, 15)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_BASIC_ID;
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->IDType = inData->IDType;
-        outEncoded->UASType = inData->UASType;
+        outEncoded->UAType = inData->UAType;
         safe_copyfill(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
         return 1;
     }
@@ -263,7 +159,12 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData)
 {
     uint8_t multflag = 0;
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData ||
+        !intInRange(inData->Status, 0, 15) ||
+        !intInRange(inData->HorizAccuracy, 0, 15) ||
+        !intInRange(inData->VertAccuracy, 0, 15) ||
+        !intInRange(inData->SpeedAccuracy, 0, 15) ||
+        !intInRange(inData->TSAccuracy, 0, 15)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
@@ -280,10 +181,10 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         outEncoded->AltitudeBaro = encodeAltitude(inData->AltitudeBaro);
         outEncoded->AltitudeGeo = encodeAltitude(inData->AltitudeGeo);
         outEncoded->HeightAboveTakeoff = encodeAltitude(inData->HeightAboveTakeoff);
-        outEncoded->HorizAccuracy = encodeHorizontalAccuracy(inData->HorizAccuracy);
-        outEncoded->VertAccuracy = encodeVerticalAccuracy(inData->VertAccuracy);
-        outEncoded->SpeedAccuracy = encodeSpeedAccuracy(inData->SpeedAccuracy);
-        outEncoded->TSAccuracy = encodeTimeStampAccuracy(inData->TSAccuracy);
+        outEncoded->HorizAccuracy = inData->HorizAccuracy;
+        outEncoded->VertAccuracy = inData->VertAccuracy;
+        outEncoded->SpeedAccuracy = inData->SpeedAccuracy;
+        outEncoded->TSAccuracy = inData->TSAccuracy;
         outEncoded->TimeStamp = encodeTimeStamp(inData->TimeStamp);
         memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
         return 1;
@@ -299,7 +200,7 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
 */
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 {
-    if (!inData || !intInRange(inData->AuthType,0,15) || !outEncoded) {
+    if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15)) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_AUTH;
@@ -321,7 +222,7 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 */
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData)
 {
-    if (!inData || !intInRange(inData->DescType,0,UINT8_MAX) || !outEncoded) {
+    if (!outEncoded || !inData) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
@@ -341,15 +242,15 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
 */
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
 {
-    if (!inData || !intInRange(inData->LocationSource,0,15) || !outEncoded) {
+    if (!outEncoded || !inData) {
         return 0;
     } else {
         outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->Reserved = 0;
         outEncoded->LocationSource = inData->LocationSource;
-        outEncoded->Latitude = encodeLatLon(inData->Latitude);
-        outEncoded->Longitude = encodeLatLon(inData->Longitude);
+        outEncoded->remotePilotLatitude = encodeLatLon(inData->remotePilotLatitude);
+        outEncoded->remotePilotLongitude = encodeLatLon(inData->remotePilotLongitude);
         outEncoded->GroupCount = inData->GroupCount;
         outEncoded->GroupRadius = encodeGroupRadius(inData->GroupRadius);
         outEncoded->GroupCeiling = encodeAltitude(inData->GroupCeiling);
@@ -414,120 +315,6 @@ static float decodeAltitude(uint16_t Alt_enc)
 }
 
 /**
-* Decode horizontal accuracy from ODID format
-*
-* This decodes a horizontal accuracy enum to the corresponding value
-*
-* @param Accuracy Enum value representing the accuracy
-* @return The maximum horizontal accuracy in meters
-*/
-static float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy)
-{
-    switch (Accuracy)
-    {
-    case ODID_HOR_ACC_UNKNOWN:
-        return 18520;
-    case ODID_HOR_ACC_10NM:
-        return 18520;
-    case ODID_HOR_ACC_4NM:
-        return 7808;
-    case ODID_HOR_ACC_2NM:
-        return 3704;
-    case ODID_HOR_ACC_1NM:
-        return 1852;
-    case ODID_HOR_ACC_0_5NM:
-        return 926;
-    case ODID_HOR_ACC_0_3NM:
-        return 555.6f;
-    case ODID_HOR_ACC_0_1NM:
-        return 185.2f;
-    case ODID_HOR_ACC_0_05NM:
-        return 92.6f;
-    case ODID_HOR_ACC_30_METER:
-        return 30;
-    case ODID_HOR_ACC_10_METER:
-        return 10;
-    case ODID_HOR_ACC_3_METER:
-        return 3;
-    case ODID_HOR_ACC_1_METER:
-        return 1;
-    default:
-        return 18520;
-    }
-}
-
-/**
-* Decode vertical accuracy from ODID format
-*
-* This decodes a vertical accuracy enum to the corresponding value
-*
-* @param Accuracy Enum value representing the accuracy
-* @return The maximum vertical accuracy in meters
-*/
-static float decodeVerticalAccuracy(ODID_Vertical_accuracy_t Accuracy)
-{
-    switch (Accuracy)
-    {
-    case ODID_VER_ACC_UNKNOWN:
-        return 150;
-    case ODID_VER_ACC_150_METER:
-        return 150;
-    case ODID_VER_ACC_45_METER:
-        return 45;
-    case ODID_VER_ACC_25_METER:
-        return 25;
-    case ODID_VER_ACC_10_METER:
-        return 10;
-    case ODID_VER_ACC_3_METER:
-        return 3;
-    case ODID_VER_ACC_1_METER:
-        return 1;
-    default:
-        return 150;
-    }
-}
-
-/**
-* Decode speed accuracy from ODID format
-*
-* This decodes a speed accuracy enum to the corresponding value
-*
-* @param Accuracy Enum value representing the accuracy
-* @return The maximum speed accuracy in m/s
-*/
-static float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy)
-{
-    switch (Accuracy)
-    {
-    case ODID_SPEED_ACC_UNKNOWN:
-        return 10;
-    case ODID_SPEED_ACC_10_METERS_SECOND:
-        return 10;
-    case ODID_SPEED_ACC_3_METERS_SECOND:
-        return 3;
-    case ODID_SPEED_ACC_1_METERS_SECOND:
-        return 1;
-    case ODID_SPEED_ACC_0_3_METERS_SECOND:
-        return 0.3f;
-    default:
-        return 10;
-    }
-}
-
-/**
-* Decode timestamp accuracy from ODID format
-*
-* This decodes a 1 byte value to a fractional seconds value
-*
-* @param Accuracy Encoded timestamp accuracy (Tenths of seconds)
-* @return The maximum timestamp accuracy in seconds
-*/
-static float decodeTimeStampAccuracy(uint16_t Accuracy)
-{
-    return (float) Accuracy / 10;
-}
-
-/**
 * Decode timestamp data from ODID packed format
 *
 * @param Seconds_enc Encoded Timestamp
@@ -560,11 +347,13 @@ static uint16_t decodeGroupRadius(uint8_t Radius_enc)
 */
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded ||
+        !intInRange(inEncoded->IDType, 0, 15) ||
+        !intInRange(inEncoded->UAType, 0, 15)) {
         return 0;
     } else {
         outData->IDType = (ODID_idtype_t) inEncoded->IDType;
-        outData->UASType = (ODID_uavtype_t) inEncoded->UASType;
+        outData->UAType = (ODID_uatype_t) inEncoded->UAType;
         safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
         return 1;
     }
@@ -579,7 +368,7 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
 */
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->Status, 0, 15)) {
         return 0;
     } else {
         outData->Status = (ODID_status_t) inEncoded->Status;
@@ -591,10 +380,10 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
         outData->AltitudeBaro = decodeAltitude(inEncoded->AltitudeBaro);
         outData->AltitudeGeo = decodeAltitude(inEncoded->AltitudeGeo);
         outData->HeightAboveTakeoff = decodeAltitude(inEncoded->HeightAboveTakeoff);
-        outData->HorizAccuracy = decodeHorizontalAccuracy((ODID_Horizontal_accuracy_t) inEncoded->HorizAccuracy);
-        outData->VertAccuracy = decodeVerticalAccuracy((ODID_Vertical_accuracy_t) inEncoded->VertAccuracy);
-        outData->SpeedAccuracy = decodeSpeedAccuracy((ODID_Speed_accuracy_t) inEncoded->SpeedAccuracy);
-        outData->TSAccuracy = decodeTimeStampAccuracy(inEncoded->TSAccuracy);
+        outData->HorizAccuracy = (ODID_Horizontal_accuracy_t) inEncoded->HorizAccuracy;
+        outData->VertAccuracy = (ODID_Vertical_accuracy_t) inEncoded->VertAccuracy;
+        outData->SpeedAccuracy = (ODID_Speed_accuracy_t) inEncoded->SpeedAccuracy;
+        outData->TSAccuracy = (ODID_Timestamp_accuracy_t) inEncoded->TSAccuracy;
         outData->TimeStamp = decodeTimeStamp(inEncoded->TimeStamp);
         return 1;
     }
@@ -609,11 +398,11 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 */
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->AuthType,0,15) || !outData) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->AuthType, 0, 15)) {
         return 0;
     } else {
         // TODO: Implement Multi-page support (for now, this will handle a single DataPage)
-        outData->AuthType = inEncoded->AuthType;
+        outData->AuthType = (ODID_authtype_t) inEncoded->AuthType;
         outData->DataPage = 0;
         safe_dec_copyfill(outData->AuthData, inEncoded->AuthData, sizeof(outData->AuthData));
         return 1;
@@ -629,7 +418,7 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 */
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->DescType,0,UINT8_MAX) || !outData) {
+    if (!outData || !inEncoded) {
         return 0;
     } else {
         outData->DescType = inEncoded->DescType;
@@ -647,12 +436,12 @@ int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncode
 */
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded)
 {
-    if (!inEncoded || !intInRange(inEncoded->LocationSource,0,15) || !outData) {
+    if (!outData || !inEncoded) {
         return 0;
     } else {
         outData->LocationSource = inEncoded->LocationSource;
-        outData->Latitude = decodeLatLon(inEncoded->Latitude);
-        outData->Longitude = decodeLatLon(inEncoded->Longitude);
+        outData->remotePilotLatitude = decodeLatLon(inEncoded->remotePilotLatitude);
+        outData->remotePilotLongitude = decodeLatLon(inEncoded->remotePilotLongitude);
         outData->GroupCount = inEncoded->GroupCount;
         outData->GroupRadius = decodeGroupRadius(inEncoded->GroupRadius);
         outData->GroupCeiling = decodeAltitude(inEncoded->GroupCeiling);
@@ -729,6 +518,276 @@ int intInRange(int inValue, int startRange, int endRange)
     }
 }
 
+/**
+* This converts a horizontal accuracy float value to the corresponding enum
+*
+* @param Accuracy The horizontal accuracy in meters
+* @return Enum value representing the accuracy
+*/
+ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy)
+{
+    if (Accuracy >= 18520)
+        return ODID_HOR_ACC_UNKNOWN;
+    else if (Accuracy > 7408)
+        return ODID_HOR_ACC_10NM;
+    else if (Accuracy > 3704)
+        return ODID_HOR_ACC_4NM;
+    else if (Accuracy > 1852)
+        return ODID_HOR_ACC_2NM;
+    else if (Accuracy > 926)
+        return ODID_HOR_ACC_1NM;
+    else if (Accuracy > 555.6f)
+        return ODID_HOR_ACC_0_5NM;
+    else if (Accuracy > 185.2f)
+        return ODID_HOR_ACC_0_3NM;
+    else if (Accuracy > 92.6f)
+        return ODID_HOR_ACC_0_1NM;
+    else if (Accuracy > 30)
+        return ODID_HOR_ACC_0_05NM;
+    else if (Accuracy > 10)
+        return ODID_HOR_ACC_30_METER;
+    else if (Accuracy > 3)
+        return ODID_HOR_ACC_10_METER;
+    else if (Accuracy > 1)
+        return ODID_HOR_ACC_3_METER;
+    else if (Accuracy > 0)
+        return ODID_HOR_ACC_1_METER;
+    else
+        return ODID_HOR_ACC_UNKNOWN;
+}
+
+/**
+* This converts a vertical accuracy float value to the corresponding enum
+*
+* @param Accuracy The vertical accuracy in meters
+* @return Enum value representing the accuracy
+*/
+ODID_Vertical_accuracy_t createEnumVerticalAccuracy(float Accuracy)
+{
+    if (Accuracy >= 150)
+        return ODID_VER_ACC_UNKNOWN;
+    else if (Accuracy > 45)
+        return ODID_VER_ACC_150_METER;
+    else if (Accuracy > 25)
+        return ODID_VER_ACC_45_METER;
+    else if (Accuracy > 10)
+        return ODID_VER_ACC_25_METER;
+    else if (Accuracy > 3)
+        return ODID_VER_ACC_10_METER;
+    else if (Accuracy > 1)
+        return ODID_VER_ACC_3_METER;
+    else if (Accuracy > 0)
+        return ODID_VER_ACC_1_METER;
+    else
+        return ODID_VER_ACC_UNKNOWN;
+}
+
+/**
+* This converts a speed accuracy float value to the corresponding enum
+*
+* @param Accuracy The speed accuracy in m/s
+* @return Enum value representing the accuracy
+*/
+ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy)
+{
+    if (Accuracy >= 10)
+        return ODID_SPEED_ACC_UNKNOWN;
+    else if (Accuracy > 3)
+        return ODID_SPEED_ACC_10_METERS_SECOND;
+    else if (Accuracy > 1)
+        return ODID_SPEED_ACC_3_METERS_SECOND;
+    else if (Accuracy > 0.3f)
+        return ODID_SPEED_ACC_1_METERS_SECOND;
+    else if (Accuracy > 0)
+        return ODID_SPEED_ACC_0_3_METERS_SECOND;
+    else
+        return ODID_SPEED_ACC_UNKNOWN;
+}
+
+/**
+* This converts a timestamp accuracy float value to the corresponding enum
+*
+* @param Accuracy The timestamp accuracy in seconds
+* @return Enum value representing the accuracy
+*/
+ODID_Timestamp_accuracy_t createEnumTimestampAccuracy(float Accuracy)
+{
+    if (Accuracy >= 1.5f)
+        return ODID_TIME_ACC_1_5_SECONDS;
+    else if (Accuracy > 1.4f)
+        return ODID_TIME_ACC_1_4_SECONDS;
+    else if (Accuracy > 1.3f)
+        return ODID_TIME_ACC_1_3_SECONDS;
+    else if (Accuracy > 1.2f)
+        return ODID_TIME_ACC_1_2_SECONDS;
+    else if (Accuracy > 1.1f)
+        return ODID_TIME_ACC_1_1_SECONDS;
+    else if (Accuracy > 1.0f)
+        return ODID_TIME_ACC_1_0_SECONDS;
+    else if (Accuracy > 0.9f)
+        return ODID_TIME_ACC_0_9_SECONDS;
+    else if (Accuracy > 0.8f)
+        return ODID_TIME_ACC_0_8_SECONDS;
+    else if (Accuracy > 0.7f)
+        return ODID_TIME_ACC_0_7_SECONDS;
+    else if (Accuracy > 0.6f)
+        return ODID_TIME_ACC_0_6_SECONDS;
+    else if (Accuracy > 0.5f)
+        return ODID_TIME_ACC_0_5_SECONDS;
+    else if (Accuracy > 0.4f)
+        return ODID_TIME_ACC_0_4_SECONDS;
+    else if (Accuracy > 0.3f)
+        return ODID_TIME_ACC_0_3_SECONDS;
+    else if (Accuracy > 0.2f)
+        return ODID_TIME_ACC_0_2_SECONDS;
+    else if (Accuracy > 0.0f)
+        return ODID_TIME_ACC_0_1_SECONDS;
+    else
+        return ODID_TIME_ACC_UNKNOWN;
+}
+
+/**
+* This decodes a horizontal accuracy enum to the corresponding float value
+*
+* @param Accuracy Enum value representing the accuracy
+* @return The maximum horizontal accuracy in meters
+*/
+float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy)
+{
+    switch (Accuracy)
+    {
+    case ODID_HOR_ACC_UNKNOWN:
+        return 18520;
+    case ODID_HOR_ACC_10NM:
+        return 18520;
+    case ODID_HOR_ACC_4NM:
+        return 7808;
+    case ODID_HOR_ACC_2NM:
+        return 3704;
+    case ODID_HOR_ACC_1NM:
+        return 1852;
+    case ODID_HOR_ACC_0_5NM:
+        return 926;
+    case ODID_HOR_ACC_0_3NM:
+        return 555.6f;
+    case ODID_HOR_ACC_0_1NM:
+        return 185.2f;
+    case ODID_HOR_ACC_0_05NM:
+        return 92.6f;
+    case ODID_HOR_ACC_30_METER:
+        return 30;
+    case ODID_HOR_ACC_10_METER:
+        return 10;
+    case ODID_HOR_ACC_3_METER:
+        return 3;
+    case ODID_HOR_ACC_1_METER:
+        return 1;
+    default:
+        return 18520;
+    }
+}
+
+/**
+* This decodes a vertical accuracy enum to the corresponding float value
+*
+* @param Accuracy Enum value representing the accuracy
+* @return The maximum vertical accuracy in meters
+*/
+float decodeVerticalAccuracy(ODID_Vertical_accuracy_t Accuracy)
+{
+    switch (Accuracy)
+    {
+    case ODID_VER_ACC_UNKNOWN:
+        return 150;
+    case ODID_VER_ACC_150_METER:
+        return 150;
+    case ODID_VER_ACC_45_METER:
+        return 45;
+    case ODID_VER_ACC_25_METER:
+        return 25;
+    case ODID_VER_ACC_10_METER:
+        return 10;
+    case ODID_VER_ACC_3_METER:
+        return 3;
+    case ODID_VER_ACC_1_METER:
+        return 1;
+    default:
+        return 150;
+    }
+}
+
+/**
+* This decodes a speed accuracy enum to the corresponding float value
+*
+* @param Accuracy Enum value representing the accuracy
+* @return The maximum speed accuracy in m/s
+*/
+float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy)
+{
+    switch (Accuracy)
+    {
+    case ODID_SPEED_ACC_UNKNOWN:
+        return 10;
+    case ODID_SPEED_ACC_10_METERS_SECOND:
+        return 10;
+    case ODID_SPEED_ACC_3_METERS_SECOND:
+        return 3;
+    case ODID_SPEED_ACC_1_METERS_SECOND:
+        return 1;
+    case ODID_SPEED_ACC_0_3_METERS_SECOND:
+        return 0.3f;
+    default:
+        return 10;
+    }
+}
+
+/**
+* This decodes a timestamp accuracy enum to the corresponding float value
+*
+* @param Accuracy Enum value representing the accuracy
+* @return The maximum timestamp accuracy in seconds
+*/
+float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy)
+{
+    switch (Accuracy)
+    {
+    case ODID_TIME_ACC_UNKNOWN:
+        return 0.0f;
+    case ODID_TIME_ACC_0_1_SECONDS:
+        return 0.1f;
+    case ODID_TIME_ACC_0_2_SECONDS:
+        return 0.2f;
+    case ODID_TIME_ACC_0_3_SECONDS:
+        return 0.3f;
+    case ODID_TIME_ACC_0_4_SECONDS:
+        return 0.4f;
+    case ODID_TIME_ACC_0_5_SECONDS:
+        return 0.5f;
+    case ODID_TIME_ACC_0_6_SECONDS:
+        return 0.6f;
+    case ODID_TIME_ACC_0_7_SECONDS:
+        return 0.7f;
+    case ODID_TIME_ACC_0_8_SECONDS:
+        return 0.8f;
+    case ODID_TIME_ACC_0_9_SECONDS:
+        return 0.9f;
+    case ODID_TIME_ACC_1_0_SECONDS:
+        return 1.0f;
+    case ODID_TIME_ACC_1_1_SECONDS:
+        return 1.1f;
+    case ODID_TIME_ACC_1_2_SECONDS:
+        return 1.2f;
+    case ODID_TIME_ACC_1_3_SECONDS:
+        return 1.3f;
+    case ODID_TIME_ACC_1_4_SECONDS:
+        return 1.4f;
+    case ODID_TIME_ACC_1_5_SECONDS:
+        return 1.5f;
+    default:
+        return 0.0f;
+    }
+}
+
 #ifndef ODID_DISABLE_PRINTF
 
 /**
@@ -759,8 +818,8 @@ void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced)
 */
 void printBasicID_data(ODID_BasicID_data BasicID)
 {
-    const char ODID_BasicID_data_format[] = "UASType: %d\nIDType: %d\nUASID: %s\n";
-    printf(ODID_BasicID_data_format, BasicID.IDType, BasicID.UASType, BasicID.UASID);
+    const char ODID_BasicID_data_format[] = "UAType: %d\nIDType: %d\nUASID: %s\n";
+    printf(ODID_BasicID_data_format, BasicID.IDType, BasicID.UAType, BasicID.UASID);
 }
 
 /**
@@ -773,8 +832,9 @@ void printLocation_data(ODID_Location_data Location)
     const char ODID_Location_data_format[] = "Status: %d\nSpeedNS/EW: %.2f, %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, AboveTO: %.2f, %.2f, %.2f\nHoriz, Vert, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
     printf(ODID_Location_data_format, Location.Status, Location.SpeedNS, Location.SpeedEW,
         Location.SpeedVertical, Location.Latitude, Location.Longitude, Location.AltitudeBaro,
-        Location.AltitudeGeo, Location.HeightAboveTakeoff, Location.HorizAccuracy,
-        Location.VertAccuracy, Location.SpeedAccuracy, Location.TSAccuracy, Location.TimeStamp);
+        Location.AltitudeGeo, Location.HeightAboveTakeoff, decodeHorizontalAccuracy(Location.HorizAccuracy),
+        decodeVerticalAccuracy(Location.VertAccuracy), decodeSpeedAccuracy(Location.SpeedAccuracy),
+        decodeTimestampAccuracy(Location.TSAccuracy), Location.TimeStamp);
 }
 
 /**
@@ -807,7 +867,7 @@ void printSelfID_data(ODID_SelfID_data SelfID)
 void printSystem_data(ODID_System_data System_data)
 {
     const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: %.7f, %.7f\nGroup Count, Radius, Ceiling: %d, %d, %.2f\n";
-    printf(ODID_System_data_format, System_data.LocationSource, System_data.Latitude, System_data.Longitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling);
+    printf(ODID_System_data_format, System_data.LocationSource, System_data.remotePilotLatitude, System_data.remotePilotLongitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling);
 }
 
 #endif // ODID_DISABLE_PRINTF

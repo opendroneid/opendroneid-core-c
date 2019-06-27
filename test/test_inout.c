@@ -38,7 +38,7 @@ void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
     BasicID.IDType = ODID_IDTYPE_CAA_ASSIGNED_ID;
-    BasicID.UASType = ODID_UAVTYPE_ROTORCRAFT_MULTIROTOR;
+    BasicID.UAType = ODID_UATYPE_ROTORCRAFT_MULTIROTOR;
     safe_copyfill(BasicID.UASID,"123456789012345678901", sizeof(BasicID.UASID));
     printf("BasicID\n-------\n");
     printBasicID_data(BasicID);
@@ -53,31 +53,31 @@ void test_InOut()
     Location.AltitudeBaro = 100;
     Location.AltitudeGeo = 110;
     Location.HeightAboveTakeoff = 80;
-    Location.HorizAccuracy = 2.5f;
-    Location.VertAccuracy = 0.5f;
-    Location.SpeedAccuracy = 0.5f;
-    Location.TSAccuracy = 0.2f;
+    Location.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
+    Location.VertAccuracy = createEnumVerticalAccuracy(0.5f);
+    Location.TSAccuracy = createEnumSpeedAccuracy(0.5f);
+    Location.SpeedAccuracy = createEnumTimestampAccuracy(0.2f);
     Location.TimeStamp = 3600.52;
     printf("\nLocation\n--------\n");
     printLocation_data(Location);
     encodeLocationMessage(&Location_enc, &Location);
 
-    Auth.AuthType = 1;
+    Auth.AuthType = ODID_AUTH_MPUID;
     Auth.DataPage = 0;
     safe_copyfill(Auth.AuthData, "1234567890123456789012", ODID_STR_SIZE);
     printf("\nAuth\n--------------\n");
     printAuth_data(Auth);
     encodeAuthMessage(&Auth_enc, &Auth);
 
-    SelfID.DescType = 0;
+    SelfID.DescType = ODID_DESC_TYPE_TEXT;
     safe_copyfill(SelfID.Desc,"DronesRUS: Real Estate",sizeof(SelfID.Desc));
     printf("\nSelfID\n------\n");
     printSelfID_data(SelfID);
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
 
-    System_data.LocationSource = 0;
-    System_data.Latitude = Location.Latitude + 0.00001;
-    System_data.Longitude = Location.Longitude + 0.00001;
+    System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
+    System_data.remotePilotLatitude = Location.Latitude + 0.00001;
+    System_data.remotePilotLongitude = Location.Longitude + 0.00001;
     System_data.GroupCount = 0;
     System_data.GroupRadius = 0;
     System_data.GroupCeiling = 0;

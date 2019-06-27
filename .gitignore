@@ -1,0 +1,13 @@
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+libopendroneid/CMakeFiles/
+libopendroneid/Makefile
+libopendroneid/cmake_install.cmake
+libopendroneid/libopendroneid.pc
+libopendroneid/libopendroneid.so
+test/CMakeFiles/
+test/Makefile
+test/cmake_install.cmake
+test/odidtest
