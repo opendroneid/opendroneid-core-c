@@ -43,8 +43,10 @@ typedef enum ODID_uatype {
     ODID_UATYPE_FREE_FALL = 6,     /* example: Parachute */
     ODID_UATYPE_ROCKET = 7,
     ODID_UATYPE_GLIDER = 8,
-    ODID_UATYPE_OTHER = 9,
-    // 10 to 15 reserved
+    ODID_UATYPE_TETHERED_AIRCRAFT = 9,
+    ODID_UATYPE_GROUND_OBSTACLE = 10,
+    ODID_UATYPE_OTHER = 11,
+    // 12 to 15 reserved
 } ODID_uatype_t;
 
 typedef enum ODID_status {
