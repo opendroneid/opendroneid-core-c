@@ -8,6 +8,8 @@ just type:
 cmake .
 make
 
+The outputs will be libopendroneid/libopendroneid.so and the test/odidtest sample application.
+
 The sample application will do a test encode/decode, then continuously generate sample messages.
 
 The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in libopendroneid/opendroneid.h 
