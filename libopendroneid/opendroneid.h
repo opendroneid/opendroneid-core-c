@@ -125,7 +125,8 @@ typedef enum ODID_desctype {
 typedef enum ODID_location_source {
     ODID_LOCATION_SRC_TAKEOFF = 0,
     ODID_LOCATION_SRC_LIVE_GNSS = 1,
-    // 2 to 255 reserved
+    ODID_LOCATION_SRC_FIXED = 2,
+    // 3 to 255 reserved
 } ODID_location_source_t;
 
  /*
