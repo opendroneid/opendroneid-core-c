@@ -35,18 +35,21 @@ typedef enum ODID_idtype {
 
 typedef enum ODID_uatype {
     ODID_UATYPE_NONE = 0,
-    ODID_UATYPE_FIXED_WING_POWERED = 1,
-    ODID_UATYPE_ROTORCRAFT_MULTIROTOR = 2,
-    ODID_UATYPE_LTA_POWERED = 3,   /* Lighter Than Air (such as a Blimp) */
-    ODID_UATYPE_LTA_UNPOWERED = 4, /* example: Balloon */
-    ODID_UATYPE_VTOL = 5,          /* Fixed wing aircraft that can take off vertically) */
-    ODID_UATYPE_FREE_FALL = 6,     /* example: Parachute */
-    ODID_UATYPE_ROCKET = 7,
-    ODID_UATYPE_GLIDER = 8,
-    ODID_UATYPE_TETHERED_AIRCRAFT = 9,
-    ODID_UATYPE_GROUND_OBSTACLE = 10,
-    ODID_UATYPE_OTHER = 11,
-    // 12 to 15 reserved
+    ODID_UATYPE_AEROPLANE = 1,
+    ODID_UATYPE_ROTORCRAFT = 2, // Including Multirotor
+    ODID_UATYPE_GYROPLANE = 3,
+    ODID_UATYPE_VTOL = 4, // Fixed wing aircraft that can take off vertically
+    ODID_UATYPE_ORNITHOPTER = 5,
+    ODID_UATYPE_GLIDER = 6,
+    ODID_UATYPE_KITE = 7,
+    ODID_UATYPE_FREE_BALLOON = 8,
+    ODID_UATYPE_CAPTIVE_BALLOON = 9,
+    ODID_UATYPE_AIRSHIP = 10,
+    ODID_UATYPE_FREE_FALL_PARACHUTE = 11,
+    ODID_UATYPE_ROCKET = 12,
+    ODID_UATYPE_GROUND_OBSTACLE = 13,
+    ODID_UATYPE_RESERVED = 14,
+    ODID_UATYPE_OTHER = 15,
 } ODID_uatype_t;
 
 typedef enum ODID_status {

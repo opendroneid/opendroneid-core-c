@@ -38,7 +38,7 @@ void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
     BasicID.IDType = ODID_IDTYPE_CAA_ASSIGNED_ID;
-    BasicID.UAType = ODID_UATYPE_ROTORCRAFT_MULTIROTOR;
+    BasicID.UAType = ODID_UATYPE_ROTORCRAFT;
     safe_copyfill(BasicID.UASID,"123456789012345678901", sizeof(BasicID.UASID));
     printf("BasicID\n-------\n");
     printBasicID_data(BasicID);
