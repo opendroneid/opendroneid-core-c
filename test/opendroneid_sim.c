@@ -108,7 +108,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             location_data.Longitude = simLon;
             location_data.AltitudeBaro = 100;
             location_data.AltitudeGeo = 100;
-            location_data.HeightAboveTakeoff = 50;
+            location_data.HeightType = ODID_HEIGHT_REF_OVER_GROUND;
+            location_data.Height = 50;
             location_data.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
             location_data.VertAccuracy = createEnumVerticalAccuracy(2.5f);
             location_data.TSAccuracy = createEnumSpeedAccuracy(0.2f);

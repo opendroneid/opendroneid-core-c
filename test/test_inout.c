@@ -52,7 +52,8 @@ void test_InOut()
     Location.Longitude = -122.966389;
     Location.AltitudeBaro = 100;
     Location.AltitudeGeo = 110;
-    Location.HeightAboveTakeoff = 80;
+    Location.HeightType = ODID_HEIGHT_REF_OVER_GROUND;
+    Location.Height = 80;
     Location.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
     Location.VertAccuracy = createEnumVerticalAccuracy(0.5f);
     Location.TSAccuracy = createEnumSpeedAccuracy(0.5f);

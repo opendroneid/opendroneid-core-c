@@ -199,7 +199,8 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         outEncoded->Longitude = encodeLatLon(inData->Longitude);
         outEncoded->AltitudeBaro = encodeAltitude(inData->AltitudeBaro);
         outEncoded->AltitudeGeo = encodeAltitude(inData->AltitudeGeo);
-        outEncoded->HeightAboveTakeoff = encodeAltitude(inData->HeightAboveTakeoff);
+        outEncoded->HeightType = inData->HeightType;
+        outEncoded->Height = encodeAltitude(inData->Height);
         outEncoded->HorizAccuracy = inData->HorizAccuracy;
         outEncoded->VertAccuracy = inData->VertAccuracy;
         outEncoded->SpeedAccuracy = inData->SpeedAccuracy;
@@ -406,7 +407,8 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
         outData->Longitude = decodeLatLon(inEncoded->Longitude);
         outData->AltitudeBaro = decodeAltitude(inEncoded->AltitudeBaro);
         outData->AltitudeGeo = decodeAltitude(inEncoded->AltitudeGeo);
-        outData->HeightAboveTakeoff = decodeAltitude(inEncoded->HeightAboveTakeoff);
+        outData->HeightType = (ODID_Height_reference_t) inEncoded->HeightType;
+        outData->Height = decodeAltitude(inEncoded->Height);
         outData->HorizAccuracy = (ODID_Horizontal_accuracy_t) inEncoded->HorizAccuracy;
         outData->VertAccuracy = (ODID_Vertical_accuracy_t) inEncoded->VertAccuracy;
         outData->SpeedAccuracy = (ODID_Speed_accuracy_t) inEncoded->SpeedAccuracy;
@@ -856,10 +858,11 @@ void printBasicID_data(ODID_BasicID_data BasicID)
 */
 void printLocation_data(ODID_Location_data Location)
 {
-    const char ODID_Location_data_format[] = "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, AboveTO: %.2f, %.2f, %.2f\nHoriz, Vert, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
+    const char ODID_Location_data_format[] = "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, %.2f, %.2f\nHoriz, Vert, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
     printf(ODID_Location_data_format, Location.Status, Location.Direction, Location.SpeedHorizontal,
-        Location.SpeedVertical, Location.Latitude, Location.Longitude, Location.AltitudeBaro,
-        Location.AltitudeGeo, Location.HeightAboveTakeoff, decodeHorizontalAccuracy(Location.HorizAccuracy),
+        Location.SpeedVertical, Location.Latitude, Location.Longitude,
+        Location.HeightType ? "Ground" : "TakeOff",  Location.AltitudeBaro,
+        Location.AltitudeGeo, Location.Height, decodeHorizontalAccuracy(Location.HorizAccuracy),
         decodeVerticalAccuracy(Location.VertAccuracy), decodeSpeedAccuracy(Location.SpeedAccuracy),
         decodeTimestampAccuracy(Location.TSAccuracy), Location.TimeStamp);
 }

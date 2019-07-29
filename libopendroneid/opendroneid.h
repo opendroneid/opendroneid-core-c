@@ -56,6 +56,11 @@ typedef enum ODID_status {
     // 3 to 15 reserved
 } ODID_status_t;
 
+typedef enum ODID_Height_reference {
+    ODID_HEIGHT_REF_OVER_TAKEOFF = 0,
+    ODID_HEIGHT_REF_OVER_GROUND = 1,
+} ODID_Height_reference_t;
+
 typedef enum ODID_Horizontal_accuracy {
     ODID_HOR_ACC_UNKNOWN = 0,
     ODID_HOR_ACC_10NM = 1, // Nautical Miles
@@ -152,7 +157,8 @@ typedef struct {
     double Longitude;
     float AltitudeBaro;       // meter
     float AltitudeGeo;        // meter
-    float HeightAboveTakeoff; // meter
+    ODID_Height_reference_t HeightType;
+    float Height;             // meter
     ODID_Horizontal_accuracy_t HorizAccuracy;
     ODID_Vertical_accuracy_t VertAccuracy;
     ODID_Speed_accuracy_t SpeedAccuracy;
@@ -217,7 +223,8 @@ typedef struct __attribute__((__packed__)) {
     // Byte 1 [Status][Reserved][NSMult][EWMult] -- must define LSb first
     uint8_t SpeedMult: 1;
     uint8_t EWDirection: 1;
-    uint8_t Reserved: 2;
+    uint8_t HeightType: 1;
+    uint8_t Reserved: 1;
     uint8_t Status: 4;
 
     // Bytes 2-18
@@ -228,7 +235,7 @@ typedef struct __attribute__((__packed__)) {
     int32_t Longitude;
     uint16_t AltitudeBaro;
     uint16_t AltitudeGeo;
-    uint16_t HeightAboveTakeoff;
+    uint16_t Height;
 
     // Byte 19 [VertAccuracy][HorizAccuracy]  -- must define LSb first
     uint8_t HorizAccuracy:4;
