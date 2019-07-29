@@ -45,8 +45,8 @@ void test_InOut()
     encodeBasicIDMessage(&BasicID_enc, &BasicID);
 
     Location.Status = ODID_STATUS_AIRBORNE;
-    Location.SpeedNS = 5.25;
-    Location.SpeedEW = 3.5;
+    Location.Direction = 215.7;
+    Location.SpeedHorizontal = 5.4;
     Location.SpeedVertical = 5.25;
     Location.Latitude = 45.539309;
     Location.Longitude = -122.966389;

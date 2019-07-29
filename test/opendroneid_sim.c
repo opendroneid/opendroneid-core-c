@@ -38,8 +38,8 @@ double simLat = 45.5393092;
 double simLon = -122.9663894;
 double simGndLat = 45.5393082;
 double simGndLon = -122.9663884;
-float simSpeedNS = 0;
-float simSpeedEW = 0;
+float simDirection = 0;
+float simSpeedHorizontal;
 
 enum compdirs {E,S,W,N};
 enum compdirs direction = E;
@@ -47,12 +47,12 @@ int stepCount = 0;
 
 void updateLocation(void)
 {
+    simSpeedHorizontal = DISTANCE_PER_LAT * SIM_STEP_SIZE;
     stepCount++;
     switch(direction) {
         case E:
             simLon+= SIM_STEP_SIZE;
-            simSpeedNS = 0;
-            simSpeedEW = (cos(simLat * (M_PI/180)) * DISTANCE_PER_LAT) * SIM_STEP_SIZE;
+            simDirection = 90;
             if (stepCount >= SIM_STEPS) {
                 direction = S;
                 stepCount = 0;
@@ -60,8 +60,7 @@ void updateLocation(void)
             break;
         case S:
             simLat-= SIM_STEP_SIZE;
-            simSpeedNS = -1.0 * DISTANCE_PER_LAT * SIM_STEP_SIZE;
-            simSpeedEW = 0;
+            simDirection = 180;
             if (stepCount >= SIM_STEPS) {
                 direction = W;
                 stepCount = 0;
@@ -69,8 +68,7 @@ void updateLocation(void)
             break;
         case W:
             simLon-= SIM_STEP_SIZE;
-            simSpeedNS = 0;
-            simSpeedEW = -1 * (cos(simLat * (M_PI/180)) * DISTANCE_PER_LAT) * SIM_STEP_SIZE;
+            simDirection = 270;
             if (stepCount >= SIM_STEPS) {
                 direction = N;
                 stepCount = 0;
@@ -78,8 +76,7 @@ void updateLocation(void)
             break;
         case N:
             simLat+= SIM_STEP_SIZE;
-            simSpeedNS = DISTANCE_PER_LAT * SIM_STEP_SIZE;
-            simSpeedEW = 0;
+            simDirection = 0;
             if (stepCount >= SIM_STEPS) {
                 direction = E;
                 stepCount = 0;
@@ -104,8 +101,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
         case 1:
             updateLocation();
             location_data.Status = ODID_STATUS_AIRBORNE;
-            location_data.SpeedNS = simSpeedNS;
-            location_data.SpeedEW = simSpeedEW;
+            location_data.Direction = simDirection;
+            location_data.SpeedHorizontal = simSpeedHorizontal;
             location_data.SpeedVertical = 2;
             location_data.Latitude = simLat;
             location_data.Longitude = simLon;

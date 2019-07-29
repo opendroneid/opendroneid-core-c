@@ -17,7 +17,7 @@ gabriel.c.cox@intel.com
 #include <stdio.h>
 #define ENABLE_DEBUG 1
 
-const float SPEED_DIV[2] = {0.25,0.75};
+const float SPEED_DIV[2] = {0.25f, 0.75f};
 const float VSPEED_DIV = 0.5;
 const int32_t LATLON_MULT = 10000000;
 const float ALT_DIV = 0.5;
@@ -25,36 +25,55 @@ const int ALT_ADDER = 1000;
 const int DATA_AGE_DIV = 10;
 
 /**
+* Encode direction as defined by Open Drone ID
+*
+* The encoding method uses 8 bits for the direction in degrees and
+* one extra bit for indicating the East/West direction.
+*
+* @param Direcction in degrees (typically between 0 and 359)
+* @param EWDirection Bit flag indicating whether the direction is towards
+                     East (0 - 179 degrees) or West (180 - 359)
+* @return Encoded Direction in a single byte
+*/
+static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
+{
+    if (Direction < 0)
+        Direction = 0;
+
+    unsigned int direction_int = (unsigned int) roundf(Direction) % 360;
+    if (direction_int < 180) {
+        *EWDirection = 0;
+    } else {
+        *EWDirection = 1;
+        direction_int -= 180;
+    }
+    return (uint8_t) intRangeMax(direction_int, 0, UINT8_MAX);
+}
+
+/**
 * Encode speed into units defined by Open Drone ID
 *
 * The quantization algorithm allows for speed to be stored in units of 0.25 m/s
 * on the low end of the scale and 0.75 m/s on the high end of the scale.
-* This allows for more precise speeds to be represented in a single Int8 byte
+* This allows for more precise speeds to be represented in a single Uint8 byte
 * rather than using a large float value.
 *
 * @param Speed_data Speed (and decimal) in m/s
 * @param mult a (write only) value that sets the multiplier flag
 * @return Encoded Speed in a single byte or max speed if over max encoded speed.
 */
-static int8_t encodeSpeed(float Speed_data, uint8_t *mult)
+static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
 {
-    int8_t signMult = 1;
-    int big_value = 0;
+    if (Speed_data < 0)
+        Speed_data = 0;
 
-    if (abs((int)Speed_data)/SPEED_DIV[0] <= INT8_MAX) {
-        // Value fits within adjusted units
-        (*mult) = 0;
-        return Speed_data / SPEED_DIV[0];
+    if (Speed_data <= UINT8_MAX * SPEED_DIV[0]) {
+        *mult = 0;
+        return (uint8_t) (Speed_data / SPEED_DIV[0]);
     } else {
-        // value does not fit within high resolution range
-        (*mult) = 1;
-
-        if (Speed_data < 0) signMult = -1;  // It's negative, set sign multiplier
-        
-        // Calculated value expressed in a big int
-        big_value = (int) (Speed_data-(signMult*(INT8_MAX/SPEED_DIV[0]))) / SPEED_DIV[1];
-
-        return (int8_t) intRangeMax(big_value, INT8_MIN, INT8_MAX);
+        *mult = 1;
+        int big_value = (int) ((Speed_data - (UINT8_MAX * SPEED_DIV[0])) / SPEED_DIV[1]);
+        return (uint8_t) intRangeMax(big_value, 0, UINT8_MAX);
     }
 }
 
@@ -158,7 +177,7 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
 */
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData)
 {
-    uint8_t multflag = 0;
+    uint8_t bitflag;
     if (!outEncoded || !inData ||
         !intInRange(inData->Status, 0, 15) ||
         !intInRange(inData->HorizAccuracy, 0, 15) ||
@@ -171,10 +190,10 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->Status = inData->Status;
         outEncoded->Reserved = 0;
-        outEncoded->SpeedNS = encodeSpeed(inData->SpeedNS, &multflag);
-        outEncoded->NSMult = multflag;
-        outEncoded->SpeedEW = encodeSpeed(inData->SpeedEW, &multflag);
-        outEncoded->EWMult = multflag;
+        outEncoded->Direction = encodeDirection(inData->Direction, &bitflag);
+        outEncoded->EWDirection = bitflag;
+        outEncoded->SpeedHorizontal = encodeSpeedHorizontal(inData->SpeedHorizontal, &bitflag);
+        outEncoded->SpeedMult = bitflag;
         outEncoded->SpeedVertical = encodeSpeedVertical(inData->SpeedVertical);
         outEncoded->Latitude = encodeLatLon(inData->Latitude);
         outEncoded->Longitude = encodeLatLon(inData->Longitude);
@@ -260,25 +279,33 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
 }
 
 /**
+* Dencode direction from Open Drone ID packed message
+*
+* @param Direction_enc encoded direction
+* @param EWDirection East/West direction flag
+* @return direction in degrees (0 - 359)
+*/
+static float decodeDirection(uint8_t Direction_enc, uint8_t EWDirection)
+{
+    if (EWDirection)
+        return Direction_enc + 180;
+    else
+        return Direction_enc;
+}
+
+/**
 * Dencode speed from Open Drone ID packed message
 *
 * @param Speed_enc encoded speed
 * @param mult multiplier flag
 * @return decoded speed in m/s
 */
-static float decodeSpeed(int8_t Speed_enc, uint8_t mult)
+static float decodeSpeedHorizontal(uint8_t Speed_enc, uint8_t mult)
 {
-    float retValue = 0;
-    if (mult == 0) {
-        retValue = (float) Speed_enc * SPEED_DIV[0];
-    } else {
-        if (Speed_enc < 0) {
-            retValue = (float) Speed_enc * SPEED_DIV[1] - (INT8_MAX * SPEED_DIV[0]);
-        } else {
-            retValue = (float) Speed_enc * SPEED_DIV[1] + (INT8_MAX * SPEED_DIV[0]);
-        }
-    }
-    return retValue;
+    if (mult)
+        return ((float) Speed_enc * SPEED_DIV[1]) + (UINT8_MAX * SPEED_DIV[0]);
+    else
+        return (float) Speed_enc * SPEED_DIV[0];
 }
 
 /**
@@ -372,8 +399,8 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
         return 0;
     } else {
         outData->Status = (ODID_status_t) inEncoded->Status;
-        outData->SpeedNS = decodeSpeed(inEncoded->SpeedNS, inEncoded->NSMult);
-        outData->SpeedEW = decodeSpeed(inEncoded->SpeedEW, inEncoded->EWMult);
+        outData->Direction = decodeDirection(inEncoded->Direction, inEncoded-> EWDirection);
+        outData->SpeedHorizontal = decodeSpeedHorizontal(inEncoded->SpeedHorizontal, inEncoded->SpeedMult);
         outData->SpeedVertical = decodeSpeedVertical(inEncoded->SpeedVertical);
         outData->Latitude = decodeLatLon(inEncoded->Latitude);
         outData->Longitude = decodeLatLon(inEncoded->Longitude);
@@ -829,8 +856,8 @@ void printBasicID_data(ODID_BasicID_data BasicID)
 */
 void printLocation_data(ODID_Location_data Location)
 {
-    const char ODID_Location_data_format[] = "Status: %d\nSpeedNS/EW: %.2f, %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, AboveTO: %.2f, %.2f, %.2f\nHoriz, Vert, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
-    printf(ODID_Location_data_format, Location.Status, Location.SpeedNS, Location.SpeedEW,
+    const char ODID_Location_data_format[] = "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, AboveTO: %.2f, %.2f, %.2f\nHoriz, Vert, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
+    printf(ODID_Location_data_format, Location.Status, Location.Direction, Location.SpeedHorizontal,
         Location.SpeedVertical, Location.Latitude, Location.Longitude, Location.AltitudeBaro,
         Location.AltitudeGeo, Location.HeightAboveTakeoff, decodeHorizontalAccuracy(Location.HorizAccuracy),
         decodeVerticalAccuracy(Location.VertAccuracy), decodeSpeedAccuracy(Location.SpeedAccuracy),

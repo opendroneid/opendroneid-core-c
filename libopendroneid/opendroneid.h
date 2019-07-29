@@ -145,8 +145,8 @@ typedef struct {
 
 typedef struct {
     ODID_status_t Status;
-    float SpeedNS;            // m/s
-    float SpeedEW;            // m/s
+    float Direction;          // Degrees
+    float SpeedHorizontal;    // m/s. Positive only
     float SpeedVertical;      // m/s
     double Latitude;
     double Longitude;
@@ -215,14 +215,14 @@ typedef struct __attribute__((__packed__)) {
     uint8_t MessageType : 4;
 
     // Byte 1 [Status][Reserved][NSMult][EWMult] -- must define LSb first
-    uint8_t EWMult: 1;
-    uint8_t NSMult: 1;
+    uint8_t SpeedMult: 1;
+    uint8_t EWDirection: 1;
     uint8_t Reserved: 2;
     uint8_t Status: 4;
 
     // Bytes 2-18
-    uint8_t SpeedNS;
-    uint8_t SpeedEW;
+    uint8_t Direction;
+    uint8_t SpeedHorizontal;
     int8_t SpeedVertical;
     int32_t Latitude;
     int32_t Longitude;
