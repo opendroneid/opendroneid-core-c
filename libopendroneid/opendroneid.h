@@ -153,13 +153,13 @@ typedef struct {
 
 typedef struct {
     ODID_status_t Status;
-    float Direction;          // Degrees
+    float Direction;          // Degrees. 0 <= x < 360. Route course based on true North
     float SpeedHorizontal;    // m/s. Positive only
     float SpeedVertical;      // m/s
     double Latitude;
     double Longitude;
-    float AltitudeBaro;       // meter
-    float AltitudeGeo;        // meter
+    float AltitudeBaro;       // meter (Ref 29.92 inHg, 1013.24 mb)
+    float AltitudeGeo;        // meter (WGS84-HAE)
     ODID_Height_reference_t HeightType;
     float Height;             // meter
     ODID_Horizontal_accuracy_t HorizAccuracy;

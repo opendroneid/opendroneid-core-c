@@ -30,7 +30,7 @@ const int DATA_AGE_DIV = 10;
 * The encoding method uses 8 bits for the direction in degrees and
 * one extra bit for indicating the East/West direction.
 *
-* @param Direcction in degrees (typically between 0 and 359)
+* @param Direcction in degrees. 0 <= x < 360. Route course based on true North
 * @param EWDirection Bit flag indicating whether the direction is towards
                      East (0 - 179 degrees) or West (180 - 359)
 * @return Encoded Direction in a single byte
