@@ -645,33 +645,35 @@ ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy)
 */
 ODID_Timestamp_accuracy_t createEnumTimestampAccuracy(float Accuracy)
 {
-    if (Accuracy >= 1.5f)
-        return ODID_TIME_ACC_1_5_SECONDS;
+    if (Accuracy > 1.5f)
+        return ODID_TIME_ACC_UNKNOWN;
     else if (Accuracy > 1.4f)
-        return ODID_TIME_ACC_1_4_SECONDS;
+        return ODID_TIME_ACC_1_5_SECONDS;
     else if (Accuracy > 1.3f)
-        return ODID_TIME_ACC_1_3_SECONDS;
+        return ODID_TIME_ACC_1_4_SECONDS;
     else if (Accuracy > 1.2f)
-        return ODID_TIME_ACC_1_2_SECONDS;
+        return ODID_TIME_ACC_1_3_SECONDS;
     else if (Accuracy > 1.1f)
-        return ODID_TIME_ACC_1_1_SECONDS;
+        return ODID_TIME_ACC_1_2_SECONDS;
     else if (Accuracy > 1.0f)
-        return ODID_TIME_ACC_1_0_SECONDS;
+        return ODID_TIME_ACC_1_1_SECONDS;
     else if (Accuracy > 0.9f)
-        return ODID_TIME_ACC_0_9_SECONDS;
+        return ODID_TIME_ACC_1_0_SECONDS;
     else if (Accuracy > 0.8f)
-        return ODID_TIME_ACC_0_8_SECONDS;
+        return ODID_TIME_ACC_0_9_SECONDS;
     else if (Accuracy > 0.7f)
-        return ODID_TIME_ACC_0_7_SECONDS;
+        return ODID_TIME_ACC_0_8_SECONDS;
     else if (Accuracy > 0.6f)
-        return ODID_TIME_ACC_0_6_SECONDS;
+        return ODID_TIME_ACC_0_7_SECONDS;
     else if (Accuracy > 0.5f)
-        return ODID_TIME_ACC_0_5_SECONDS;
+        return ODID_TIME_ACC_0_6_SECONDS;
     else if (Accuracy > 0.4f)
-        return ODID_TIME_ACC_0_4_SECONDS;
+        return ODID_TIME_ACC_0_5_SECONDS;
     else if (Accuracy > 0.3f)
-        return ODID_TIME_ACC_0_3_SECONDS;
+        return ODID_TIME_ACC_0_4_SECONDS;
     else if (Accuracy > 0.2f)
+        return ODID_TIME_ACC_0_3_SECONDS;
+    else if (Accuracy > 0.1f)
         return ODID_TIME_ACC_0_2_SECONDS;
     else if (Accuracy > 0.0f)
         return ODID_TIME_ACC_0_1_SECONDS;
