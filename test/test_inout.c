@@ -56,6 +56,7 @@ void test_InOut()
     Location.Height = 80;
     Location.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
     Location.VertAccuracy = createEnumVerticalAccuracy(0.5f);
+    Location.BaroAccuracy = createEnumVerticalAccuracy(1.5f);
     Location.TSAccuracy = createEnumSpeedAccuracy(0.5f);
     Location.SpeedAccuracy = createEnumTimestampAccuracy(0.2f);
     Location.TimeStamp = 3600.52;

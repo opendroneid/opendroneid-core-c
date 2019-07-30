@@ -182,6 +182,7 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         !intInRange(inData->Status, 0, 15) ||
         !intInRange(inData->HorizAccuracy, 0, 15) ||
         !intInRange(inData->VertAccuracy, 0, 15) ||
+        !intInRange(inData->BaroAccuracy, 0, 15) ||
         !intInRange(inData->SpeedAccuracy, 0, 15) ||
         !intInRange(inData->TSAccuracy, 0, 15)) {
         return 0;
@@ -203,10 +204,12 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         outEncoded->Height = encodeAltitude(inData->Height);
         outEncoded->HorizAccuracy = inData->HorizAccuracy;
         outEncoded->VertAccuracy = inData->VertAccuracy;
+        outEncoded->BaroAccuracy = inData->BaroAccuracy;
         outEncoded->SpeedAccuracy = inData->SpeedAccuracy;
         outEncoded->TSAccuracy = inData->TSAccuracy;
+        outEncoded->Reserved2 = 0;
         outEncoded->TimeStamp = encodeTimeStamp(inData->TimeStamp);
-        memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
+        outEncoded->Reserved3 = 0;
         return 1;
     }
 }
@@ -411,6 +414,7 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
         outData->Height = decodeAltitude(inEncoded->Height);
         outData->HorizAccuracy = (ODID_Horizontal_accuracy_t) inEncoded->HorizAccuracy;
         outData->VertAccuracy = (ODID_Vertical_accuracy_t) inEncoded->VertAccuracy;
+        outData->BaroAccuracy = (ODID_Vertical_accuracy_t) inEncoded->BaroAccuracy;
         outData->SpeedAccuracy = (ODID_Speed_accuracy_t) inEncoded->SpeedAccuracy;
         outData->TSAccuracy = (ODID_Timestamp_accuracy_t) inEncoded->TSAccuracy;
         outData->TimeStamp = decodeTimeStamp(inEncoded->TimeStamp);
@@ -858,13 +862,14 @@ void printBasicID_data(ODID_BasicID_data BasicID)
 */
 void printLocation_data(ODID_Location_data Location)
 {
-    const char ODID_Location_data_format[] = "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, %.2f, %.2f\nHoriz, Vert, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
+    const char ODID_Location_data_format[] = "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, %.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
     printf(ODID_Location_data_format, Location.Status, Location.Direction, Location.SpeedHorizontal,
         Location.SpeedVertical, Location.Latitude, Location.Longitude,
         Location.HeightType ? "Ground" : "TakeOff",  Location.AltitudeBaro,
         Location.AltitudeGeo, Location.Height, decodeHorizontalAccuracy(Location.HorizAccuracy),
-        decodeVerticalAccuracy(Location.VertAccuracy), decodeSpeedAccuracy(Location.SpeedAccuracy),
-        decodeTimestampAccuracy(Location.TSAccuracy), Location.TimeStamp);
+        decodeVerticalAccuracy(Location.VertAccuracy), decodeVerticalAccuracy(Location.BaroAccuracy),
+        decodeSpeedAccuracy(Location.SpeedAccuracy), decodeTimestampAccuracy(Location.TSAccuracy),
+        Location.TimeStamp);
 }
 
 /**

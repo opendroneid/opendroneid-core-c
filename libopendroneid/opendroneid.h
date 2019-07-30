@@ -164,6 +164,7 @@ typedef struct {
     float Height;             // meter
     ODID_Horizontal_accuracy_t HorizAccuracy;
     ODID_Vertical_accuracy_t VertAccuracy;
+    ODID_Vertical_accuracy_t BaroAccuracy;
     ODID_Speed_accuracy_t SpeedAccuracy;
     ODID_Timestamp_accuracy_t TSAccuracy;
     float TimeStamp;          // seconds after the full hour
@@ -244,15 +245,19 @@ typedef struct __attribute__((__packed__)) {
     uint8_t HorizAccuracy:4;
     uint8_t VertAccuracy:4;
 
-    // Byte 20 [Reserved2][SpeedAccuracy]  -- must define LSb first
+    // Byte 20 [BaroAccuracy][SpeedAccuracy]  -- must define LSb first
     uint8_t SpeedAccuracy:4;
-    uint8_t TSAccuracy:4;
+    uint8_t BaroAccuracy:4;
 
     // Byte 21-22
     uint16_t TimeStamp;
 
-    // Byte 23-24
-    char Reserved2[2];
+    // Byte 23 [Reserved2][TSAccuracy]  -- must define LSb first
+    uint8_t TSAccuracy:4;
+    uint8_t Reserved2:4;
+
+    // Byte 24
+    char Reserved3;
 } ODID_Location_encoded;
 
 typedef struct __attribute__((__packed__)) {
