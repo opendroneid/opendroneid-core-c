@@ -188,6 +188,7 @@ typedef struct {
     uint16_t GroupCount;
     uint16_t GroupRadius;     // meter
     float GroupCeiling;       // meter
+    float GroupFloor;         // meter
 } ODID_System_data;
 
 typedef struct {
@@ -215,6 +216,7 @@ typedef struct __attribute__((__packed__)) {
 
     // Bytes 2-21
     char UASID[ODID_ID_SIZE];
+
     // 22-24
     char Reserved[3];
 } ODID_BasicID_encoded;
@@ -298,13 +300,14 @@ typedef struct __attribute__((__packed__)) {
     int32_t remotePilotLatitude;
     int32_t remotePilotLongitude;
 
-    // Byte 10-14
+    // Byte 10-16
     uint16_t GroupCount;
     uint8_t  GroupRadius;
     uint16_t GroupCeiling;
+    uint16_t GroupFloor;
 
-    // Byte 15-24
-    char Reserved2[10];
+    // Byte 17-24
+    char Reserved2[8];
 } ODID_System_encoded;
 
 typedef struct {

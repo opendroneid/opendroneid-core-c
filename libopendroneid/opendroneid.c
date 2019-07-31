@@ -277,6 +277,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
         outEncoded->GroupCount = inData->GroupCount;
         outEncoded->GroupRadius = encodeGroupRadius(inData->GroupRadius);
         outEncoded->GroupCeiling = encodeAltitude(inData->GroupCeiling);
+        outEncoded->GroupFloor = encodeAltitude(inData->GroupFloor);
         memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
         return 1;
     }
@@ -478,6 +479,7 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
         outData->GroupCount = inEncoded->GroupCount;
         outData->GroupRadius = decodeGroupRadius(inEncoded->GroupRadius);
         outData->GroupCeiling = decodeAltitude(inEncoded->GroupCeiling);
+        outData->GroupFloor = decodeAltitude(inEncoded->GroupFloor);
         return 1;
     }
 }
@@ -903,8 +905,8 @@ void printSelfID_data(ODID_SelfID_data SelfID)
 */
 void printSystem_data(ODID_System_data System_data)
 {
-    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: %.7f, %.7f\nGroup Count, Radius, Ceiling: %d, %d, %.2f\n";
-    printf(ODID_System_data_format, System_data.LocationSource, System_data.remotePilotLatitude, System_data.remotePilotLongitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling);
+    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: %.7f, %.7f\nGroup Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
+    printf(ODID_System_data_format, System_data.LocationSource, System_data.remotePilotLatitude, System_data.remotePilotLongitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling, System_data.GroupFloor);
 }
 
 #endif // ODID_DISABLE_PRINTF
