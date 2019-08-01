@@ -35,18 +35,21 @@ typedef enum ODID_idtype {
 
 typedef enum ODID_uatype {
     ODID_UATYPE_NONE = 0,
-    ODID_UATYPE_FIXED_WING_POWERED = 1,
-    ODID_UATYPE_ROTORCRAFT_MULTIROTOR = 2,
-    ODID_UATYPE_LTA_POWERED = 3,   /* Lighter Than Air (such as a Blimp) */
-    ODID_UATYPE_LTA_UNPOWERED = 4, /* example: Balloon */
-    ODID_UATYPE_VTOL = 5,          /* Fixed wing aircraft that can take off vertically) */
-    ODID_UATYPE_FREE_FALL = 6,     /* example: Parachute */
-    ODID_UATYPE_ROCKET = 7,
-    ODID_UATYPE_GLIDER = 8,
-    ODID_UATYPE_TETHERED_AIRCRAFT = 9,
-    ODID_UATYPE_GROUND_OBSTACLE = 10,
-    ODID_UATYPE_OTHER = 11,
-    // 12 to 15 reserved
+    ODID_UATYPE_AEROPLANE = 1,
+    ODID_UATYPE_ROTORCRAFT = 2, // Including Multirotor
+    ODID_UATYPE_GYROPLANE = 3,
+    ODID_UATYPE_VTOL = 4, // Fixed wing aircraft that can take off vertically
+    ODID_UATYPE_ORNITHOPTER = 5,
+    ODID_UATYPE_GLIDER = 6,
+    ODID_UATYPE_KITE = 7,
+    ODID_UATYPE_FREE_BALLOON = 8,
+    ODID_UATYPE_CAPTIVE_BALLOON = 9,
+    ODID_UATYPE_AIRSHIP = 10,
+    ODID_UATYPE_FREE_FALL_PARACHUTE = 11,
+    ODID_UATYPE_ROCKET = 12,
+    ODID_UATYPE_GROUND_OBSTACLE = 13,
+    ODID_UATYPE_RESERVED = 14,
+    ODID_UATYPE_OTHER = 15,
 } ODID_uatype_t;
 
 typedef enum ODID_status {
@@ -55,6 +58,11 @@ typedef enum ODID_status {
     ODID_STATUS_AIRBORNE = 2,
     // 3 to 15 reserved
 } ODID_status_t;
+
+typedef enum ODID_Height_reference {
+    ODID_HEIGHT_REF_OVER_TAKEOFF = 0,
+    ODID_HEIGHT_REF_OVER_GROUND = 1,
+} ODID_Height_reference_t;
 
 typedef enum ODID_Horizontal_accuracy {
     ODID_HOR_ACC_UNKNOWN = 0,
@@ -145,16 +153,18 @@ typedef struct {
 
 typedef struct {
     ODID_status_t Status;
-    float SpeedNS;            // m/s
-    float SpeedEW;            // m/s
+    float Direction;          // Degrees. 0 <= x < 360. Route course based on true North
+    float SpeedHorizontal;    // m/s. Positive only
     float SpeedVertical;      // m/s
     double Latitude;
     double Longitude;
-    float AltitudeBaro;       // meter
-    float AltitudeGeo;        // meter
-    float HeightAboveTakeoff; // meter
+    float AltitudeBaro;       // meter (Ref 29.92 inHg, 1013.24 mb)
+    float AltitudeGeo;        // meter (WGS84-HAE)
+    ODID_Height_reference_t HeightType;
+    float Height;             // meter
     ODID_Horizontal_accuracy_t HorizAccuracy;
     ODID_Vertical_accuracy_t VertAccuracy;
+    ODID_Vertical_accuracy_t BaroAccuracy;
     ODID_Speed_accuracy_t SpeedAccuracy;
     ODID_Timestamp_accuracy_t TSAccuracy;
     float TimeStamp;          // seconds after the full hour
@@ -178,6 +188,7 @@ typedef struct {
     uint16_t GroupCount;
     uint16_t GroupRadius;     // meter
     float GroupCeiling;       // meter
+    float GroupFloor;         // meter
 } ODID_System_data;
 
 typedef struct {
@@ -205,6 +216,7 @@ typedef struct __attribute__((__packed__)) {
 
     // Bytes 2-21
     char UASID[ODID_ID_SIZE];
+
     // 22-24
     char Reserved[3];
 } ODID_BasicID_encoded;
@@ -215,34 +227,39 @@ typedef struct __attribute__((__packed__)) {
     uint8_t MessageType : 4;
 
     // Byte 1 [Status][Reserved][NSMult][EWMult] -- must define LSb first
-    uint8_t EWMult: 1;
-    uint8_t NSMult: 1;
-    uint8_t Reserved: 2;
+    uint8_t SpeedMult: 1;
+    uint8_t EWDirection: 1;
+    uint8_t HeightType: 1;
+    uint8_t Reserved: 1;
     uint8_t Status: 4;
 
     // Bytes 2-18
-    uint8_t SpeedNS;
-    uint8_t SpeedEW;
+    uint8_t Direction;
+    uint8_t SpeedHorizontal;
     int8_t SpeedVertical;
     int32_t Latitude;
     int32_t Longitude;
     uint16_t AltitudeBaro;
     uint16_t AltitudeGeo;
-    uint16_t HeightAboveTakeoff;
+    uint16_t Height;
 
     // Byte 19 [VertAccuracy][HorizAccuracy]  -- must define LSb first
     uint8_t HorizAccuracy:4;
     uint8_t VertAccuracy:4;
 
-    // Byte 20 [Reserved2][SpeedAccuracy]  -- must define LSb first
+    // Byte 20 [BaroAccuracy][SpeedAccuracy]  -- must define LSb first
     uint8_t SpeedAccuracy:4;
-    uint8_t TSAccuracy:4;
+    uint8_t BaroAccuracy:4;
 
     // Byte 21-22
     uint16_t TimeStamp;
 
-    // Byte 23-24
-    char Reserved2[2];
+    // Byte 23 [Reserved2][TSAccuracy]  -- must define LSb first
+    uint8_t TSAccuracy:4;
+    uint8_t Reserved2:4;
+
+    // Byte 24
+    char Reserved3;
 } ODID_Location_encoded;
 
 typedef struct __attribute__((__packed__)) {
@@ -283,13 +300,14 @@ typedef struct __attribute__((__packed__)) {
     int32_t remotePilotLatitude;
     int32_t remotePilotLongitude;
 
-    // Byte 10-14
+    // Byte 10-16
     uint16_t GroupCount;
     uint8_t  GroupRadius;
     uint16_t GroupCeiling;
+    uint16_t GroupFloor;
 
-    // Byte 15-24
-    char Reserved2[10];
+    // Byte 17-24
+    char Reserved2[8];
 } ODID_System_encoded;
 
 typedef struct {

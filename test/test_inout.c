@@ -38,25 +38,27 @@ void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
     BasicID.IDType = ODID_IDTYPE_CAA_ASSIGNED_ID;
-    BasicID.UAType = ODID_UATYPE_ROTORCRAFT_MULTIROTOR;
+    BasicID.UAType = ODID_UATYPE_ROTORCRAFT;
     safe_copyfill(BasicID.UASID,"123456789012345678901", sizeof(BasicID.UASID));
     printf("BasicID\n-------\n");
     printBasicID_data(BasicID);
     encodeBasicIDMessage(&BasicID_enc, &BasicID);
 
     Location.Status = ODID_STATUS_AIRBORNE;
-    Location.SpeedNS = 5.25;
-    Location.SpeedEW = 3.5;
+    Location.Direction = 215.7;
+    Location.SpeedHorizontal = 5.4;
     Location.SpeedVertical = 5.25;
     Location.Latitude = 45.539309;
     Location.Longitude = -122.966389;
     Location.AltitudeBaro = 100;
     Location.AltitudeGeo = 110;
-    Location.HeightAboveTakeoff = 80;
+    Location.HeightType = ODID_HEIGHT_REF_OVER_GROUND;
+    Location.Height = 80;
     Location.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
     Location.VertAccuracy = createEnumVerticalAccuracy(0.5f);
-    Location.TSAccuracy = createEnumSpeedAccuracy(0.5f);
-    Location.SpeedAccuracy = createEnumTimestampAccuracy(0.2f);
+    Location.BaroAccuracy = createEnumVerticalAccuracy(1.5f);
+    Location.SpeedAccuracy = createEnumSpeedAccuracy(0.5f);
+    Location.TSAccuracy = createEnumTimestampAccuracy(0.2f);
     Location.TimeStamp = 3600.52;
     printf("\nLocation\n--------\n");
     printLocation_data(Location);
@@ -78,9 +80,10 @@ void test_InOut()
     System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
     System_data.remotePilotLatitude = Location.Latitude + 0.00001;
     System_data.remotePilotLongitude = Location.Longitude + 0.00001;
-    System_data.GroupCount = 0;
-    System_data.GroupRadius = 0;
-    System_data.GroupCeiling = 0;
+    System_data.GroupCount = 35;
+    System_data.GroupRadius = 75;
+    System_data.GroupCeiling = 176.9;
+    System_data.GroupFloor = 41.7;
     printf("\nSystem\n------\n");
     printSystem_data(System_data);
     encodeSystemMessage(&System_enc, &System_data);
