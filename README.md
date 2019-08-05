@@ -4,9 +4,10 @@ Open Drone ID Core C Library
 This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the specification.
 
 To build the library and the sample app:
-just type:
+```
 cmake .
 make
+```
 
 The outputs will be libopendroneid/libopendroneid.so and the test/odidtest sample application.
 
