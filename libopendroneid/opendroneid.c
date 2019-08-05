@@ -455,7 +455,7 @@ int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncode
     if (!outData || !inEncoded) {
         return 0;
     } else {
-        outData->DescType = inEncoded->DescType;
+        outData->DescType = (ODID_desctype_t) inEncoded->DescType;
         safe_dec_copyfill(outData->Desc, inEncoded->Desc, sizeof(outData->Desc));
         return 1;
     }
@@ -473,7 +473,7 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
     if (!outData || !inEncoded) {
         return 0;
     } else {
-        outData->LocationSource = inEncoded->LocationSource;
+        outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
         outData->remotePilotLatitude = decodeLatLon(inEncoded->remotePilotLatitude);
         outData->remotePilotLongitude = decodeLatLon(inEncoded->remotePilotLongitude);
         outData->GroupCount = inEncoded->GroupCount;
