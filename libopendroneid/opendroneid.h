@@ -177,12 +177,12 @@ typedef struct {
 } ODID_Auth_data;
 
 typedef struct {
-    uint8_t DescType;
+    ODID_desctype_t DescType;
     char Desc[ODID_STR_SIZE+1];
 } ODID_SelfID_data;
 
 typedef struct {
-    uint8_t LocationSource;
+    ODID_location_source_t LocationSource;
     double remotePilotLatitude;
     double remotePilotLongitude;
     uint16_t GroupCount;
