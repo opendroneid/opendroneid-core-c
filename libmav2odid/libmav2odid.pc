@@ -1,0 +1,12 @@
+prefix=/usr/local
+exec_prefix=
+libdir=
+includedir=
+
+Name: libmav2odid
+Version: 0.2
+Description: Mavlink to OpenDroneID reference library
+Requires.private: 
+Libs.private: -lm
+Libs: -L${libdir} -lmav2odid
+Cflags: -I${includedir}
