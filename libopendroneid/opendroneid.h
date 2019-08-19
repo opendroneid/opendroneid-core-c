@@ -10,6 +10,9 @@ Gabriel Cox
 gabriel.c.cox@intel.com
 */
 
+#ifndef _OPENDRONEID_H_
+#define _OPENDRONEID_H_
+
 #include <stdint.h>
 #define ODID_MESSAGE_SIZE 25
 #define ODID_ID_SIZE 20
@@ -364,7 +367,7 @@ void printLocation_data(ODID_Location_data Location);
 void printAuth_data(ODID_Auth_data Auth);
 void printSelfID_data(ODID_SelfID_data SelfID);
 void printSystem_data(ODID_System_data System_data);
-void test_InOut(void);
-void ODID_getSimData(uint8_t *message, uint8_t msgType);
-void test_sim(void);
 #endif // ODID_DISABLE_PRINTF
+
+#endif // _OPENDRONEID_H_
+

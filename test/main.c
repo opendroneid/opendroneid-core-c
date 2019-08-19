@@ -13,6 +13,10 @@ gabriel.c.cox@intel.com
 #include <stdio.h>
 #include <opendroneid.h>
 
+void test_InOut(void);
+void ODID_getSimData(uint8_t *message, uint8_t msgType);
+void test_sim(void);
+
 int main(int argc, char const *argv[]) {
 
     // Perform test that takes all nominal unpacked structures displays them, encodes them, decodes them, displays result
