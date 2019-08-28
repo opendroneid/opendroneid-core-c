@@ -364,11 +364,11 @@ float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
 
 #ifndef ODID_DISABLE_PRINTF
 void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
-void printBasicID_data(ODID_BasicID_data BasicID);
-void printLocation_data(ODID_Location_data Location);
-void printAuth_data(ODID_Auth_data Auth);
-void printSelfID_data(ODID_SelfID_data SelfID);
-void printSystem_data(ODID_System_data System_data);
+void printBasicID_data(ODID_BasicID_data *BasicID);
+void printLocation_data(ODID_Location_data *Location);
+void printAuth_data(ODID_Auth_data *Auth);
+void printSelfID_data(ODID_SelfID_data *SelfID);
+void printSystem_data(ODID_System_data *System_data);
 #endif // ODID_DISABLE_PRINTF
 
 #endif // _OPENDRONEID_H_

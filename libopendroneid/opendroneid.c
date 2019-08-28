@@ -934,10 +934,12 @@ void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced)
 *
 * @param BasicID structure to be printed
 */
-void printBasicID_data(ODID_BasicID_data BasicID)
+void printBasicID_data(ODID_BasicID_data *BasicID)
 {
-    const char ODID_BasicID_data_format[] = "UAType: %d\nIDType: %d\nUASID: %s\n";
-    printf(ODID_BasicID_data_format, BasicID.IDType, BasicID.UAType, BasicID.UASID);
+    const char ODID_BasicID_data_format[] =
+        "UAType: %d\nIDType: %d\nUASID: %s\n";
+    printf(ODID_BasicID_data_format, BasicID->IDType, BasicID->UAType,
+        BasicID->UASID);
 }
 
 /**
@@ -945,16 +947,23 @@ void printBasicID_data(ODID_BasicID_data BasicID)
 *
 * @param Location structure to be printed
 */
-void printLocation_data(ODID_Location_data Location)
+void printLocation_data(ODID_Location_data *Location)
 {
-    const char ODID_Location_data_format[] = "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, %.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, %.1f, %.1f\nTimeStamp: %.2f\n";
-    printf(ODID_Location_data_format, Location.Status, Location.Direction, Location.SpeedHorizontal,
-        Location.SpeedVertical, Location.Latitude, Location.Longitude,
-        Location.HeightType ? "Ground" : "TakeOff",  Location.AltitudeBaro,
-        Location.AltitudeGeo, Location.Height, decodeHorizontalAccuracy(Location.HorizAccuracy),
-        decodeVerticalAccuracy(Location.VertAccuracy), decodeVerticalAccuracy(Location.BaroAccuracy),
-        decodeSpeedAccuracy(Location.SpeedAccuracy), decodeTimestampAccuracy(Location.TSAccuracy),
-        Location.TimeStamp);
+    const char ODID_Location_data_format[] =
+        "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: \
+        %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, \
+        %.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, \
+        %.1f, %.1f\nTimeStamp: %.2f\n";
+    printf(ODID_Location_data_format, Location->Status, Location->Direction,
+        Location->SpeedHorizontal, Location->SpeedVertical, Location->Latitude,
+        Location->Longitude, Location->HeightType ? "Ground" : "TakeOff",
+        Location->AltitudeBaro, Location->AltitudeGeo, Location->Height,
+        decodeHorizontalAccuracy(Location->HorizAccuracy),
+        decodeVerticalAccuracy(Location->VertAccuracy),
+        decodeVerticalAccuracy(Location->BaroAccuracy),
+        decodeSpeedAccuracy(Location->SpeedAccuracy),
+        decodeTimestampAccuracy(Location->TSAccuracy),
+        Location->TimeStamp);
 }
 
 /**
@@ -962,10 +971,12 @@ void printLocation_data(ODID_Location_data Location)
 *
 * @param Auth structure to be printed
 */
-void printAuth_data(ODID_Auth_data Auth)
+void printAuth_data(ODID_Auth_data *Auth)
 {
-    const char ODID_Auth_data_format[] = "AuthType: %d\nDataPage: %d\nAuthData: %s\n";
-    printf(ODID_Auth_data_format, Auth.AuthType, Auth.DataPage, Auth.AuthData);
+    const char ODID_Auth_data_format[] =
+        "AuthType: %d\nDataPage: %d\nAuthData: %s\n";
+    printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
+        Auth->AuthData);
 }
 
 /**
@@ -973,10 +984,10 @@ void printAuth_data(ODID_Auth_data Auth)
 *
 * @param SelfID structure to be printed
 */
-void printSelfID_data(ODID_SelfID_data SelfID)
+void printSelfID_data(ODID_SelfID_data *SelfID)
 {
     const char ODID_SelfID_data_format[] = "DescType: %d\nDesc: %s\n";
-    printf(ODID_SelfID_data_format, SelfID.DescType, SelfID.Desc);
+    printf(ODID_SelfID_data_format, SelfID->DescType, SelfID->Desc);
 }
 
 /**
@@ -984,10 +995,14 @@ void printSelfID_data(ODID_SelfID_data SelfID)
 *
 * @param System_data structure to be printed
 */
-void printSystem_data(ODID_System_data System_data)
+void printSystem_data(ODID_System_data *System_data)
 {
-    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: %.7f, %.7f\nGroup Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
-    printf(ODID_System_data_format, System_data.LocationSource, System_data.remotePilotLatitude, System_data.remotePilotLongitude, System_data.GroupCount, System_data.GroupRadius, System_data.GroupCeiling, System_data.GroupFloor);
+    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: \
+        %.7f, %.7f\nGroup Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
+    printf(ODID_System_data_format, System_data->LocationSource,
+        System_data->remotePilotLatitude, System_data->remotePilotLongitude,
+        System_data->GroupCount, System_data->GroupRadius,
+        System_data->GroupCeiling, System_data->GroupFloor);
 }
 
 #endif // ODID_DISABLE_PRINTF
