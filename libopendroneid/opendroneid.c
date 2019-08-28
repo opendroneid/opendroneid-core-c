@@ -485,6 +485,87 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
 }
 
 /**
+* Decodes the message type of a packed Open Drone ID message
+*
+* @param byte   The first byte of the message
+* @return       The message type: ODID_messagetype_t
+*/
+ODID_messagetype_t decodeMessageType(uint8_t byte)
+{
+    switch (byte >> 4)
+    {
+    case ODID_MESSAGETYPE_BASIC_ID:
+        return ODID_MESSAGETYPE_BASIC_ID;
+    case ODID_MESSAGETYPE_LOCATION:
+        return ODID_MESSAGETYPE_LOCATION;
+    case ODID_MESSAGETYPE_AUTH:
+        return ODID_MESSAGETYPE_AUTH;
+    case ODID_MESSAGETYPE_SELF_ID:
+        return ODID_MESSAGETYPE_SELF_ID;
+    case ODID_MESSAGETYPE_SYSTEM:
+        return ODID_MESSAGETYPE_SYSTEM;
+    default:
+        return ODID_MESSAGETYPE_INVALID;
+    }
+}
+
+/**
+* Parse encoded Open Drone ID data to identify the message type and decode
+* from Open Drone ID packed format into the appropriate Open Drone ID structure
+* 
+* This function assumes that msg_data points to a buffer conaining all
+* ODID_MESSAGE_SIZE bytes of an Open Drone ID message.
+*
+* @param uas_data   Structure containing buffers for holding all message data
+* @param msg_data   Pointer to a buffer containing a full encoded Open Drone ID
+*                   message
+* @return           The message type: ODID_messagetype_t
+*/
+ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data)
+{
+    if (!uas_data || !msg_data)
+        return ODID_MESSAGETYPE_INVALID;
+
+    switch (decodeMessageType(msg_data[0]))
+    {
+    case ODID_MESSAGETYPE_BASIC_ID:
+        if (decodeBasicIDMessage(&uas_data->BasicID,
+                (ODID_BasicID_encoded *) msg_data) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_BASIC_ID;
+        break;
+
+    case ODID_MESSAGETYPE_LOCATION:
+        if (decodeLocationMessage(&uas_data->Location,
+                (ODID_Location_encoded *) msg_data) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_LOCATION;
+        break;
+
+    case ODID_MESSAGETYPE_AUTH:
+        if (decodeAuthMessage(&uas_data->Auth,
+                (ODID_Auth_encoded *) msg_data) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_AUTH;
+        break;
+
+    case ODID_MESSAGETYPE_SELF_ID:
+        if (decodeSelfIDMessage(&uas_data->SelfID,
+                (ODID_SelfID_encoded *) msg_data) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_SELF_ID;
+        break;
+
+    case ODID_MESSAGETYPE_SYSTEM:
+        if (decodeSystemMessage(&uas_data->System,
+                (ODID_System_encoded *) msg_data) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_SYSTEM;
+        break;
+
+    default:
+        break;
+    }
+
+    return ODID_MESSAGETYPE_INVALID;
+}
+
+/**
 * Safely fill then copy string to destination
 *
 * This prevents overrun and guarantees copy behavior (fully null padded)
