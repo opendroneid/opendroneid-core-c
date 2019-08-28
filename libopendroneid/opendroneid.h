@@ -17,6 +17,9 @@ gabriel.c.cox@intel.com
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.64.3
 
+#define ODID_SUCCESS    0
+#define ODID_FAIL       1
+
 typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_BASIC_ID = 0,
     ODID_MESSAGETYPE_LOCATION = 1,
