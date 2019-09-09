@@ -10,6 +10,9 @@ Gabriel Cox
 gabriel.c.cox@intel.com
 */
 
+#ifndef _OPENDRONEID_H_
+#define _OPENDRONEID_H_
+
 #include <stdint.h>
 #define ODID_MESSAGE_SIZE 25
 #define ODID_ID_SIZE 20
@@ -17,12 +20,16 @@ gabriel.c.cox@intel.com
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.64.3
 
+#define ODID_SUCCESS    0
+#define ODID_FAIL       1
+
 typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_BASIC_ID = 0,
     ODID_MESSAGETYPE_LOCATION = 1,
     ODID_MESSAGETYPE_AUTH = 2,
     ODID_MESSAGETYPE_SELF_ID = 3,
     ODID_MESSAGETYPE_SYSTEM = 4,
+    ODID_MESSAGETYPE_INVALID = 0xFF,
 } ODID_messagetype_t;
 
 typedef enum ODID_idtype {
@@ -324,7 +331,6 @@ typedef struct __attribute__((__packed__)) {
     ODID_Message Messages[];
 } ODID_Message_Pack;
 
-
 // API Calls
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);
@@ -337,6 +343,8 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
+ODID_messagetype_t decodeMessageType(uint8_t byte);
+ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);
 
 // Helper Functions
 char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize);
@@ -356,12 +364,12 @@ float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
 
 #ifndef ODID_DISABLE_PRINTF
 void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
-void printBasicID_data(ODID_BasicID_data BasicID);
-void printLocation_data(ODID_Location_data Location);
-void printAuth_data(ODID_Auth_data Auth);
-void printSelfID_data(ODID_SelfID_data SelfID);
-void printSystem_data(ODID_System_data System_data);
-void test_InOut(void);
-void ODID_getSimData(uint8_t *message, uint8_t msgType);
-void test_sim(void);
+void printBasicID_data(ODID_BasicID_data *BasicID);
+void printLocation_data(ODID_Location_data *Location);
+void printAuth_data(ODID_Auth_data *Auth);
+void printSelfID_data(ODID_SelfID_data *SelfID);
+void printSystem_data(ODID_System_data *System_data);
 #endif // ODID_DISABLE_PRINTF
+
+#endif // _OPENDRONEID_H_
+

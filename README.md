@@ -5,6 +5,8 @@ This provides a function library for encoding and decoding (packing/unpacking) O
 
 To build the library and the sample app:
 ```
+git submodule init
+git submodule update
 cmake .
 make
 ```
@@ -54,3 +56,9 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
 ```
+
+Specific messages have been added to the Mavlink message set to accomodate data for Open Drone ID implementations:
+
+https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID
+
+The functions in mav2odid.c can be used to convert these Mavlink messages into suitable opendroneid.h data structures and back again. See the example usages in test/test_mav2odid.c.

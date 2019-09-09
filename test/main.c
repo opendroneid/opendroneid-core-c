@@ -12,14 +12,26 @@ gabriel.c.cox@intel.com
 
 #include <stdio.h>
 #include <opendroneid.h>
+#include <mav2odid.h>
+
+void test_InOut(void);
+void ODID_getSimData(uint8_t *message, uint8_t msgType);
+void test_sim(void);
+void test_mav2odid();
 
 int main(int argc, char const *argv[]) {
 
-    // Perform test that takes all nominal unpacked structures displays them, encodes them, decodes them, displays result
+    // Perform test that takes all nominal unpacked structures displays them,
+    // encodes them, decodes them, displays result
     test_InOut();
 
+    // Test the Mavlink to OpenDroneID conversion functionality
+    printf("\nPress enter to run the Mavlink to Open Drone ID test");
+    getchar();
+    test_mav2odid();
+
     // Simulates a moving drone, encodes and displays data
-    printf("Press any key to begin simulator messages...");
+    printf("\nPress enter to begin simulator messages...");
     getchar();
     test_sim();
 }
