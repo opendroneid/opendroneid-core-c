@@ -1,9 +1,11 @@
 # opendroneid-core-c
+
 Open Drone ID Core C Library
 
 This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the specification.
 
 To build the library and the sample app:
+
 ```
 git submodule init
 git submodule update
@@ -11,15 +13,15 @@ cmake .
 make
 ```
 
-The outputs will be libopendroneid/libopendroneid.so and the test/odidtest sample application.
+The outputs will be `libopendroneid/libopendroneid.so` and the `test/odidtest` sample application.
 
 The sample application will do a test encode/decode, then continuously generate sample messages.
 
-The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in libopendroneid/opendroneid.h
+The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in `libopendroneid/opendroneid.h`.
 
 ![Core SDK Scope](img/core-arch.png "Core SDK Scope")
 
-These are nominal (non-encoded) strutures:
+These are nominal (non-encoded) structures:
 
 ```
 ODID_BasicID_data
@@ -61,4 +63,4 @@ Specific messages have been added to the Mavlink message set to accomodate data 
 
 https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID
 
-The functions in mav2odid.c can be used to convert these Mavlink messages into suitable opendroneid.h data structures and back again. See the example usages in test/test_mav2odid.c.
+The functions in `mav2odid.c` can be used to convert these Mavlink messages into suitable `opendroneid.h` data structures and back again. See the example usages in `test/test_mav2odid.c`.
