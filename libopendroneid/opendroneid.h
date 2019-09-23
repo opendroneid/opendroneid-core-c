@@ -160,15 +160,15 @@ typedef struct {
 
 typedef struct {
     ODID_status_t Status;
-    float Direction;          // Degrees. 0 <= x < 360. Route course based on true North
-    float SpeedHorizontal;    // m/s. Positive only
-    float SpeedVertical;      // m/s
-    double Latitude;
-    double Longitude;
-    float AltitudeBaro;       // meter (Ref 29.92 inHg, 1013.24 mb)
-    float AltitudeGeo;        // meter (WGS84-HAE)
+    float Direction;          // Degrees. 0 <= x < 360. Route course based on true North. Invalid, No Value, or Unknown: 361deg
+    float SpeedHorizontal;    // m/s. Positive only. Invalid, No Value, or Unknown: 255m/s. If speed is >= 254.25 m/s: 254.25m/s
+    float SpeedVertical;      // m/s. Invalid, No Value, or Unknown: 63m/s. If speed is >= 62m/s: 62m/s
+    double Latitude;          // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
+    double Longitude;         // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
+    float AltitudeBaro;       // meter (Ref 29.92 inHg, 1013.24 mb). Invalid, No Value, or Unknown: -1000m
+    float AltitudeGeo;        // meter (WGS84-HAE). Invalid, No Value, or Unknown: -1000m
     ODID_Height_reference_t HeightType;
-    float Height;             // meter
+    float Height;             // meter. Invalid, No Value, or Unknown: -1000m
     ODID_Horizontal_accuracy_t HorizAccuracy;
     ODID_Vertical_accuracy_t VertAccuracy;
     ODID_Vertical_accuracy_t BaroAccuracy;
@@ -190,12 +190,12 @@ typedef struct {
 
 typedef struct {
     ODID_location_source_t LocationSource;
-    double remotePilotLatitude;
-    double remotePilotLongitude;
+    double remotePilotLatitude;  // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
+    double remotePilotLongitude; // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
     uint16_t AreaCount;      // Default 1
-    uint16_t AreaRadius;     // meter
-    float AreaCeiling;       // meter
-    float AreaFloor;         // meter
+    uint16_t AreaRadius;     // meter. Default 0
+    float AreaCeiling;       // meter. Invalid, No Value, or Unknown: -1000m
+    float AreaFloor;         // meter. Invalid, No Value, or Unknown: -1000m
 } ODID_System_data;
 
 typedef struct {

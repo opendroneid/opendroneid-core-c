@@ -40,7 +40,10 @@ static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
     if (Direction < 0)
         Direction = 0;
 
-    unsigned int direction_int = (unsigned int) roundf(Direction) % 360;
+    if (Direction > 361)
+        Direction = 361;
+
+    unsigned int direction_int = (unsigned int) roundf(Direction);
     if (direction_int < 180) {
         *EWDirection = 0;
     } else {
@@ -67,6 +70,9 @@ static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
     if (Speed_data < 0)
         Speed_data = 0;
 
+    if (Speed_data > 255)
+        Speed_data = 255;
+
     if (Speed_data <= UINT8_MAX * SPEED_DIV[0]) {
         *mult = 0;
         return (uint8_t) (Speed_data / SPEED_DIV[0]);
@@ -85,6 +91,12 @@ static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
 */
 static int8_t encodeSpeedVertical(float SpeedVertical_data)
 {
+    if (SpeedVertical_data < -63)
+        SpeedVertical_data = -63;
+
+    if (SpeedVertical_data > 63)
+        SpeedVertical_data = 63;
+
     int encValue = (int) (SpeedVertical_data / VSPEED_DIV);
     return (int8_t) intRangeMax(encValue, INT8_MIN, INT8_MAX);
 }
@@ -114,6 +126,12 @@ static int32_t encodeLatLon(double LatLon_data)
 */
 static int16_t encodeAltitude(float Alt_data)
 {
+    if (Alt_data < -1000)
+        Alt_data = -1000;
+
+    if (Alt_data > 31767.5)
+        Alt_data = 31767.5;
+
     return (uint16_t) intRangeMax( (int) ((Alt_data + ALT_ADDER) / ALT_DIV), 0, UINT16_MAX);
 }
 
