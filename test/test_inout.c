@@ -80,10 +80,10 @@ void test_InOut()
     System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
     System_data.remotePilotLatitude = Location.Latitude + 0.00001;
     System_data.remotePilotLongitude = Location.Longitude + 0.00001;
-    System_data.GroupCount = 35;
-    System_data.GroupRadius = 75;
-    System_data.GroupCeiling = 176.9;
-    System_data.GroupFloor = 41.7;
+    System_data.AreaCount = 35;
+    System_data.AreaRadius = 75;
+    System_data.AreaCeiling = 176.9;
+    System_data.AreaFloor = 41.7;
     printf("\nSystem\n------\n");
     printSystem_data(&System_data);
     encodeSystemMessage(&System_enc, &System_data);

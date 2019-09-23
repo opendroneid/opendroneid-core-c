@@ -192,10 +192,10 @@ typedef struct {
     ODID_location_source_t LocationSource;
     double remotePilotLatitude;
     double remotePilotLongitude;
-    uint16_t GroupCount;
-    uint16_t GroupRadius;     // meter
-    float GroupCeiling;       // meter
-    float GroupFloor;         // meter
+    uint16_t AreaCount;      // Default 1
+    uint16_t AreaRadius;     // meter
+    float AreaCeiling;       // meter
+    float AreaFloor;         // meter
 } ODID_System_data;
 
 typedef struct {
@@ -308,10 +308,10 @@ typedef struct __attribute__((__packed__)) {
     int32_t remotePilotLongitude;
 
     // Byte 10-16
-    uint16_t GroupCount;
-    uint8_t  GroupRadius;
-    uint16_t GroupCeiling;
-    uint16_t GroupFloor;
+    uint16_t AreaCount;
+    uint8_t  AreaRadius;
+    uint16_t AreaCeiling;
+    uint16_t AreaFloor;
 
     // Byte 17-24
     char Reserved2[8];

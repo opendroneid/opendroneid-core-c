@@ -133,14 +133,14 @@ static uint16_t encodeTimeStamp(float Seconds_data)
 }
 
 /**
-* Encode group radius data in ODID format
+* Encode area radius data in ODID format
 *
-* This encodes the group radius in meters into a 1 byte value
+* This encodes the area radius in meters into a 1 byte value
 *
-* @param Radius The radius of the drone group/swarm
-* @return Encoded group radius
+* @param Radius The radius of the drone area/swarm
+* @return Encoded area radius
 */
-static uint16_t encodeGroupRadius(uint16_t Radius)
+static uint16_t encodeAreaRadius(uint16_t Radius)
 {
     return (uint8_t) intRangeMax(Radius / 10, 0, 255);
 }
@@ -274,10 +274,10 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
         outEncoded->LocationSource = inData->LocationSource;
         outEncoded->remotePilotLatitude = encodeLatLon(inData->remotePilotLatitude);
         outEncoded->remotePilotLongitude = encodeLatLon(inData->remotePilotLongitude);
-        outEncoded->GroupCount = inData->GroupCount;
-        outEncoded->GroupRadius = encodeGroupRadius(inData->GroupRadius);
-        outEncoded->GroupCeiling = encodeAltitude(inData->GroupCeiling);
-        outEncoded->GroupFloor = encodeAltitude(inData->GroupFloor);
+        outEncoded->AreaCount = inData->AreaCount;
+        outEncoded->AreaRadius = encodeAreaRadius(inData->AreaRadius);
+        outEncoded->AreaCeiling = encodeAltitude(inData->AreaCeiling);
+        outEncoded->AreaFloor = encodeAltitude(inData->AreaFloor);
         memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
         return ODID_SUCCESS;
     }
@@ -358,14 +358,14 @@ static float decodeTimeStamp(uint16_t Seconds_enc)
 }
 
 /**
-* Decode group radius data from ODID format
+* Decode area radius data from ODID format
 *
-* This decodes a 1 byte value to the group radius in meters
+* This decodes a 1 byte value to the area radius in meters
 *
-* @param Radius_enc Encoded group radius
-* @return The radius of the drone group/swarm in meters
+* @param Radius_enc Encoded area radius
+* @return The radius of the drone area/swarm in meters
 */
-static uint16_t decodeGroupRadius(uint8_t Radius_enc)
+static uint16_t decodeAreaRadius(uint8_t Radius_enc)
 {
     return (uint16_t) Radius_enc * 10;
 }
@@ -476,10 +476,10 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
         outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
         outData->remotePilotLatitude = decodeLatLon(inEncoded->remotePilotLatitude);
         outData->remotePilotLongitude = decodeLatLon(inEncoded->remotePilotLongitude);
-        outData->GroupCount = inEncoded->GroupCount;
-        outData->GroupRadius = decodeGroupRadius(inEncoded->GroupRadius);
-        outData->GroupCeiling = decodeAltitude(inEncoded->GroupCeiling);
-        outData->GroupFloor = decodeAltitude(inEncoded->GroupFloor);
+        outData->AreaCount = inEncoded->AreaCount;
+        outData->AreaRadius = decodeAreaRadius(inEncoded->AreaRadius);
+        outData->AreaCeiling = decodeAltitude(inEncoded->AreaCeiling);
+        outData->AreaFloor = decodeAltitude(inEncoded->AreaFloor);
         return ODID_SUCCESS;
     }
 }
@@ -998,11 +998,11 @@ void printSelfID_data(ODID_SelfID_data *SelfID)
 void printSystem_data(ODID_System_data *System_data)
 {
     const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: \
-        %.7f, %.7f\nGroup Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
+        %.7f, %.7f\nArea Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
     printf(ODID_System_data_format, System_data->LocationSource,
         System_data->remotePilotLatitude, System_data->remotePilotLongitude,
-        System_data->GroupCount, System_data->GroupRadius,
-        System_data->GroupCeiling, System_data->GroupFloor);
+        System_data->AreaCount, System_data->AreaRadius,
+        System_data->AreaCeiling, System_data->AreaFloor);
 }
 
 #endif // ODID_DISABLE_PRINTF
