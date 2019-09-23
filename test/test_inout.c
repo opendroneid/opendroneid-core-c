@@ -42,7 +42,8 @@ void test_InOut()
     printf("\n-------------------------------------Source Data-----------------------------------\n");
     BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
     BasicID.UAType = ODID_UATYPE_ROTORCRAFT;
-    safe_copyfill(BasicID.UASID,"123456789012345678901", sizeof(BasicID.UASID));
+    char id[] = "12345678901234567890";
+    strncpy(BasicID.UASID, id, sizeof(id));
     printf("BasicID\n-------\n");
     printBasicID_data(&BasicID);
     encodeBasicIDMessage(&BasicID_enc, &BasicID);
@@ -72,20 +73,23 @@ void test_InOut()
     Auth0.PageCount = 2;
     Auth0.Length = 39;
     Auth0.Timestamp = 28000000;
-    safe_copyfill(Auth0.AuthData, "12345678901234567", ODID_STR_SIZE);
+    char auth0_data[] = "12345678901234567";
+    strncpy(Auth0.AuthData, auth0_data, sizeof(auth0_data));
     printf("\nAuth0\n--------------\n");
     printAuth_data(&Auth0);
     encodeAuthMessage(&Auth0_enc, &Auth0);
 
     Auth1.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     Auth1.DataPage = 1;
-    safe_copyfill(Auth1.AuthData, "12345678901234567890123", ODID_STR_SIZE);
+    char auth1_data[] = "12345678901234567890123";
+    strncpy(Auth1.AuthData, auth1_data, sizeof(auth1_data));
     printf("\nAuth1\n--------------\n");
     printAuth_data(&Auth1);
     encodeAuthMessage(&Auth1_enc, &Auth1);
 
     SelfID.DescType = ODID_DESC_TYPE_TEXT;
-    safe_copyfill(SelfID.Desc,"DronesRUS: Real Estate",sizeof(SelfID.Desc));
+    char description[] = "DronesRUS: Real Estate";
+    strncpy(SelfID.Desc, description, sizeof(description));
     printf("\nSelfID\n------\n");
     printSelfID_data(&SelfID);
     encodeSelfIDMessage(&SelfID_enc, &SelfID);

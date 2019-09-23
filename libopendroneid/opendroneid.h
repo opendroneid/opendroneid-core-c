@@ -384,11 +384,6 @@ ODID_messagetype_t decodeMessageType(uint8_t byte);
 ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);
 
 // Helper Functions
-char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize);
-char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize);
-int intRangeMax(int64_t inValue, int startRange, int endRange);
-int intInRange(int inValue, int startRange, int endRange);
-
 ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy);
 ODID_Vertical_accuracy_t createEnumVerticalAccuracy(float Accuracy);
 ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy);

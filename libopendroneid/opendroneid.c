@@ -24,6 +24,10 @@ const float ALT_DIV = 0.5;
 const int ALT_ADDER = 1000;
 const int DATA_AGE_DIV = 10;
 
+static char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize);
+static int intRangeMax(int64_t inValue, int startRange, int endRange);
+static int intInRange(int inValue, int startRange, int endRange);
+
 /**
 * Encode direction as defined by Open Drone ID
 *
@@ -181,7 +185,7 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->IDType = inData->IDType;
         outEncoded->UAType = inData->UAType;
-        safe_copyfill(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
+        strncpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
         return ODID_SUCCESS;
     }
 }
@@ -252,9 +256,9 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
             outEncoded->page_0.PageCount = inData->PageCount;
             outEncoded->page_0.Length = inData->Length;
             outEncoded->page_0.Timestamp = inData->Timestamp;
-            safe_copyfill(outEncoded->page_0.AuthData, inData->AuthData, sizeof(outEncoded->page_0.AuthData));
+            strncpy(outEncoded->page_0.AuthData, inData->AuthData, sizeof(outEncoded->page_0.AuthData));
         } else {
-            safe_copyfill(outEncoded->page_1_4.AuthData, inData->AuthData, sizeof(outEncoded->page_1_4.AuthData));
+            strncpy(outEncoded->page_1_4.AuthData, inData->AuthData, sizeof(outEncoded->page_1_4.AuthData));
         }
         return ODID_SUCCESS;
     }
@@ -275,7 +279,7 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
         outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->DescType = inData->DescType;
-        safe_copyfill(outEncoded->Desc, inData->Desc, sizeof(outEncoded->Desc));
+        strncpy(outEncoded->Desc, inData->Desc, sizeof(outEncoded->Desc));
         return ODID_SUCCESS;
     }
 }
@@ -597,22 +601,6 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data)
 }
 
 /**
-* Safely fill then copy string to destination
-*
-* This prevents overrun and guarantees copy behavior (fully null padded)
-*
-* @param dstStr Destination string
-* @param srcStr Source string
-* @param dstSize Destination size
-*/
-char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize)
-{
-    memset(dstStr,0,dstSize);  // fills destination with nulls
-    strncpy(dstStr,srcStr,dstSize); // copy only up to dst size (no overruns)
-    return dstStr;
-}
-
-/**
 * Safely fill then copy string to destination (when decoding)
 *
 * This prevents overrun and guarantees copy behavior (fully null padded)
@@ -623,10 +611,10 @@ char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize)
 * @param srcStr Source string
 * @param dstSize Destination size
 */
-char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize)
+static char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize)
 {
-    memset(dstStr,0,dstSize);  // fills destination with nulls
-    strncpy(dstStr,srcStr,dstSize-1); // copy only up to dst size-1 (no overruns)
+    memset(dstStr, 0, dstSize);  // fills destination with nulls
+    strncpy(dstStr, srcStr, dstSize-1); // copy only up to dst size-1 (no overruns)
     return dstStr;
 }
 
@@ -638,7 +626,7 @@ char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize)
 * @param endRange End of range to compare
 * @return same value if it fits, otherwise, min or max of range as appropriate.
 */
-int intRangeMax(int64_t inValue, int startRange, int endRange) {
+static int intRangeMax(int64_t inValue, int startRange, int endRange) {
     if ( inValue < startRange ) {
         return startRange;
     } else if (inValue > endRange) {
@@ -656,7 +644,7 @@ int intRangeMax(int64_t inValue, int startRange, int endRange) {
  * @param endRange End of range to compare
  * @return 1 = yes, 0 = no
  */
-int intInRange(int inValue, int startRange, int endRange)
+static int intInRange(int inValue, int startRange, int endRange)
 {
     if (inValue < startRange || inValue > endRange) {
         return 0;

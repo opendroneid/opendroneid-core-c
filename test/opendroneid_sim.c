@@ -92,7 +92,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
             basicID_data.UAType = ODID_UATYPE_ROTORCRAFT;
             // 4 chr mfg code, 1chr Len, 15chr serial
-            safe_copyfill(basicID_data.UASID, "INTCE123456789012345", sizeof(basicID_data.UASID));
+            char id[] = "INTCE123456789012345";
+            strncpy(basicID_data.UASID, id, sizeof(id));
 
             encodeBasicIDMessage(&basicID_enc, &basicID_data);
             memcpy(message, &basicID_enc, ODID_MESSAGE_SIZE);
@@ -127,7 +128,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             auth_data.PageCount = 1;
             auth_data.Length = 12;
             auth_data.Timestamp = 23000000;
-            safe_copyfill(auth_data.AuthData, "030a0cd033a3",sizeof(auth_data.AuthData));
+            char data[] = "030a0cd033a3";
+            strncpy(auth_data.AuthData, data, sizeof(data));
 
             encodeAuthMessage(&auth_enc, &auth_data);
             memcpy(message, &auth_enc, ODID_MESSAGE_SIZE);
@@ -135,7 +137,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 
         case 3:
             selfID_data.DescType = ODID_DESC_TYPE_TEXT;
-            safe_copyfill(selfID_data.Desc, "Real Estate Photos", sizeof(selfID_data.Desc));
+            char description[] = "Real Estate Photos";
+            strncpy(selfID_data.Desc, description, sizeof(description));
             encodeSelfIDMessage(&selfID_enc, &selfID_data);
             memcpy(message, &selfID_enc, ODID_MESSAGE_SIZE);
             break;
