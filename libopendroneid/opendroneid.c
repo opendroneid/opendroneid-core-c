@@ -244,12 +244,18 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
     if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15)) {
         return ODID_FAIL;
     } else {
-        outEncoded->MessageType = ODID_MESSAGETYPE_AUTH;
-        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->AuthType = inData->AuthType;
-        // TODO: Implement Multi-page support (for now, this will handle a single DataPage)
-        outEncoded->DataPage = 0;
-        safe_copyfill(outEncoded->AuthData, inData->AuthData, sizeof(outEncoded->AuthData));
+        outEncoded->page_0.MessageType = ODID_MESSAGETYPE_AUTH;
+        outEncoded->page_0.ProtoVersion = ODID_PROTOCOL_VERSION;
+        outEncoded->page_0.AuthType = inData->AuthType;
+        outEncoded->page_0.DataPage = inData->DataPage;
+        if (inData->DataPage == 0) {
+            outEncoded->page_0.PageCount = inData->PageCount;
+            outEncoded->page_0.Length = inData->Length;
+            outEncoded->page_0.Timestamp = inData->Timestamp;
+            safe_copyfill(outEncoded->page_0.AuthData, inData->AuthData, sizeof(outEncoded->page_0.AuthData));
+        } else {
+            safe_copyfill(outEncoded->page_1_4.AuthData, inData->AuthData, sizeof(outEncoded->page_1_4.AuthData));
+        }
         return ODID_SUCCESS;
     }
 }
@@ -450,13 +456,20 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 */
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
-    if (!outData || !inEncoded || !intInRange(inEncoded->AuthType, 0, 15)) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_0.DataPage, 0, 4)) {
         return ODID_FAIL;
     } else {
-        // TODO: Implement Multi-page support (for now, this will handle a single DataPage)
-        outData->AuthType = (ODID_authtype_t) inEncoded->AuthType;
-        outData->DataPage = 0;
-        safe_dec_copyfill(outData->AuthData, inEncoded->AuthData, sizeof(outData->AuthData));
+        outData->AuthType = (ODID_authtype_t) inEncoded->page_0.AuthType;
+        outData->DataPage = inEncoded->page_0.DataPage;
+        if (inEncoded->page_0.DataPage == 0) {
+            outData->PageCount = inEncoded->page_0.PageCount;
+            outData->Length = inEncoded->page_0.Length;
+            outData->Timestamp = inEncoded->page_0.Timestamp;
+            safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData, sizeof(outData->AuthData) - 6);
+        } else {
+            safe_dec_copyfill(outData->AuthData, inEncoded->page_1_4.AuthData, sizeof(outData->AuthData));
+        }
         return ODID_SUCCESS;
     }
 }
@@ -968,10 +981,10 @@ void printBasicID_data(ODID_BasicID_data *BasicID)
 void printLocation_data(ODID_Location_data *Location)
 {
     const char ODID_Location_data_format[] =
-        "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: \
-        %.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, \
-        %.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, \
-        %.1f, %.1f\nTimeStamp: %.2f\n";
+        "Status: %d\nDirection: %.1f\nSpeedHori: %.2f\nSpeedVert: "\
+        "%.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, "\
+        "%.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, "\
+        "%.1f, %.1f\nTimeStamp: %.2f\n";
     printf(ODID_Location_data_format, Location->Status, Location->Direction,
         Location->SpeedHorizontal, Location->SpeedVertical, Location->Latitude,
         Location->Longitude, Location->HeightType ? "Ground" : "TakeOff",
@@ -991,10 +1004,18 @@ void printLocation_data(ODID_Location_data *Location)
 */
 void printAuth_data(ODID_Auth_data *Auth)
 {
-    const char ODID_Auth_data_format[] =
-        "AuthType: %d\nDataPage: %d\nAuthData: %s\n";
-    printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
-        Auth->AuthData);
+    if (Auth->DataPage == 0) {
+        const char ODID_Auth_data_format[] =
+            "AuthType: %d\nDataPage: %d\nPageCount: %d\nLenght: %d\nTimestamp:"\
+            " %d\nAuthData: %s\n";
+        printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
+            Auth->PageCount, Auth->Length, Auth->Timestamp, Auth->AuthData);
+    } else {
+        const char ODID_Auth_data_format[] =
+            "AuthType: %d\nDataPage: %d\nAuthData: %s\n";
+        printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
+            Auth->AuthData);
+    }
 }
 
 /**
@@ -1015,8 +1036,8 @@ void printSelfID_data(ODID_SelfID_data *SelfID)
 */
 void printSystem_data(ODID_System_data *System_data)
 {
-    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: \
-        %.7f, %.7f\nArea Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
+    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: "\
+        "%.7f, %.7f\nArea Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
     printf(ODID_System_data_format, System_data->LocationSource,
         System_data->remotePilotLatitude, System_data->remotePilotLongitude,
         System_data->AreaCount, System_data->AreaRadius,

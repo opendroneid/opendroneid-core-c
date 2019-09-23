@@ -129,8 +129,11 @@ typedef enum ODID_Timestamp_accuracy {
 
 typedef enum ODID_authtype {
     ODID_AUTH_NONE = 0,
-    ODID_AUTH_MPUID = 1, // Manufacturer Programmed Unique ID
-    // 2 to 9 reserved. 0xA to 0xF reserved for private use
+    ODID_AUTH_UAS_ID_SIGNATURE = 1, // Unmanned Aircraft System
+    ODID_AUTH_OPERATOR_ID_SIGNATURE = 2,
+    ODID_AUTH_MESSAGE_SET_SIGNATURE = 3,
+    ODID_AUTH_NETWORK_REMOTE_ID = 4, // Authentication provided by Network Remote ID
+    // 5 to 9 reserved for the specification. 0xA to 0xF reserved for private use
 } ODID_authtype_t;
 
 typedef enum ODID_desctype {
@@ -177,15 +180,26 @@ typedef struct {
     float TimeStamp;          // seconds after the full hour
 } ODID_Location_data;
 
+/*
+ * The Authentication message can have two different formats.
+ * Five data pages are supported.
+ * For data page 0, the fields PageCount, Length and TimeStamp are present and
+ * AuthData is only 17 bytes.
+ * For data page 1 through 4, PageCount,Length and TimeStamp are not present and
+ * the size of AuthData is 23 bytes.
+ */
 typedef struct {
-    uint8_t DataPage;
+    uint8_t DataPage;   // 0 - 4
     ODID_authtype_t AuthType;
-    char AuthData[ODID_STR_SIZE+1];  // additional byte to allow for null term in normative form
+    uint8_t PageCount;  // Page 0 only. Max 5
+    uint8_t Length;     // Page 0 only. Bytes. Total of AuthData from all data pages
+    uint32_t Timestamp; // Page 0 only. Relative to 00:00:00 01/01/2019
+    char AuthData[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_Auth_data;
 
 typedef struct {
     ODID_desctype_t DescType;
-    char Desc[ODID_STR_SIZE+1];
+    char Desc[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_SelfID_data;
 
 typedef struct {
@@ -278,8 +292,31 @@ typedef struct __attribute__((__packed__)) {
     uint8_t DataPage: 4;
     uint8_t AuthType: 4;
 
+    // Bytes 2-7
+    uint8_t PageCount;
+    uint8_t Length;
+    uint32_t Timestamp;
+
+    // Byte 8-24
+    char AuthData[ODID_STR_SIZE - 6];
+} ODID_Auth_encoded_page_0;
+
+typedef struct __attribute__((__packed__)) {
+    // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
+    uint8_t ProtoVersion: 4;
+    uint8_t MessageType : 4;
+
+    // Byte 1 [AuthType][DataPage]
+    uint8_t DataPage: 4;
+    uint8_t AuthType: 4;
+
     // Byte 2-24
     char AuthData[ODID_STR_SIZE];
+} ODID_Auth_encoded_page_1_4;
+
+typedef union {
+    ODID_Auth_encoded_page_0 page_0;
+    ODID_Auth_encoded_page_1_4 page_1_4;
 } ODID_Auth_encoded;
 
 typedef struct __attribute__((__packed__)) {

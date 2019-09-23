@@ -22,9 +22,12 @@ ODID_Location_encoded Location_enc;
 ODID_Location_data Location;
 ODID_Location_data Location_out;
 
-ODID_Auth_encoded Auth_enc;
-ODID_Auth_data Auth;
-ODID_Auth_data Auth_out;
+ODID_Auth_encoded Auth0_enc;
+ODID_Auth_encoded Auth1_enc;
+ODID_Auth_data Auth0;
+ODID_Auth_data Auth1;
+ODID_Auth_data Auth0_out;
+ODID_Auth_data Auth1_out;
 
 ODID_SelfID_encoded SelfID_enc;
 ODID_SelfID_data SelfID;
@@ -64,12 +67,22 @@ void test_InOut()
     printLocation_data(&Location);
     encodeLocationMessage(&Location_enc, &Location);
 
-    Auth.AuthType = ODID_AUTH_MPUID;
-    Auth.DataPage = 0;
-    safe_copyfill(Auth.AuthData, "1234567890123456789012", ODID_STR_SIZE);
-    printf("\nAuth\n--------------\n");
-    printAuth_data(&Auth);
-    encodeAuthMessage(&Auth_enc, &Auth);
+    Auth0.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
+    Auth0.DataPage = 0;
+    Auth0.PageCount = 2;
+    Auth0.Length = 39;
+    Auth0.Timestamp = 28000000;
+    safe_copyfill(Auth0.AuthData, "12345678901234567", ODID_STR_SIZE);
+    printf("\nAuth0\n--------------\n");
+    printAuth_data(&Auth0);
+    encodeAuthMessage(&Auth0_enc, &Auth0);
+
+    Auth1.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
+    Auth1.DataPage = 1;
+    safe_copyfill(Auth1.AuthData, "12345678901234567890123", ODID_STR_SIZE);
+    printf("\nAuth1\n--------------\n");
+    printAuth_data(&Auth1);
+    encodeAuthMessage(&Auth1_enc, &Auth1);
 
     SelfID.DescType = ODID_DESC_TYPE_TEXT;
     safe_copyfill(SelfID.Desc,"DronesRUS: Real Estate",sizeof(SelfID.Desc));
@@ -95,8 +108,11 @@ void test_InOut()
     printf("Location: ");
     printByteArray((uint8_t*) &Location_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("Auth:     ");
-    printByteArray((uint8_t*) &Auth_enc, ODID_MESSAGE_SIZE, 1);
+    printf("Auth0:    ");
+    printByteArray((uint8_t*) &Auth0_enc, ODID_MESSAGE_SIZE, 1);
+
+    printf("Auth1:    ");
+    printByteArray((uint8_t*) &Auth1_enc, ODID_MESSAGE_SIZE, 1);
 
     printf("SelfID:   ");
     printByteArray((uint8_t*) &SelfID_enc, ODID_MESSAGE_SIZE, 1);
@@ -114,9 +130,13 @@ void test_InOut()
     printf("\nLocation\n--------\n");
     printLocation_data(&Location_out);
 
-    decodeAuthMessage(&Auth_out, &Auth_enc);
-    printf("\nAuth\n-------\n");
-    printAuth_data(&Auth_out);
+    decodeAuthMessage(&Auth0_out, &Auth0_enc);
+    printf("\nAuth0\n-------\n");
+    printAuth_data(&Auth0_out);
+
+    decodeAuthMessage(&Auth1_out, &Auth1_enc);
+    printf("\nAuth1\n-------\n");
+    printAuth_data(&Auth1_out);
 
     decodeSelfIDMessage(&SelfID_out, &SelfID_enc);
     printf("\nSelfID\n------\n");

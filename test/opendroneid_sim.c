@@ -122,8 +122,11 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 2:
-            auth_data.AuthType = ODID_AUTH_MPUID;
+            auth_data.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
             auth_data.DataPage = 0;
+            auth_data.PageCount = 1;
+            auth_data.Length = 12;
+            auth_data.Timestamp = 23000000;
             safe_copyfill(auth_data.AuthData, "030a0cd033a3",sizeof(auth_data.AuthData));
 
             encodeAuthMessage(&auth_enc, &auth_data);
