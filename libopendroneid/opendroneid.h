@@ -29,6 +29,7 @@ typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_AUTH = 2,
     ODID_MESSAGETYPE_SELF_ID = 3,
     ODID_MESSAGETYPE_SYSTEM = 4,
+    ODID_MESSAGETYPE_OPERATOR_ID = 5,
     ODID_MESSAGETYPE_INVALID = 0xFF,
 } ODID_messagetype_t;
 
@@ -142,6 +143,12 @@ typedef enum ODID_desctype {
     // 201 to 255 available for private use
 } ODID_desctype_t;
 
+typedef enum ODID_operatorIdType {
+    ODID_OPERATOR_ID = 0,
+    // 1 to 200 reserved
+    // 201 to 255 available for private use
+} ODID_operatorIdType_t;
+
 typedef enum ODID_location_source {
     ODID_LOCATION_SRC_TAKEOFF = 0,
     ODID_LOCATION_SRC_LIVE_GNSS = 1,
@@ -158,7 +165,7 @@ typedef enum ODID_location_source {
 typedef struct {
     ODID_uatype_t UAType;
     ODID_idtype_t IDType;
-    char UASID[ODID_ID_SIZE+1];
+    char UASID[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_BasicID_data;
 
 typedef struct {
@@ -204,13 +211,18 @@ typedef struct {
 
 typedef struct {
     ODID_location_source_t LocationSource;
-    double remotePilotLatitude;  // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
-    double remotePilotLongitude; // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
-    uint16_t AreaCount;      // Default 1
-    uint16_t AreaRadius;     // meter. Default 0
-    float AreaCeiling;       // meter. Invalid, No Value, or Unknown: -1000m
-    float AreaFloor;         // meter. Invalid, No Value, or Unknown: -1000m
+    double OperatorLatitude;  // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
+    double OperatorLongitude; // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
+    uint16_t AreaCount;       // Default 1
+    uint16_t AreaRadius;      // meter. Default 0
+    float AreaCeiling;        // meter. Invalid, No Value, or Unknown: -1000m
+    float AreaFloor;          // meter. Invalid, No Value, or Unknown: -1000m
 } ODID_System_data;
+
+typedef struct {
+    ODID_operatorIdType_t OperatorIdType;
+    char OperatorId[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form
+} ODID_OperatorID_data;
 
 typedef struct {
     ODID_BasicID_data BasicID;
@@ -218,6 +230,7 @@ typedef struct {
     ODID_Auth_data Auth;
     ODID_SelfID_data SelfID;
     ODID_System_data System;
+    ODID_OperatorID_data OperatorID;
 } ODID_UAS_Data;
 
 /**
@@ -341,8 +354,8 @@ typedef struct __attribute__((__packed__)) {
     uint8_t LocationSource: 1;
 
     // Byte 2-9
-    int32_t remotePilotLatitude;
-    int32_t remotePilotLongitude;
+    int32_t OperatorLatitude;
+    int32_t OperatorLongitude;
 
     // Byte 10-16
     uint16_t AreaCount;
@@ -353,6 +366,21 @@ typedef struct __attribute__((__packed__)) {
     // Byte 17-24
     char Reserved2[8];
 } ODID_System_encoded;
+
+typedef struct __attribute__((__packed__)) {
+    // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
+    uint8_t ProtoVersion: 4;
+    uint8_t MessageType : 4;
+
+    // Byte 1
+    uint8_t OperatorIdType;
+
+    // Bytes 2-21
+    char OperatorId[ODID_ID_SIZE];
+
+    // 22-24
+    char Reserved[3];
+} ODID_OperatorID_encoded;
 
 typedef struct {
     uint8_t msgData[ODID_MESSAGE_SIZE];
@@ -374,12 +402,15 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
+int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData);
 
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
+int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded);
+
 ODID_messagetype_t decodeMessageType(uint8_t byte);
 ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);
 
@@ -400,6 +431,7 @@ void printBasicID_data(ODID_BasicID_data *BasicID);
 void printLocation_data(ODID_Location_data *Location);
 void printAuth_data(ODID_Auth_data *Auth);
 void printSelfID_data(ODID_SelfID_data *SelfID);
+void printOperatorID_data(ODID_OperatorID_data *OperatorID);
 void printSystem_data(ODID_System_data *System_data);
 #endif // ODID_DISABLE_PRINTF
 

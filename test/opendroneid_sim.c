@@ -22,12 +22,14 @@ ODID_Location_encoded location_enc;
 ODID_Auth_encoded auth_enc;
 ODID_SelfID_encoded selfID_enc;
 ODID_System_encoded system_enc;
+ODID_OperatorID_encoded operatorID_enc;
 
 ODID_BasicID_data basicID_data;
 ODID_Location_data location_data;
 ODID_Auth_data auth_data;
 ODID_SelfID_data selfID_data;
 ODID_System_data system_data;
+ODID_OperatorID_data operatorID_data;
 
 const int SIM_STEPS = 20;
 const float SIM_STEP_SIZE = 0.0001;
@@ -145,14 +147,22 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 
         case 4:
             system_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
-            system_data.remotePilotLatitude = simGndLat;
-            system_data.remotePilotLongitude = simGndLon;
+            system_data.OperatorLatitude = simGndLat;
+            system_data.OperatorLongitude = simGndLon;
             system_data.AreaCount = 35;
             system_data.AreaRadius = 75;
             system_data.AreaCeiling = 176.9;
             system_data.AreaFloor = 41.7;
             encodeSystemMessage(&system_enc, &system_data);
             memcpy(message, &system_enc, ODID_MESSAGE_SIZE);
+            break;
+
+        case 5:
+            operatorID_data.OperatorIdType = ODID_OPERATOR_ID;
+            char operatorId[] = "98765432100123456789";
+            strncpy(operatorID_data.OperatorId, operatorId, sizeof(operatorId));
+            encodeOperatorIDMessage(&operatorID_enc, &operatorID_data);
+            memcpy(message, &operatorID_enc, ODID_MESSAGE_SIZE);
             break;
     }
 }
@@ -163,7 +173,7 @@ void test_sim()
     int x;
     while (1)
     {
-        for (x=0; x<=4; x++) {
+        for (x = 0; x <= 5; x++) {
             memset(testBytes,0,ODID_MESSAGE_SIZE);
             ODID_getSimData(testBytes,x);
             printByteArray(testBytes,ODID_MESSAGE_SIZE,1);

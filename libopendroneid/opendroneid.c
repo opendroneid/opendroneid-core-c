@@ -300,13 +300,33 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
         outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
         outEncoded->Reserved = 0;
         outEncoded->LocationSource = inData->LocationSource;
-        outEncoded->remotePilotLatitude = encodeLatLon(inData->remotePilotLatitude);
-        outEncoded->remotePilotLongitude = encodeLatLon(inData->remotePilotLongitude);
+        outEncoded->OperatorLatitude = encodeLatLon(inData->OperatorLatitude);
+        outEncoded->OperatorLongitude = encodeLatLon(inData->OperatorLongitude);
         outEncoded->AreaCount = inData->AreaCount;
         outEncoded->AreaRadius = encodeAreaRadius(inData->AreaRadius);
         outEncoded->AreaCeiling = encodeAltitude(inData->AreaCeiling);
         outEncoded->AreaFloor = encodeAltitude(inData->AreaFloor);
         memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
+        return ODID_SUCCESS;
+    }
+}
+
+/**
+* Encode Operator ID message (packed, ready for broadcast)
+*
+* @param outEncoded output (encoded/packed) structure
+* @param inData input data (non encoded/packed) structure
+* @return ODID_SUCCESS or ODID_FAIL;
+*/
+int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData)
+{
+    if (!outEncoded || !inData) {
+        return ODID_FAIL;
+    } else {
+        outEncoded->MessageType = ODID_MESSAGETYPE_OPERATOR_ID;
+        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+        outEncoded->OperatorIdType = inData->OperatorIdType;
+        strncpy(outEncoded->OperatorId, inData->OperatorId, sizeof(outEncoded->OperatorId));
         return ODID_SUCCESS;
     }
 }
@@ -509,12 +529,30 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
         return ODID_FAIL;
     } else {
         outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
-        outData->remotePilotLatitude = decodeLatLon(inEncoded->remotePilotLatitude);
-        outData->remotePilotLongitude = decodeLatLon(inEncoded->remotePilotLongitude);
+        outData->OperatorLatitude = decodeLatLon(inEncoded->OperatorLatitude);
+        outData->OperatorLongitude = decodeLatLon(inEncoded->OperatorLongitude);
         outData->AreaCount = inEncoded->AreaCount;
         outData->AreaRadius = decodeAreaRadius(inEncoded->AreaRadius);
         outData->AreaCeiling = decodeAltitude(inEncoded->AreaCeiling);
         outData->AreaFloor = decodeAltitude(inEncoded->AreaFloor);
+        return ODID_SUCCESS;
+    }
+}
+
+/**
+* Decode Operator ID data from packed message
+*
+* @param outData output: decoded message
+* @param inEncoded input message (encoded/packed) structure
+* @return ODID_SUCCESS or ODID_FAIL;
+*/
+int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded)
+{
+    if (!outData || !inEncoded) {
+        return ODID_FAIL;
+    } else {
+        outData->OperatorIdType = (ODID_operatorIdType_t) inEncoded->OperatorIdType;
+        safe_dec_copyfill(outData->OperatorId, inEncoded->OperatorId, sizeof(outData->OperatorId));
         return ODID_SUCCESS;
     }
 }
@@ -539,6 +577,8 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
         return ODID_MESSAGETYPE_SELF_ID;
     case ODID_MESSAGETYPE_SYSTEM:
         return ODID_MESSAGETYPE_SYSTEM;
+    case ODID_MESSAGETYPE_OPERATOR_ID:
+        return ODID_MESSAGETYPE_OPERATOR_ID;
     default:
         return ODID_MESSAGETYPE_INVALID;
     }
@@ -591,6 +631,12 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data)
         if (decodeSystemMessage(&uas_data->System,
                 (ODID_System_encoded *) msg_data) == ODID_SUCCESS)
             return ODID_MESSAGETYPE_SYSTEM;
+        break;
+
+    case ODID_MESSAGETYPE_OPERATOR_ID:
+        if (decodeOperatorIDMessage(&uas_data->OperatorID,
+                (ODID_OperatorID_encoded *) msg_data) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_OPERATOR_ID;
         break;
 
     default:
@@ -1027,9 +1073,20 @@ void printSystem_data(ODID_System_data *System_data)
     const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: "\
         "%.7f, %.7f\nArea Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
     printf(ODID_System_data_format, System_data->LocationSource,
-        System_data->remotePilotLatitude, System_data->remotePilotLongitude,
+        System_data->OperatorLatitude, System_data->OperatorLongitude,
         System_data->AreaCount, System_data->AreaRadius,
         System_data->AreaCeiling, System_data->AreaFloor);
+}
+
+/**
+* Print formatted OperatorID Data
+*
+* @param OperatorID structure to be printed
+*/
+void printOperatorID_data(ODID_OperatorID_data *operatorID)
+{
+    const char ODID_OperatorID_data_format[] = "OperatorIdType: %d\nOperatorId: %s\n";
+    printf(ODID_OperatorID_data_format, operatorID->OperatorIdType, operatorID->OperatorId);
 }
 
 #endif // ODID_DISABLE_PRINTF

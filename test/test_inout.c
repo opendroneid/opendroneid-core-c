@@ -37,6 +37,10 @@ ODID_System_encoded System_enc;
 ODID_System_data System_data;
 ODID_System_data System_out;
 
+ODID_OperatorID_encoded operatorID_enc;
+ODID_OperatorID_data operatorID;
+ODID_OperatorID_data operatorID_out;
+
 void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
@@ -95,8 +99,8 @@ void test_InOut()
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
 
     System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
-    System_data.remotePilotLatitude = Location.Latitude + 0.00001;
-    System_data.remotePilotLongitude = Location.Longitude + 0.00001;
+    System_data.OperatorLatitude = Location.Latitude + 0.00001;
+    System_data.OperatorLongitude = Location.Longitude + 0.00001;
     System_data.AreaCount = 35;
     System_data.AreaRadius = 75;
     System_data.AreaCeiling = 176.9;
@@ -104,25 +108,36 @@ void test_InOut()
     printf("\nSystem\n------\n");
     printSystem_data(&System_data);
     encodeSystemMessage(&System_enc, &System_data);
+
+    operatorID.OperatorIdType = ODID_OPERATOR_ID;
+    char operatorId[] = "98765432100123456789";
+    strncpy(operatorID.OperatorId, operatorId, sizeof(operatorId));
+    printf("\nOperatorID\n------\n");
+    printOperatorID_data(&operatorID);
+    encodeOperatorIDMessage(&operatorID_enc, &operatorID);
+
     printf("\n-------------------------------------Encoded Data-----------------------------------\n");
-    printf("          0- 1- 2- 3- 4- 5- 6- 7- 8- 9- 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24\n");
-    printf("BasicID:  ");
+    printf("            0- 1- 2- 3- 4- 5- 6- 7- 8- 9- 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24\n");
+    printf("BasicID:    ");
     printByteArray((uint8_t*) &BasicID_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("Location: ");
+    printf("Location:   ");
     printByteArray((uint8_t*) &Location_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("Auth0:    ");
+    printf("Auth0:      ");
     printByteArray((uint8_t*) &Auth0_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("Auth1:    ");
+    printf("Auth1:      ");
     printByteArray((uint8_t*) &Auth1_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("SelfID:   ");
+    printf("SelfID:     ");
     printByteArray((uint8_t*) &SelfID_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("System:   ");
+    printf("System:     ");
     printByteArray((uint8_t*) &System_enc, ODID_MESSAGE_SIZE, 1);
+
+    printf("OperatorID: ");
+    printByteArray((uint8_t*) &operatorID_enc, ODID_MESSAGE_SIZE, 1);
 
     printf("\n-------------------------------------Decoded Data-----------------------------------\n");
     // Now for the reverse -- decode test
@@ -149,6 +164,11 @@ void test_InOut()
     decodeSystemMessage(&System_out, &System_enc);
     printf("\nSystem\n------\n");
     printSystem_data(&System_out);
+
+    decodeOperatorIDMessage(&operatorID_out, &operatorID_enc);
+    printf("\nOperatorID\n------\n");
+    printOperatorID_data(&operatorID_out);
+
     printf("\n-------------------------------------------------------------------------------\n");
     printf("-------------------------------------  End  -----------------------------------\n");
     printf("-------------------------------------------------------------------------------\n\n");
