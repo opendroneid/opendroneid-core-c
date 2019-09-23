@@ -512,7 +512,7 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
 /**
 * Parse encoded Open Drone ID data to identify the message type and decode
 * from Open Drone ID packed format into the appropriate Open Drone ID structure
-* 
+*
 * This function assumes that msg_data points to a buffer conaining all
 * ODID_MESSAGE_SIZE bytes of an Open Drone ID message.
 *
@@ -709,13 +709,13 @@ ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy)
     if (Accuracy >= 10)
         return ODID_SPEED_ACC_UNKNOWN;
     else if (Accuracy > 3)
-        return ODID_SPEED_ACC_10_METERS_SECOND;
+        return ODID_SPEED_ACC_10_METERS_PER_SECOND;
     else if (Accuracy > 1)
-        return ODID_SPEED_ACC_3_METERS_SECOND;
+        return ODID_SPEED_ACC_3_METERS_PER_SECOND;
     else if (Accuracy > 0.3f)
-        return ODID_SPEED_ACC_1_METERS_SECOND;
+        return ODID_SPEED_ACC_1_METERS_PER_SECOND;
     else if (Accuracy > 0)
-        return ODID_SPEED_ACC_0_3_METERS_SECOND;
+        return ODID_SPEED_ACC_0_3_METERS_PER_SECOND;
     else
         return ODID_SPEED_ACC_UNKNOWN;
 }
@@ -731,35 +731,35 @@ ODID_Timestamp_accuracy_t createEnumTimestampAccuracy(float Accuracy)
     if (Accuracy > 1.5f)
         return ODID_TIME_ACC_UNKNOWN;
     else if (Accuracy > 1.4f)
-        return ODID_TIME_ACC_1_5_SECONDS;
+        return ODID_TIME_ACC_1_5_SECOND;
     else if (Accuracy > 1.3f)
-        return ODID_TIME_ACC_1_4_SECONDS;
+        return ODID_TIME_ACC_1_4_SECOND;
     else if (Accuracy > 1.2f)
-        return ODID_TIME_ACC_1_3_SECONDS;
+        return ODID_TIME_ACC_1_3_SECOND;
     else if (Accuracy > 1.1f)
-        return ODID_TIME_ACC_1_2_SECONDS;
+        return ODID_TIME_ACC_1_2_SECOND;
     else if (Accuracy > 1.0f)
-        return ODID_TIME_ACC_1_1_SECONDS;
+        return ODID_TIME_ACC_1_1_SECOND;
     else if (Accuracy > 0.9f)
-        return ODID_TIME_ACC_1_0_SECONDS;
+        return ODID_TIME_ACC_1_0_SECOND;
     else if (Accuracy > 0.8f)
-        return ODID_TIME_ACC_0_9_SECONDS;
+        return ODID_TIME_ACC_0_9_SECOND;
     else if (Accuracy > 0.7f)
-        return ODID_TIME_ACC_0_8_SECONDS;
+        return ODID_TIME_ACC_0_8_SECOND;
     else if (Accuracy > 0.6f)
-        return ODID_TIME_ACC_0_7_SECONDS;
+        return ODID_TIME_ACC_0_7_SECOND;
     else if (Accuracy > 0.5f)
-        return ODID_TIME_ACC_0_6_SECONDS;
+        return ODID_TIME_ACC_0_6_SECOND;
     else if (Accuracy > 0.4f)
-        return ODID_TIME_ACC_0_5_SECONDS;
+        return ODID_TIME_ACC_0_5_SECOND;
     else if (Accuracy > 0.3f)
-        return ODID_TIME_ACC_0_4_SECONDS;
+        return ODID_TIME_ACC_0_4_SECOND;
     else if (Accuracy > 0.2f)
-        return ODID_TIME_ACC_0_3_SECONDS;
+        return ODID_TIME_ACC_0_3_SECOND;
     else if (Accuracy > 0.1f)
-        return ODID_TIME_ACC_0_2_SECONDS;
+        return ODID_TIME_ACC_0_2_SECOND;
     else if (Accuracy > 0.0f)
-        return ODID_TIME_ACC_0_1_SECONDS;
+        return ODID_TIME_ACC_0_1_SECOND;
     else
         return ODID_TIME_ACC_UNKNOWN;
 }
@@ -846,13 +846,13 @@ float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy)
     {
     case ODID_SPEED_ACC_UNKNOWN:
         return 10;
-    case ODID_SPEED_ACC_10_METERS_SECOND:
+    case ODID_SPEED_ACC_10_METERS_PER_SECOND:
         return 10;
-    case ODID_SPEED_ACC_3_METERS_SECOND:
+    case ODID_SPEED_ACC_3_METERS_PER_SECOND:
         return 3;
-    case ODID_SPEED_ACC_1_METERS_SECOND:
+    case ODID_SPEED_ACC_1_METERS_PER_SECOND:
         return 1;
-    case ODID_SPEED_ACC_0_3_METERS_SECOND:
+    case ODID_SPEED_ACC_0_3_METERS_PER_SECOND:
         return 0.3f;
     default:
         return 10;
@@ -871,35 +871,35 @@ float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy)
     {
     case ODID_TIME_ACC_UNKNOWN:
         return 0.0f;
-    case ODID_TIME_ACC_0_1_SECONDS:
+    case ODID_TIME_ACC_0_1_SECOND:
         return 0.1f;
-    case ODID_TIME_ACC_0_2_SECONDS:
+    case ODID_TIME_ACC_0_2_SECOND:
         return 0.2f;
-    case ODID_TIME_ACC_0_3_SECONDS:
+    case ODID_TIME_ACC_0_3_SECOND:
         return 0.3f;
-    case ODID_TIME_ACC_0_4_SECONDS:
+    case ODID_TIME_ACC_0_4_SECOND:
         return 0.4f;
-    case ODID_TIME_ACC_0_5_SECONDS:
+    case ODID_TIME_ACC_0_5_SECOND:
         return 0.5f;
-    case ODID_TIME_ACC_0_6_SECONDS:
+    case ODID_TIME_ACC_0_6_SECOND:
         return 0.6f;
-    case ODID_TIME_ACC_0_7_SECONDS:
+    case ODID_TIME_ACC_0_7_SECOND:
         return 0.7f;
-    case ODID_TIME_ACC_0_8_SECONDS:
+    case ODID_TIME_ACC_0_8_SECOND:
         return 0.8f;
-    case ODID_TIME_ACC_0_9_SECONDS:
+    case ODID_TIME_ACC_0_9_SECOND:
         return 0.9f;
-    case ODID_TIME_ACC_1_0_SECONDS:
+    case ODID_TIME_ACC_1_0_SECOND:
         return 1.0f;
-    case ODID_TIME_ACC_1_1_SECONDS:
+    case ODID_TIME_ACC_1_1_SECOND:
         return 1.1f;
-    case ODID_TIME_ACC_1_2_SECONDS:
+    case ODID_TIME_ACC_1_2_SECOND:
         return 1.2f;
-    case ODID_TIME_ACC_1_3_SECONDS:
+    case ODID_TIME_ACC_1_3_SECOND:
         return 1.3f;
-    case ODID_TIME_ACC_1_4_SECONDS:
+    case ODID_TIME_ACC_1_4_SECOND:
         return 1.4f;
-    case ODID_TIME_ACC_1_5_SECONDS:
+    case ODID_TIME_ACC_1_5_SECOND:
         return 1.5f;
     default:
         return 0.0f;

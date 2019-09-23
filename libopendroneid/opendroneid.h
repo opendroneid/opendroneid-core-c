@@ -18,7 +18,7 @@ gabriel.c.cox@intel.com
 #define ODID_ID_SIZE 20
 #define ODID_STR_SIZE 23
 #define ODID_PROTOCOL_VERSION 0
-#define ODID_SPEC_VERSION 0.64.3
+#define ODID_SPEC_VERSION 0.8
 
 #define ODID_SUCCESS    0
 #define ODID_FAIL       1
@@ -35,14 +35,14 @@ typedef enum ODID_messagetype {
 typedef enum ODID_idtype {
     ODID_IDTYPE_NONE = 0,
     ODID_IDTYPE_SERIAL_NUMBER = 1,
-    ODID_IDTYPE_CAA_ASSIGNED_ID = 2,
-    ODID_IDTYPE_UTM_ASSIGNED_ID = 3,
+    ODID_IDTYPE_CAA_REGISTRATION_ID = 2, // Civil Aviation Authority
+    ODID_IDTYPE_UTM_ASSIGNED_UUID = 3, // UAS (Unmanned Aircraft System) Traffic Management
     // 4 to 15 reserved
 } ODID_idtype_t;
 
 typedef enum ODID_uatype {
     ODID_UATYPE_NONE = 0,
-    ODID_UATYPE_AEROPLANE = 1,
+    ODID_UATYPE_AEROPLANE = 1, // Fixed wing
     ODID_UATYPE_ROTORCRAFT = 2, // Including Multirotor
     ODID_UATYPE_GYROPLANE = 3,
     ODID_UATYPE_VTOL = 4, // Fixed wing aircraft that can take off vertically
@@ -51,11 +51,11 @@ typedef enum ODID_uatype {
     ODID_UATYPE_KITE = 7,
     ODID_UATYPE_FREE_BALLOON = 8,
     ODID_UATYPE_CAPTIVE_BALLOON = 9,
-    ODID_UATYPE_AIRSHIP = 10,
+    ODID_UATYPE_AIRSHIP = 10, // Such as a blimp
     ODID_UATYPE_FREE_FALL_PARACHUTE = 11,
     ODID_UATYPE_ROCKET = 12,
-    ODID_UATYPE_GROUND_OBSTACLE = 13,
-    ODID_UATYPE_RESERVED = 14,
+    ODID_UATYPE_TETHERED_POWERED_AIRCRAFT = 13,
+    ODID_UATYPE_GROUND_OBSTACLE = 14,
     ODID_UATYPE_OTHER = 15,
 } ODID_uatype_t;
 
@@ -73,14 +73,14 @@ typedef enum ODID_Height_reference {
 
 typedef enum ODID_Horizontal_accuracy {
     ODID_HOR_ACC_UNKNOWN = 0,
-    ODID_HOR_ACC_10NM = 1, // Nautical Miles
-    ODID_HOR_ACC_4NM = 2,
-    ODID_HOR_ACC_2NM = 3,
-    ODID_HOR_ACC_1NM = 4,
-    ODID_HOR_ACC_0_5NM = 5,
-    ODID_HOR_ACC_0_3NM = 6,
-    ODID_HOR_ACC_0_1NM = 7,
-    ODID_HOR_ACC_0_05NM = 8,
+    ODID_HOR_ACC_10NM = 1,      // Nautical Miles. 18.52 km
+    ODID_HOR_ACC_4NM = 2,       // 7.408 km
+    ODID_HOR_ACC_2NM = 3,       // 3.704 km
+    ODID_HOR_ACC_1NM = 4,       // 1.852 km
+    ODID_HOR_ACC_0_5NM = 5,     // 926 m
+    ODID_HOR_ACC_0_3NM = 6,     // 555.6 m
+    ODID_HOR_ACC_0_1NM = 7,     // 185.2 m
+    ODID_HOR_ACC_0_05NM = 8,    // 92.6 m
     ODID_HOR_ACC_30_METER = 9,
     ODID_HOR_ACC_10_METER = 10,
     ODID_HOR_ACC_3_METER = 11,
@@ -101,30 +101,30 @@ typedef enum ODID_Vertical_accuracy {
 
 typedef enum ODID_Speed_accuracy {
     ODID_SPEED_ACC_UNKNOWN = 0,
-    ODID_SPEED_ACC_10_METERS_SECOND = 1,
-    ODID_SPEED_ACC_3_METERS_SECOND = 2,
-    ODID_SPEED_ACC_1_METERS_SECOND = 3,
-    ODID_SPEED_ACC_0_3_METERS_SECOND = 4,
+    ODID_SPEED_ACC_10_METERS_PER_SECOND = 1,
+    ODID_SPEED_ACC_3_METERS_PER_SECOND = 2,
+    ODID_SPEED_ACC_1_METERS_PER_SECOND = 3,
+    ODID_SPEED_ACC_0_3_METERS_PER_SECOND = 4,
     // 5 to 15 reserved
 } ODID_Speed_accuracy_t;
 
 typedef enum ODID_Timestamp_accuracy {
     ODID_TIME_ACC_UNKNOWN = 0,
-    ODID_TIME_ACC_0_1_SECONDS = 1,
-    ODID_TIME_ACC_0_2_SECONDS = 2,
-    ODID_TIME_ACC_0_3_SECONDS = 3,
-    ODID_TIME_ACC_0_4_SECONDS = 4,
-    ODID_TIME_ACC_0_5_SECONDS = 5,
-    ODID_TIME_ACC_0_6_SECONDS = 6,
-    ODID_TIME_ACC_0_7_SECONDS = 7,
-    ODID_TIME_ACC_0_8_SECONDS = 8,
-    ODID_TIME_ACC_0_9_SECONDS = 9,
-    ODID_TIME_ACC_1_0_SECONDS = 10,
-    ODID_TIME_ACC_1_1_SECONDS = 11,
-    ODID_TIME_ACC_1_2_SECONDS = 12,
-    ODID_TIME_ACC_1_3_SECONDS = 13,
-    ODID_TIME_ACC_1_4_SECONDS = 14,
-    ODID_TIME_ACC_1_5_SECONDS = 15,
+    ODID_TIME_ACC_0_1_SECOND = 1,
+    ODID_TIME_ACC_0_2_SECOND = 2,
+    ODID_TIME_ACC_0_3_SECOND = 3,
+    ODID_TIME_ACC_0_4_SECOND = 4,
+    ODID_TIME_ACC_0_5_SECOND = 5,
+    ODID_TIME_ACC_0_6_SECOND = 6,
+    ODID_TIME_ACC_0_7_SECOND = 7,
+    ODID_TIME_ACC_0_8_SECOND = 8,
+    ODID_TIME_ACC_0_9_SECOND = 9,
+    ODID_TIME_ACC_1_0_SECOND = 10,
+    ODID_TIME_ACC_1_1_SECOND = 11,
+    ODID_TIME_ACC_1_2_SECOND = 12,
+    ODID_TIME_ACC_1_3_SECOND = 13,
+    ODID_TIME_ACC_1_4_SECOND = 14,
+    ODID_TIME_ACC_1_5_SECOND = 15,
 } ODID_Timestamp_accuracy_t;
 
 typedef enum ODID_authtype {
@@ -135,8 +135,8 @@ typedef enum ODID_authtype {
 
 typedef enum ODID_desctype {
     ODID_DESC_TYPE_TEXT = 0,
-    ODID_DESC_TYPE_REMOTE_PILOT_ID = 1,
-    // 2 to 255 reserved
+    // 1 to 200 reserved
+    // 201 to 255 available for private use
 } ODID_desctype_t;
 
 typedef enum ODID_location_source {
@@ -372,4 +372,3 @@ void printSystem_data(ODID_System_data *System_data);
 #endif // ODID_DISABLE_PRINTF
 
 #endif // _OPENDRONEID_H_
-
