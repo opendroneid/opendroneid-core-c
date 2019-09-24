@@ -170,32 +170,31 @@ static uint16_t encodeAreaRadius(uint16_t Radius)
 /**
 * Encode Basic ID message (packed, ready for broadcast)
 *
-* @param outEncoded output (encoded/packed) structure
-* @param inData input data (non encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
 */
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData)
 {
     if (!outEncoded || !inData ||
         !intInRange(inData->IDType, 0, 15) ||
-        !intInRange(inData->UAType, 0, 15)) {
+        !intInRange(inData->UAType, 0, 15))
         return ODID_FAIL;
-    } else {
-        outEncoded->MessageType = ODID_MESSAGETYPE_BASIC_ID;
-        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->IDType = inData->IDType;
-        outEncoded->UAType = inData->UAType;
-        strncpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
-        return ODID_SUCCESS;
-    }
+
+    outEncoded->MessageType = ODID_MESSAGETYPE_BASIC_ID;
+    outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->IDType = inData->IDType;
+    outEncoded->UAType = inData->UAType;
+    strncpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
+    return ODID_SUCCESS;
 }
 
 /**
 * Encode Location message (packed, ready for broadcast)
 *
-* @param outEncoded output (encoded/packed) structure
-* @param inData input data (non encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
 */
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData)
 {
@@ -206,129 +205,126 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         !intInRange(inData->VertAccuracy, 0, 15) ||
         !intInRange(inData->BaroAccuracy, 0, 15) ||
         !intInRange(inData->SpeedAccuracy, 0, 15) ||
-        !intInRange(inData->TSAccuracy, 0, 15)) {
+        !intInRange(inData->TSAccuracy, 0, 15))
         return ODID_FAIL;
-    } else {
-        outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
-        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->Status = inData->Status;
-        outEncoded->Reserved = 0;
-        outEncoded->Direction = encodeDirection(inData->Direction, &bitflag);
-        outEncoded->EWDirection = bitflag;
-        outEncoded->SpeedHorizontal = encodeSpeedHorizontal(inData->SpeedHorizontal, &bitflag);
-        outEncoded->SpeedMult = bitflag;
-        outEncoded->SpeedVertical = encodeSpeedVertical(inData->SpeedVertical);
-        outEncoded->Latitude = encodeLatLon(inData->Latitude);
-        outEncoded->Longitude = encodeLatLon(inData->Longitude);
-        outEncoded->AltitudeBaro = encodeAltitude(inData->AltitudeBaro);
-        outEncoded->AltitudeGeo = encodeAltitude(inData->AltitudeGeo);
-        outEncoded->HeightType = inData->HeightType;
-        outEncoded->Height = encodeAltitude(inData->Height);
-        outEncoded->HorizAccuracy = inData->HorizAccuracy;
-        outEncoded->VertAccuracy = inData->VertAccuracy;
-        outEncoded->BaroAccuracy = inData->BaroAccuracy;
-        outEncoded->SpeedAccuracy = inData->SpeedAccuracy;
-        outEncoded->TSAccuracy = inData->TSAccuracy;
-        outEncoded->Reserved2 = 0;
-        outEncoded->TimeStamp = encodeTimeStamp(inData->TimeStamp);
-        outEncoded->Reserved3 = 0;
-        return ODID_SUCCESS;
-    }
+
+    outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
+    outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->Status = inData->Status;
+    outEncoded->Reserved = 0;
+    outEncoded->Direction = encodeDirection(inData->Direction, &bitflag);
+    outEncoded->EWDirection = bitflag;
+    outEncoded->SpeedHorizontal = encodeSpeedHorizontal(inData->SpeedHorizontal, &bitflag);
+    outEncoded->SpeedMult = bitflag;
+    outEncoded->SpeedVertical = encodeSpeedVertical(inData->SpeedVertical);
+    outEncoded->Latitude = encodeLatLon(inData->Latitude);
+    outEncoded->Longitude = encodeLatLon(inData->Longitude);
+    outEncoded->AltitudeBaro = encodeAltitude(inData->AltitudeBaro);
+    outEncoded->AltitudeGeo = encodeAltitude(inData->AltitudeGeo);
+    outEncoded->HeightType = inData->HeightType;
+    outEncoded->Height = encodeAltitude(inData->Height);
+    outEncoded->HorizAccuracy = inData->HorizAccuracy;
+    outEncoded->VertAccuracy = inData->VertAccuracy;
+    outEncoded->BaroAccuracy = inData->BaroAccuracy;
+    outEncoded->SpeedAccuracy = inData->SpeedAccuracy;
+    outEncoded->TSAccuracy = inData->TSAccuracy;
+    outEncoded->Reserved2 = 0;
+    outEncoded->TimeStamp = encodeTimeStamp(inData->TimeStamp);
+    outEncoded->Reserved3 = 0;
+    return ODID_SUCCESS;
 }
 
 /**
 * Encode Auth message (packed, ready for broadcast)
 *
-* @param outEncoded output (encoded/packed) structure
-* @param inData input data (non encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
 */
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 {
-    if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15)) {
+    if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15))
         return ODID_FAIL;
+
+    outEncoded->page_0.MessageType = ODID_MESSAGETYPE_AUTH;
+    outEncoded->page_0.ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->page_0.AuthType = inData->AuthType;
+    outEncoded->page_0.DataPage = inData->DataPage;
+    if (inData->DataPage == 0) {
+        outEncoded->page_0.PageCount = inData->PageCount;
+        outEncoded->page_0.Length = inData->Length;
+        outEncoded->page_0.Timestamp = inData->Timestamp;
+        strncpy(outEncoded->page_0.AuthData, inData->AuthData,
+                sizeof(outEncoded->page_0.AuthData));
     } else {
-        outEncoded->page_0.MessageType = ODID_MESSAGETYPE_AUTH;
-        outEncoded->page_0.ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->page_0.AuthType = inData->AuthType;
-        outEncoded->page_0.DataPage = inData->DataPage;
-        if (inData->DataPage == 0) {
-            outEncoded->page_0.PageCount = inData->PageCount;
-            outEncoded->page_0.Length = inData->Length;
-            outEncoded->page_0.Timestamp = inData->Timestamp;
-            strncpy(outEncoded->page_0.AuthData, inData->AuthData, sizeof(outEncoded->page_0.AuthData));
-        } else {
-            strncpy(outEncoded->page_1_4.AuthData, inData->AuthData, sizeof(outEncoded->page_1_4.AuthData));
-        }
-        return ODID_SUCCESS;
+        strncpy(outEncoded->page_1_4.AuthData, inData->AuthData,
+                sizeof(outEncoded->page_1_4.AuthData));
     }
+    return ODID_SUCCESS;
 }
 
 /**
 * Encode Self ID message (packed, ready for broadcast)
 *
-* @param outEncoded output (encoded/packed) structure
-* @param inData input data (non encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
 */
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData)
 {
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData)
         return ODID_FAIL;
-    } else {
-        outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
-        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->DescType = inData->DescType;
-        strncpy(outEncoded->Desc, inData->Desc, sizeof(outEncoded->Desc));
-        return ODID_SUCCESS;
-    }
+
+    outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
+    outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->DescType = inData->DescType;
+    strncpy(outEncoded->Desc, inData->Desc, sizeof(outEncoded->Desc));
+    return ODID_SUCCESS;
 }
 
 /**
 * Encode System message (packed, ready for broadcast)
 *
-* @param outEncoded output (encoded/packed) structure
-* @param inData input data (non encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
 */
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
 {
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData)
         return ODID_FAIL;
-    } else {
-        outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
-        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->Reserved = 0;
-        outEncoded->LocationSource = inData->LocationSource;
-        outEncoded->OperatorLatitude = encodeLatLon(inData->OperatorLatitude);
-        outEncoded->OperatorLongitude = encodeLatLon(inData->OperatorLongitude);
-        outEncoded->AreaCount = inData->AreaCount;
-        outEncoded->AreaRadius = encodeAreaRadius(inData->AreaRadius);
-        outEncoded->AreaCeiling = encodeAltitude(inData->AreaCeiling);
-        outEncoded->AreaFloor = encodeAltitude(inData->AreaFloor);
-        memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
-        return ODID_SUCCESS;
-    }
+
+    outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
+    outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->Reserved = 0;
+    outEncoded->LocationSource = inData->LocationSource;
+    outEncoded->OperatorLatitude = encodeLatLon(inData->OperatorLatitude);
+    outEncoded->OperatorLongitude = encodeLatLon(inData->OperatorLongitude);
+    outEncoded->AreaCount = inData->AreaCount;
+    outEncoded->AreaRadius = encodeAreaRadius(inData->AreaRadius);
+    outEncoded->AreaCeiling = encodeAltitude(inData->AreaCeiling);
+    outEncoded->AreaFloor = encodeAltitude(inData->AreaFloor);
+    memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
+    return ODID_SUCCESS;
 }
 
 /**
 * Encode Operator ID message (packed, ready for broadcast)
 *
-* @param outEncoded output (encoded/packed) structure
-* @param inData input data (non encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
 */
 int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData)
 {
-    if (!outEncoded || !inData) {
+    if (!outEncoded || !inData)
         return ODID_FAIL;
-    } else {
-        outEncoded->MessageType = ODID_MESSAGETYPE_OPERATOR_ID;
-        outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
-        outEncoded->OperatorIdType = inData->OperatorIdType;
-        strncpy(outEncoded->OperatorId, inData->OperatorId, sizeof(outEncoded->OperatorId));
-        return ODID_SUCCESS;
-    }
+
+    outEncoded->MessageType = ODID_MESSAGETYPE_OPERATOR_ID;
+    outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->OperatorIdType = inData->OperatorIdType;
+    strncpy(outEncoded->OperatorId, inData->OperatorId, sizeof(outEncoded->OperatorId));
+    return ODID_SUCCESS;
 }
 
 /**
@@ -483,54 +479,52 @@ static uint16_t decodeAreaRadius(uint8_t Radius_enc)
 /**
 * Decode Basic ID data from packed message
 *
-* @param outData output: decoded message
-* @param inEncoded input message (encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outData   Output: decoded message
+* @param inEncoded Input message (encoded/packed) structure
+* @return          ODID_SUCCESS or ODID_FAIL;
 */
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         !intInRange(inEncoded->IDType, 0, 15) ||
-        !intInRange(inEncoded->UAType, 0, 15)) {
+        !intInRange(inEncoded->UAType, 0, 15))
         return ODID_FAIL;
-    } else {
-        outData->IDType = (ODID_idtype_t) inEncoded->IDType;
-        outData->UAType = (ODID_uatype_t) inEncoded->UAType;
-        safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
-        return ODID_SUCCESS;
-    }
+
+    outData->IDType = (ODID_idtype_t) inEncoded->IDType;
+    outData->UAType = (ODID_uatype_t) inEncoded->UAType;
+    safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
+    return ODID_SUCCESS;
 }
 
 /**
 * Decode Location data from packed message
 *
-* @param outData output: decoded message
-* @param inEncoded input message (encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outData   Output: decoded message
+* @param inEncoded Input message (encoded/packed) structure
+* @return          ODID_SUCCESS or ODID_FAIL;
 */
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded)
 {
-    if (!outData || !inEncoded || !intInRange(inEncoded->Status, 0, 15)) {
+    if (!outData || !inEncoded || !intInRange(inEncoded->Status, 0, 15))
         return ODID_FAIL;
-    } else {
-        outData->Status = (ODID_status_t) inEncoded->Status;
-        outData->Direction = decodeDirection(inEncoded->Direction, inEncoded-> EWDirection);
-        outData->SpeedHorizontal = decodeSpeedHorizontal(inEncoded->SpeedHorizontal, inEncoded->SpeedMult);
-        outData->SpeedVertical = decodeSpeedVertical(inEncoded->SpeedVertical);
-        outData->Latitude = decodeLatLon(inEncoded->Latitude);
-        outData->Longitude = decodeLatLon(inEncoded->Longitude);
-        outData->AltitudeBaro = decodeAltitude(inEncoded->AltitudeBaro);
-        outData->AltitudeGeo = decodeAltitude(inEncoded->AltitudeGeo);
-        outData->HeightType = (ODID_Height_reference_t) inEncoded->HeightType;
-        outData->Height = decodeAltitude(inEncoded->Height);
-        outData->HorizAccuracy = (ODID_Horizontal_accuracy_t) inEncoded->HorizAccuracy;
-        outData->VertAccuracy = (ODID_Vertical_accuracy_t) inEncoded->VertAccuracy;
-        outData->BaroAccuracy = (ODID_Vertical_accuracy_t) inEncoded->BaroAccuracy;
-        outData->SpeedAccuracy = (ODID_Speed_accuracy_t) inEncoded->SpeedAccuracy;
-        outData->TSAccuracy = (ODID_Timestamp_accuracy_t) inEncoded->TSAccuracy;
-        outData->TimeStamp = decodeTimeStamp(inEncoded->TimeStamp);
-        return ODID_SUCCESS;
-    }
+
+    outData->Status = (ODID_status_t) inEncoded->Status;
+    outData->Direction = decodeDirection(inEncoded->Direction, inEncoded-> EWDirection);
+    outData->SpeedHorizontal = decodeSpeedHorizontal(inEncoded->SpeedHorizontal, inEncoded->SpeedMult);
+    outData->SpeedVertical = decodeSpeedVertical(inEncoded->SpeedVertical);
+    outData->Latitude = decodeLatLon(inEncoded->Latitude);
+    outData->Longitude = decodeLatLon(inEncoded->Longitude);
+    outData->AltitudeBaro = decodeAltitude(inEncoded->AltitudeBaro);
+    outData->AltitudeGeo = decodeAltitude(inEncoded->AltitudeGeo);
+    outData->HeightType = (ODID_Height_reference_t) inEncoded->HeightType;
+    outData->Height = decodeAltitude(inEncoded->Height);
+    outData->HorizAccuracy = (ODID_Horizontal_accuracy_t) inEncoded->HorizAccuracy;
+    outData->VertAccuracy = (ODID_Vertical_accuracy_t) inEncoded->VertAccuracy;
+    outData->BaroAccuracy = (ODID_Vertical_accuracy_t) inEncoded->BaroAccuracy;
+    outData->SpeedAccuracy = (ODID_Speed_accuracy_t) inEncoded->SpeedAccuracy;
+    outData->TSAccuracy = (ODID_Timestamp_accuracy_t) inEncoded->TSAccuracy;
+    outData->TimeStamp = decodeTimeStamp(inEncoded->TimeStamp);
+    return ODID_SUCCESS;
 }
 
 /**
@@ -554,87 +548,86 @@ int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 /**
 * Decode Auth data from packed message
 *
-* @param outData output decoded message
-* @param inEncoded input message (encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outData   Output: decoded message
+* @param inEncoded Input message (encoded/packed) structure
+* @return          ODID_SUCCESS or ODID_FAIL;
 */
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
-    if (!outData || !inEncoded || !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_0.DataPage, 0, 4)) {
+    if (!outData || !inEncoded ||
+        !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_0.DataPage, 0, 4))
         return ODID_FAIL;
+
+    outData->AuthType = (ODID_authtype_t) inEncoded->page_0.AuthType;
+    outData->DataPage = inEncoded->page_0.DataPage;
+    if (inEncoded->page_0.DataPage == 0) {
+        outData->PageCount = inEncoded->page_0.PageCount;
+        outData->Length = inEncoded->page_0.Length;
+        outData->Timestamp = inEncoded->page_0.Timestamp;
+        safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData,
+                          sizeof(outData->AuthData) - ODID_AUTH_PAGE_0_DATA_SIZE);
     } else {
-        outData->AuthType = (ODID_authtype_t) inEncoded->page_0.AuthType;
-        outData->DataPage = inEncoded->page_0.DataPage;
-        if (inEncoded->page_0.DataPage == 0) {
-            outData->PageCount = inEncoded->page_0.PageCount;
-            outData->Length = inEncoded->page_0.Length;
-            outData->Timestamp = inEncoded->page_0.Timestamp;
-            safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData, sizeof(outData->AuthData) - ODID_AUTH_PAGE_0_DATA_SIZE);
-        } else {
-            safe_dec_copyfill(outData->AuthData, inEncoded->page_1_4.AuthData, sizeof(outData->AuthData));
-        }
-        return ODID_SUCCESS;
+        safe_dec_copyfill(outData->AuthData, inEncoded->page_1_4.AuthData,
+                          sizeof(outData->AuthData));
     }
+    return ODID_SUCCESS;
 }
 
 /**
 * Decode Self ID data from packed message
 *
-* @param outData output: decoded message
-* @param inEncoded input message (encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outData   Output: decoded message
+* @param inEncoded Input message (encoded/packed) structure
+* @return          ODID_SUCCESS or ODID_FAIL;
 */
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded)
         return ODID_FAIL;
-    } else {
-        outData->DescType = (ODID_desctype_t) inEncoded->DescType;
-        safe_dec_copyfill(outData->Desc, inEncoded->Desc, sizeof(outData->Desc));
-        return ODID_SUCCESS;
-    }
+
+    outData->DescType = (ODID_desctype_t) inEncoded->DescType;
+    safe_dec_copyfill(outData->Desc, inEncoded->Desc, sizeof(outData->Desc));
+    return ODID_SUCCESS;
 }
 
 /**
 * Decode System data from packed message
 *
-* @param outData output: decoded message
-* @param inEncoded input message (encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outData   Output: decoded message
+* @param inEncoded Input message (encoded/packed) structure
+* @return          ODID_SUCCESS or ODID_FAIL;
 */
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded)
         return ODID_FAIL;
-    } else {
-        outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
-        outData->OperatorLatitude = decodeLatLon(inEncoded->OperatorLatitude);
-        outData->OperatorLongitude = decodeLatLon(inEncoded->OperatorLongitude);
-        outData->AreaCount = inEncoded->AreaCount;
-        outData->AreaRadius = decodeAreaRadius(inEncoded->AreaRadius);
-        outData->AreaCeiling = decodeAltitude(inEncoded->AreaCeiling);
-        outData->AreaFloor = decodeAltitude(inEncoded->AreaFloor);
-        return ODID_SUCCESS;
-    }
+
+    outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
+    outData->OperatorLatitude = decodeLatLon(inEncoded->OperatorLatitude);
+    outData->OperatorLongitude = decodeLatLon(inEncoded->OperatorLongitude);
+    outData->AreaCount = inEncoded->AreaCount;
+    outData->AreaRadius = decodeAreaRadius(inEncoded->AreaRadius);
+    outData->AreaCeiling = decodeAltitude(inEncoded->AreaCeiling);
+    outData->AreaFloor = decodeAltitude(inEncoded->AreaFloor);
+    return ODID_SUCCESS;
 }
 
 /**
 * Decode Operator ID data from packed message
 *
-* @param outData output: decoded message
-* @param inEncoded input message (encoded/packed) structure
-* @return ODID_SUCCESS or ODID_FAIL;
+* @param outData   Output: decoded message
+* @param inEncoded Input message (encoded/packed) structure
+* @return          ODID_SUCCESS or ODID_FAIL;
 */
 int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded)
 {
-    if (!outData || !inEncoded) {
+    if (!outData || !inEncoded)
         return ODID_FAIL;
-    } else {
-        outData->OperatorIdType = (ODID_operatorIdType_t) inEncoded->OperatorIdType;
-        safe_dec_copyfill(outData->OperatorId, inEncoded->OperatorId, sizeof(outData->OperatorId));
-        return ODID_SUCCESS;
-    }
+
+    outData->OperatorIdType = (ODID_operatorIdType_t) inEncoded->OperatorIdType;
+    safe_dec_copyfill(outData->OperatorId, inEncoded->OperatorId, sizeof(outData->OperatorId));
+    return ODID_SUCCESS;
 }
 
 /**
@@ -778,7 +771,8 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
 * Safely fill then copy string to destination (when decoding)
 *
 * This prevents overrun and guarantees copy behavior (fully null padded)
-* This function was specially made because the encoded data may not be null terminated (if full size)
+* This function was specially made because the encoded data may not be null
+* terminated (if full size).
 * Therefore, the destination must use the last byte for a null (and is +1 in size)
 *
 * @param dstStr Destination string
