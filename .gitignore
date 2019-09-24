@@ -19,3 +19,6 @@ test/CMakeFiles/
 test/Makefile
 test/cmake_install.cmake
 test/odidtest
+
+.idea/
+cmake-build-debug/
