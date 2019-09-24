@@ -41,6 +41,10 @@ ODID_OperatorID_encoded operatorID_enc;
 ODID_OperatorID_data operatorID;
 ODID_OperatorID_data operatorID_out;
 
+ODID_MessagePack_encoded pack_enc;
+ODID_MessagePack_data pack;
+ODID_UAS_Data uasData;
+
 void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
@@ -116,6 +120,17 @@ void test_InOut()
     printOperatorID_data(&operatorID);
     encodeOperatorIDMessage(&operatorID_enc, &operatorID);
 
+    pack.SingleMessageSize = ODID_MESSAGE_SIZE;
+    pack.MsgPackSize = 7;
+    memcpy(&pack.Messages[0], &BasicID_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[1], &Location_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[2], &Auth0_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[3], &Auth1_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[4], &SelfID_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[5], &System_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[6], &operatorID_enc, ODID_MESSAGE_SIZE);
+    encodeMessagePack(&pack_enc, &pack);
+
     printf("\n-------------------------------------Encoded Data-----------------------------------\n");
     printf("            0- 1- 2- 3- 4- 5- 6- 7- 8- 9- 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24\n");
     printf("BasicID:    ");
@@ -168,6 +183,23 @@ void test_InOut()
     decodeOperatorIDMessage(&operatorID_out, &operatorID_enc);
     printf("\nOperatorID\n------\n");
     printOperatorID_data(&operatorID_out);
+
+    decodeMessagePack(&uasData, &pack_enc);
+    printf("\nPack\n------\n");
+    if (uasData.BasicIDValid)
+        printBasicID_data(&uasData.BasicID);
+    if (uasData.LocationValid)
+        printLocation_data(&uasData.Location);
+    if (uasData.AuthValid[0])
+        printAuth_data(&uasData.Auth[0]);
+    if (uasData.AuthValid[1])
+        printAuth_data(&uasData.Auth[1]);
+    if (uasData.SelfIDValid)
+        printSelfID_data(&uasData.SelfID);
+    if (uasData.SystemValid)
+        printSystem_data(&uasData.System);
+    if (uasData.OperatorIDValid)
+        printOperatorID_data(&uasData.OperatorID);
 
     printf("\n-------------------------------------------------------------------------------\n");
     printf("-------------------------------------  End  -----------------------------------\n");

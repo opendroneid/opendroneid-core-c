@@ -332,6 +332,68 @@ int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID
 }
 
 /**
+* Check whether the data fields of a pack structure are valid
+*
+* @param msgs   Pointer to the buffer containing the messages
+* @param amount The amount of messages in the pack
+* @return       ODID_SUCCESS or ODID_FAIL;
+*/
+static int checkPackContent(ODID_Messages_encoded *msgs, int amount)
+{
+    if (amount == 0 || amount > ODID_PACK_MAX_MESSAGES)
+        return ODID_FAIL;
+
+    int numMessages[6] = { 0 };
+    for (int i = 0; i < amount; i++) {
+        uint8_t MessageType = decodeMessageType(msgs[i].rawData[0]);
+
+        // Check for illegal content. This also avoids recursive calls between
+        // decodeOpenDroneID() and decodeMessagePack()/checkPackContent()
+        if (MessageType == ODID_MESSAGETYPE_PACKED ||
+            MessageType == ODID_MESSAGETYPE_INVALID)
+            return ODID_FAIL;
+
+        numMessages[MessageType]++;
+    }
+
+    // Allow max one of each message except Authorization, of which there can
+    // be five. The OpenDroneID specification is slightly less restrictive but
+    // this implementation does not support anything else
+    if (numMessages[0] > 1 || numMessages[1] > 1 || numMessages[2] > 5 ||
+        numMessages[3] > 1 || numMessages[4] > 1 || numMessages[5] > 1)
+        return ODID_FAIL;
+
+    return ODID_SUCCESS;
+}
+
+/**
+* Encode message pack. I.e. a collection of multiple encoded messages
+*
+* @param outEncoded Output (encoded/packed) structure
+* @param inData     Input data (non encoded/packed) structure
+* @return           ODID_SUCCESS or ODID_FAIL;
+*/
+int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_data *inData)
+{
+    if (!outEncoded || !inData || inData->SingleMessageSize != ODID_MESSAGE_SIZE)
+        return ODID_FAIL;
+
+    if (checkPackContent(inData->Messages, inData->MsgPackSize) != ODID_SUCCESS)
+        return ODID_FAIL;
+
+    outEncoded->MessageType = ODID_MESSAGETYPE_PACKED;
+    outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
+
+    outEncoded->SingleMessageSize = inData->SingleMessageSize;
+    outEncoded->MsgPackSize = inData->MsgPackSize;
+
+    for (int i = 0; i < inData->MsgPackSize; i++)
+        memcpy(&outEncoded->Messages[i], &inData->Messages[i], ODID_MESSAGE_SIZE);
+
+    return ODID_SUCCESS;
+}
+
+/**
 * Dencode direction from Open Drone ID packed message
 *
 * @param Direction_enc encoded direction
@@ -472,6 +534,24 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 }
 
 /**
+* Get the page number of the authorization message
+*
+* @param inEncoded  Input message (encoded/packed) structure
+* @param pageNum    Output: The page number of this authorization message
+* @return           ODID_SUCCESS or ODID_FAIL;
+*/
+int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
+{
+    if (!inEncoded ||
+        !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_0.DataPage, 0, 4))
+        return ODID_FAIL;
+
+    *pageNum = inEncoded->page_0.DataPage;
+    return ODID_SUCCESS;
+}
+
+/**
 * Decode Auth data from packed message
 *
 * @param outData output decoded message
@@ -490,7 +570,7 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
             outData->PageCount = inEncoded->page_0.PageCount;
             outData->Length = inEncoded->page_0.Length;
             outData->Timestamp = inEncoded->page_0.Timestamp;
-            safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData, sizeof(outData->AuthData) - 6);
+            safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData, sizeof(outData->AuthData) - ODID_AUTH_PAGE_0_DATA_SIZE);
         } else {
             safe_dec_copyfill(outData->AuthData, inEncoded->page_1_4.AuthData, sizeof(outData->AuthData));
         }
@@ -558,6 +638,30 @@ int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encod
 }
 
 /**
+* Decode Message Pack from packed message
+*
+* @param uasData Output: Structure containing buffers for all message data
+* @param pack    Pointer to an encoded packed message
+* @return        ODID_SUCCESS or ODID_FAIL;
+*/
+int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack)
+{
+    if (!uasData || !pack || pack->MessageType != ODID_MESSAGETYPE_PACKED)
+        return ODID_FAIL;
+
+    if (pack->SingleMessageSize != ODID_MESSAGE_SIZE)
+        return ODID_FAIL;
+
+    if (checkPackContent(pack->Messages, pack->MsgPackSize) != ODID_SUCCESS)
+        return ODID_FAIL;
+
+    for (int i = 0; i < pack->MsgPackSize; i++) {
+        decodeOpenDroneID(uasData, pack->Messages[i].rawData);
+    }
+    return ODID_SUCCESS;
+}
+
+/**
 * Decodes the message type of a packed Open Drone ID message
 *
 * @param byte   The first byte of the message
@@ -579,64 +683,88 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
         return ODID_MESSAGETYPE_SYSTEM;
     case ODID_MESSAGETYPE_OPERATOR_ID:
         return ODID_MESSAGETYPE_OPERATOR_ID;
+    case ODID_MESSAGETYPE_PACKED:
+        return ODID_MESSAGETYPE_PACKED;
     default:
         return ODID_MESSAGETYPE_INVALID;
     }
 }
 
 /**
-* Parse encoded Open Drone ID data to identify the message type and decode
+* Parse encoded Open Drone ID data to identify the message type. Then decode
 * from Open Drone ID packed format into the appropriate Open Drone ID structure
 *
-* This function assumes that msg_data points to a buffer conaining all
+* This function assumes that msgData points to a buffer conaining all
 * ODID_MESSAGE_SIZE bytes of an Open Drone ID message.
 *
-* @param uas_data   Structure containing buffers for holding all message data
-* @param msg_data   Pointer to a buffer containing a full encoded Open Drone ID
+* @param uasData    Structure containing buffers for all message data
+* @param msgData    Pointer to a buffer containing a full encoded Open Drone ID
 *                   message
 * @return           The message type: ODID_messagetype_t
 */
-ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data)
+ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
 {
-    if (!uas_data || !msg_data)
+    if (!uasData || !msgData)
         return ODID_MESSAGETYPE_INVALID;
 
-    switch (decodeMessageType(msg_data[0]))
+    switch (decodeMessageType(msgData[0]))
     {
-    case ODID_MESSAGETYPE_BASIC_ID:
-        if (decodeBasicIDMessage(&uas_data->BasicID,
-                (ODID_BasicID_encoded *) msg_data) == ODID_SUCCESS)
+    case ODID_MESSAGETYPE_BASIC_ID:;
+        ODID_BasicID_encoded *basicId = (ODID_BasicID_encoded *) msgData;
+        if (decodeBasicIDMessage(&uasData->BasicID, basicId) == ODID_SUCCESS) {
+            uasData->BasicIDValid = 1;
             return ODID_MESSAGETYPE_BASIC_ID;
+        }
         break;
 
-    case ODID_MESSAGETYPE_LOCATION:
-        if (decodeLocationMessage(&uas_data->Location,
-                (ODID_Location_encoded *) msg_data) == ODID_SUCCESS)
+    case ODID_MESSAGETYPE_LOCATION:;
+        ODID_Location_encoded *location = (ODID_Location_encoded *) msgData;
+        if (decodeLocationMessage(&uasData->Location, location) == ODID_SUCCESS) {
+            uasData->LocationValid = 1;
             return ODID_MESSAGETYPE_LOCATION;
+        }
         break;
 
-    case ODID_MESSAGETYPE_AUTH:
-        if (decodeAuthMessage(&uas_data->Auth,
-                (ODID_Auth_encoded *) msg_data) == ODID_SUCCESS)
-            return ODID_MESSAGETYPE_AUTH;
+    case ODID_MESSAGETYPE_AUTH:;
+        ODID_Auth_encoded *inEncoded = (ODID_Auth_encoded *) msgData;
+        int pageNum;
+        if (getAuthPageNum(inEncoded, &pageNum) == ODID_SUCCESS) {
+            ODID_Auth_data *authData = &uasData->Auth[pageNum];
+            if (decodeAuthMessage(authData, inEncoded) == ODID_SUCCESS) {
+                uasData->AuthValid[pageNum] = 1;
+                return ODID_MESSAGETYPE_AUTH;
+            }
+        }
         break;
 
-    case ODID_MESSAGETYPE_SELF_ID:
-        if (decodeSelfIDMessage(&uas_data->SelfID,
-                (ODID_SelfID_encoded *) msg_data) == ODID_SUCCESS)
+    case ODID_MESSAGETYPE_SELF_ID:;
+        ODID_SelfID_encoded *selfId = (ODID_SelfID_encoded *) msgData;
+        if (decodeSelfIDMessage(&uasData->SelfID, selfId) == ODID_SUCCESS) {
+            uasData->SelfIDValid = 1;
             return ODID_MESSAGETYPE_SELF_ID;
+        }
         break;
 
-    case ODID_MESSAGETYPE_SYSTEM:
-        if (decodeSystemMessage(&uas_data->System,
-                (ODID_System_encoded *) msg_data) == ODID_SUCCESS)
+    case ODID_MESSAGETYPE_SYSTEM:;
+        ODID_System_encoded *system = (ODID_System_encoded *) msgData;
+        if (decodeSystemMessage(&uasData->System, system) == ODID_SUCCESS) {
+            uasData->SystemValid = 1;
             return ODID_MESSAGETYPE_SYSTEM;
+        }
         break;
 
-    case ODID_MESSAGETYPE_OPERATOR_ID:
-        if (decodeOperatorIDMessage(&uas_data->OperatorID,
-                (ODID_OperatorID_encoded *) msg_data) == ODID_SUCCESS)
+    case ODID_MESSAGETYPE_OPERATOR_ID:;
+        ODID_OperatorID_encoded *operatorId = (ODID_OperatorID_encoded *) msgData;
+        if (decodeOperatorIDMessage(&uasData->OperatorID, operatorId) == ODID_SUCCESS) {
+            uasData->OperatorIDValid = 1;
             return ODID_MESSAGETYPE_OPERATOR_ID;
+        }
+        break;
+
+    case ODID_MESSAGETYPE_PACKED:;
+        ODID_MessagePack_encoded *pack = (ODID_MessagePack_encoded *) msgData;
+        if (decodeMessagePack(uasData, pack) == ODID_SUCCESS)
+            return ODID_MESSAGETYPE_PACKED;
         break;
 
     default:

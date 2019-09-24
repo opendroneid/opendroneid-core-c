@@ -19,6 +19,9 @@ gabriel.c.cox@intel.com
 #define ODID_STR_SIZE 23
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.8
+#define ODID_AUTH_MAX_PAGES 5
+#define ODID_AUTH_PAGE_0_DATA_SIZE 6
+#define ODID_PACK_MAX_MESSAGES 10
 
 #define ODID_SUCCESS    0
 #define ODID_FAIL       1
@@ -30,6 +33,7 @@ typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_SELF_ID = 3,
     ODID_MESSAGETYPE_SYSTEM = 4,
     ODID_MESSAGETYPE_OPERATOR_ID = 5,
+    ODID_MESSAGETYPE_PACKED = 0xF,
     ODID_MESSAGETYPE_INVALID = 0xFF,
 } ODID_messagetype_t;
 
@@ -198,7 +202,7 @@ typedef struct {
 typedef struct {
     uint8_t DataPage;   // 0 - 4
     ODID_authtype_t AuthType;
-    uint8_t PageCount;  // Page 0 only. Max 5
+    uint8_t PageCount;  // Page 0 only. Maximum ODID_AUTH_MAX_PAGES
     uint8_t Length;     // Page 0 only. Bytes. Total of AuthData from all data pages
     uint32_t Timestamp; // Page 0 only. Relative to 00:00:00 01/01/2019
     char AuthData[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
@@ -227,10 +231,17 @@ typedef struct {
 typedef struct {
     ODID_BasicID_data BasicID;
     ODID_Location_data Location;
-    ODID_Auth_data Auth;
+    ODID_Auth_data Auth[ODID_AUTH_MAX_PAGES];
     ODID_SelfID_data SelfID;
     ODID_System_data System;
     ODID_OperatorID_data OperatorID;
+
+    uint8_t BasicIDValid;
+    uint8_t LocationValid;
+    uint8_t AuthValid[ODID_AUTH_MAX_PAGES];
+    uint8_t SelfIDValid;
+    uint8_t SystemValid;
+    uint8_t OperatorIDValid;
 } ODID_UAS_Data;
 
 /**
@@ -311,7 +322,7 @@ typedef struct __attribute__((__packed__)) {
     uint32_t Timestamp;
 
     // Byte 8-24
-    char AuthData[ODID_STR_SIZE - 6];
+    char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE];
 } ODID_Auth_encoded_page_0;
 
 typedef struct __attribute__((__packed__)) {
@@ -382,19 +393,38 @@ typedef struct __attribute__((__packed__)) {
     char Reserved[3];
 } ODID_OperatorID_encoded;
 
-typedef struct {
-    uint8_t msgData[ODID_MESSAGE_SIZE];
-} ODID_Message;
+typedef union {
+    uint8_t rawData[ODID_MESSAGE_SIZE];
+    ODID_BasicID_encoded basicId;
+    ODID_Location_encoded location;
+    ODID_Auth_encoded auth;
+    ODID_SelfID_encoded selfId;
+    ODID_System_encoded system;
+    ODID_OperatorID_encoded operatorId;
+} ODID_Messages_encoded;
 
-// TODO: Encoding/Decoding message pack
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
+
+    // Byte 1 - 2
     uint8_t SingleMessageSize;
-    uint8_t MsgPackSize; // No of messages in pack (NOT number of bytes)
-    ODID_Message Messages[];
-} ODID_Message_Pack;
+    uint8_t MsgPackSize;
+
+    // Byte 3 - 252
+    ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
+
+    // Byte 253 - 255
+    char Reserved[3];
+} ODID_MessagePack_encoded;
+
+typedef struct {
+    uint8_t SingleMessageSize; // Must always be ODID_MESSAGE_SIZE
+    uint8_t MsgPackSize; // Number of messages in pack (NOT number of bytes)
+
+    ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
+} ODID_MessagePack_data;
 
 // API Calls
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
@@ -403,6 +433,7 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
 int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData);
+int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_data *inData);
 
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
@@ -410,7 +441,9 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
 int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded);
+int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
 
+int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum);
 ODID_messagetype_t decodeMessageType(uint8_t byte);
 ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);
 

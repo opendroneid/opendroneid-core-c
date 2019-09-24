@@ -208,11 +208,13 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     if (msgType != ODID_MESSAGETYPE_AUTH)
         printf("ERROR: Open Drone ID message type was not Authentication\n");
 
-    printAuth_data(&uas_data->Auth);
+    if (uas_data->AuthValid[0])
+        printAuth_data(&uas_data->Auth[0]);
 
     // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_authentication_t auth2 = { 0 };
-    m2o_authentication2Mavlink(&auth2, &uas_data->Auth);
+    if (uas_data->AuthValid[0])
+        m2o_authentication2Mavlink(&auth2, &uas_data->Auth[0]);
     printf("\n");
     print_mavlink_auth(&auth2);
 }
