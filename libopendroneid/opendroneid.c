@@ -486,6 +486,7 @@ static uint16_t decodeAreaRadius(uint8_t Radius_enc)
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
+        inEncoded->MessageType != ODID_MESSAGETYPE_BASIC_ID ||
         !intInRange(inEncoded->IDType, 0, 15) ||
         !intInRange(inEncoded->UAType, 0, 15))
         return ODID_FAIL;
@@ -505,7 +506,9 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
 */
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded)
 {
-    if (!outData || !inEncoded || !intInRange(inEncoded->Status, 0, 15))
+    if (!outData || !inEncoded ||
+        inEncoded->MessageType != ODID_MESSAGETYPE_LOCATION ||
+        !intInRange(inEncoded->Status, 0, 15))
         return ODID_FAIL;
 
     outData->Status = (ODID_status_t) inEncoded->Status;
@@ -537,6 +540,7 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 {
     if (!inEncoded ||
+        inEncoded->page_0.MessageType != ODID_MESSAGETYPE_AUTH ||
         !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
         !intInRange(inEncoded->page_0.DataPage, 0, 4))
         return ODID_FAIL;
@@ -555,6 +559,7 @@ int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
+        inEncoded->page_0.MessageType != ODID_MESSAGETYPE_AUTH ||
         !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
         !intInRange(inEncoded->page_0.DataPage, 0, 4))
         return ODID_FAIL;
@@ -583,7 +588,8 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 */
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded)
 {
-    if (!outData || !inEncoded)
+    if (!outData || !inEncoded ||
+        inEncoded->MessageType != ODID_MESSAGETYPE_SELF_ID)
         return ODID_FAIL;
 
     outData->DescType = (ODID_desctype_t) inEncoded->DescType;
@@ -600,7 +606,8 @@ int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncode
 */
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded)
 {
-    if (!outData || !inEncoded)
+    if (!outData || !inEncoded ||
+        inEncoded->MessageType != ODID_MESSAGETYPE_SYSTEM)
         return ODID_FAIL;
 
     outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
@@ -622,7 +629,8 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
 */
 int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded)
 {
-    if (!outData || !inEncoded)
+    if (!outData || !inEncoded ||
+        inEncoded->MessageType != ODID_MESSAGETYPE_OPERATOR_ID)
         return ODID_FAIL;
 
     outData->OperatorIdType = (ODID_operatorIdType_t) inEncoded->OperatorIdType;
