@@ -57,7 +57,7 @@ static void print_mavlink_selfID(mavlink_open_drone_id_selfid_t *self_id)
 
 static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
 {
-    printf("Location Source: %d\nLat/Lon: %d, %d degE7, Group Count, Radius: %d, %d, \n"\
+    printf("location Source: %d\nLat/Lon: %d, %d degE7, Group Count, Radius: %d, %d, \n"\
            "Ceiling, Floor: %.2f, %.2f m\n",
            system->flags, system->remote_pilot_latitude,
            system->remote_pilot_longitude, system->group_count,
@@ -69,18 +69,18 @@ static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
 * parsing the received message and decoding it
 */
 static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
-                             uint8_t *src, ODID_UAS_Data *uas_data,
-                             ODID_messagetype_t *msgType)
+                             uint8_t *src, odid_data_uas_t *uas_data,
+                             odid_message_type_t *msgType)
 {
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
     uint16_t length = mavlink_msg_to_send_buffer(buf, msg);
 
-    ODID_messagetype_t msg_type = ODID_MESSAGETYPE_INVALID;
+    odid_message_type_t msg_type = ODID_MESSAGE_TYPE_INVALID;
     int i = 0;
-    while (msg_type == ODID_MESSAGETYPE_INVALID && i < sizeof(buf))
+    while (msg_type == ODID_MESSAGE_TYPE_INVALID && i < sizeof(buf))
         msg_type = m2o_parseMavlink(m2o, buf[i++]);
 
-    if (msg_type == ODID_MESSAGETYPE_INVALID)
+    if (msg_type == ODID_MESSAGE_TYPE_INVALID)
         printf("ERROR: Parsing Mavlink message failed\n");
 
     // m2o_parseMavlink transfered the data into the src buffer
@@ -89,12 +89,12 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
     memcpy(tx_buf, src, ODID_MESSAGE_SIZE);
 
     printf("\nEncoded: ");
-    printByteArray(tx_buf, ODID_MESSAGE_SIZE, 1);
+    odid_print_byte_array(tx_buf, ODID_MESSAGE_SIZE, 1);
     printf("\n");
 
     // The content of tx_buf has been transmitted via Bluetooth or WiFi
     // The receiver decodes the data and returns the message type and data
-    *msgType = decodeOpenDroneID(uas_data, tx_buf);
+    *msgType = odid_decode_open_drone_id(uas_data, tx_buf);
 }
 
 /**
@@ -112,7 +112,7 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
 * a mavlink structure for further transmission e.g. from a HW receiver to
 * a ground control station.
 */
-static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+static void test_basicId(mav2odid_t *m2o, odid_data_uas_t *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_basic_id_t basic_id = {
@@ -127,23 +127,23 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                               MAVLINK_COMPONENT_ID,
                                               &msg, &basic_id);
 
-    ODID_messagetype_t msgType;
+    odid_message_type_t msgType;
     send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->basicIdEnc,
                      uas_data, &msgType);
 
-    if (msgType != ODID_MESSAGETYPE_BASIC_ID)
+    if (msgType != ODID_MESSAGE_TYPE_BASIC_ID)
         printf("ERROR: Open Drone ID message type was not Basic ID\n");
 
-    printBasicID_data(&uas_data->BasicID);
+    odid_print_data_basic_id(&uas_data->basic_id);
 
-    // The received data is transferred into a Mavlink structure    
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_basic_id_t basic_id2 = { 0 };
-    m2o_basicId2Mavlink(&basic_id2, &uas_data->BasicID);
+    m2o_basicId2Mavlink(&basic_id2, &uas_data->basic_id);
     printf("\n");
     print_mavlink_basicID(&basic_id2);
 }
 
-static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+static void test_location(mav2odid_t *m2o, odid_data_uas_t *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_location_t location = {
@@ -164,30 +164,30 @@ static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .timestamp_accuracy = MAV_ODID_TIME_ACC_0_1_SECOND,
         .timestamp = 3243.4f };
 
-    printf("\n\n------------------------Location------------------------\n\n");
+    printf("\n\n------------------------location------------------------\n\n");
     print_mavlink_location(&location);
 
     mavlink_msg_open_drone_id_location_encode(MAVLINK_SYSTEM_ID,
                                               MAVLINK_COMPONENT_ID,
                                               &msg, &location);
 
-    ODID_messagetype_t msgType;
+    odid_message_type_t msgType;
     send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->locationEnc,
                      uas_data, &msgType);
 
-    if (msgType != ODID_MESSAGETYPE_LOCATION)
-        printf("ERROR: Open Drone ID message type was not Location\n");
+    if (msgType != ODID_MESSAGE_TYPE_LOCATION)
+        printf("ERROR: Open Drone ID message type was not location\n");
 
-    printLocation_data(&uas_data->Location);
-    
-    // The received data is transferred into a Mavlink structure    
+    odid_print_data_location(&uas_data->location);
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_location_t location2 = { 0 };
-    m2o_location2Mavlink(&location2, &uas_data->Location);
+    m2o_location2Mavlink(&location2, &uas_data->location);
     printf("\n");
     print_mavlink_location(&location2);
 }
 
-static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+static void test_authentication(mav2odid_t *m2o, odid_data_uas_t *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_authentication_t auth = {
@@ -201,23 +201,23 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                                     MAVLINK_COMPONENT_ID,
                                                     &msg, &auth);
 
-    ODID_messagetype_t msgType;
+    odid_message_type_t msgType;
     send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->authenticationEnc,
                      uas_data, &msgType);
 
-    if (msgType != ODID_MESSAGETYPE_AUTH)
+    if (msgType != ODID_MESSAGE_TYPE_AUTH)
         printf("ERROR: Open Drone ID message type was not Authentication\n");
 
-    printAuth_data(&uas_data->Auth);
-    
-    // The received data is transferred into a Mavlink structure    
+    odid_print_data_auth(&uas_data->auth);
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_authentication_t auth2 = { 0 };
-    m2o_authentication2Mavlink(&auth2, &uas_data->Auth);
+    m2o_authentication2Mavlink(&auth2, &uas_data->auth);
     printf("\n");
     print_mavlink_auth(&auth2);
 }
 
-static void test_selfID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+static void test_selfID(mav2odid_t *m2o, odid_data_uas_t *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_selfid_t selfID = {
@@ -231,23 +231,23 @@ static void test_selfID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                             MAVLINK_COMPONENT_ID,
                                             &msg, &selfID);
 
-    ODID_messagetype_t msgType;
+    odid_message_type_t msgType;
     send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->selfIdEnc,
                      uas_data, &msgType);
 
-    if (msgType != ODID_MESSAGETYPE_SELF_ID)
+    if (msgType != ODID_MESSAGE_TYPE_SELF_ID)
         printf("ERROR: Open Drone ID message type was not Self ID\n");
 
-    printSelfID_data(&uas_data->SelfID);
-    
-    // The received data is transferred into a Mavlink structure    
+    odid_print_data_self_id(&uas_data->self_id);
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_selfid_t selfID2 = { 0 };
-    m2o_selfId2Mavlink(&selfID2, &uas_data->SelfID);
+    m2o_selfId2Mavlink(&selfID2, &uas_data->self_id);
     printf("\n");
     print_mavlink_selfID(&selfID2);
 }
 
-static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+static void test_system(mav2odid_t *m2o, odid_data_uas_t *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_system_t system = {
@@ -259,25 +259,25 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .group_ceiling = 75.5f,
         .group_floor = 26.5f };
 
-    printf("\n\n------------------------System------------------------\n\n");
+    printf("\n\n------------------------system------------------------\n\n");
     print_mavlink_system(&system);
 
     mavlink_msg_open_drone_id_system_encode(MAVLINK_SYSTEM_ID,
                                             MAVLINK_COMPONENT_ID,
                                             &msg, &system);
 
-    ODID_messagetype_t msgType;
+    odid_message_type_t msgType;
     send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->systemEnc,
                      uas_data, &msgType);
 
-    if (msgType != ODID_MESSAGETYPE_SYSTEM)
-        printf("ERROR: Open Drone ID message type was not System\n");
+    if (msgType != ODID_MESSAGE_TYPE_SYSTEM)
+        printf("ERROR: Open Drone ID message type was not system\n");
 
-    printSystem_data(&uas_data->System);
-    
-    // The received data is transferred into a Mavlink structure    
+    odid_print_data_system(&uas_data->system);
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_system_t system2 = { 0 };
-    m2o_system2Mavlink(&system2, &uas_data->System);
+    m2o_system2Mavlink(&system2, &uas_data->system);
     printf("\n");
     print_mavlink_system(&system2);
 }
@@ -287,9 +287,9 @@ void test_mav2odid()
     mav2odid_t m2o;
     if (m2o_init(&m2o))
         printf("ERROR: Initialising mav2odid data failed\n");
-    
-    ODID_UAS_Data uas_data;
-    memset(&uas_data, 0, sizeof(ODID_UAS_Data));
+
+    odid_data_uas_t uas_data;
+    memset(&uas_data, 0, sizeof(odid_data_uas_t));
 
     test_basicId(&m2o, &uas_data);
     test_location(&m2o, &uas_data);

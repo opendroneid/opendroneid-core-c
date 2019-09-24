@@ -24,21 +24,21 @@ The intended architecture is to take whatever input you wish, and to put it into
 These are nominal (non-encoded) structures:
 
 ```
-ODID_BasicID_data
-ODID_Location_data
-ODID_Auth_data
-ODID_SelfID_data
-ODID_System_data
+odid_data_basic_id_t
+odid_data_location_t
+odid_data_auth_t
+odid_data_self_id_t
+odid_data_system_t
 ```
 
 The SDK functions will encode to (or decode from) the following structures:
 
 ```
-ODID_BasicID_encoded
-ODID_Location_encoded
-ODID_Auth_encoded
-ODID_SelfID_encoded
-ODID_System_encoded
+odid_encoded_basic_id_t
+odid_encoded_location_t
+odid_encoded_auth_t
+odid_encoded_self_id_t
+odid_encoded_system_t
 ```
 
 Once you have the encoded data, then you are ready to assemble and transmit over any of the acceptable broadcast methods in Open Drone ID.
@@ -46,17 +46,17 @@ Once you have the encoded data, then you are ready to assemble and transmit over
 The primary SDK calls are the following:
 
 ```
-int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
-int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);
-int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
-int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
-int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
+int odid_encode_message_basic_id(odid_encoded_basic_id_t *outEncoded, odid_data_basic_id_t *inData);
+int odid_encode_message_location(odid_encoded_location_t *outEncoded, odid_data_location_t *inData);
+int odid_encode_message_auth(odid_encoded_auth_t *outEncoded, odid_data_auth_t *inData);
+int odid_encode_message_self_id(odid_encoded_self_id_t *outEncoded, odid_data_self_id_t *inData);
+int odid_encode_message_system(odid_encoded_system_t *outEncoded, odid_data_system_t *inData);
 
-int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
-int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
-int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
-int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
-int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
+int odid_decode_message_basic_id(odid_data_basic_id_t *outData, odid_encoded_basic_id_t *inEncoded);
+int odid_decode_message_location(odid_data_location_t *outData, odid_encoded_location_t *inEncoded);
+int odid_decode_message_auth(odid_data_auth_t *outData, odid_encoded_auth_t *inEncoded);
+int odid_decode_message_self_id(odid_data_self_id_t *outData, odid_encoded_self_id_t *inEncoded);
+int odid_decode_message_system(odid_data_system_t *outData, odid_encoded_system_t *inEncoded);
 ```
 
 Specific messages have been added to the Mavlink message set to accomodate data for Open Drone ID implementations:

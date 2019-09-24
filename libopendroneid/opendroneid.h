@@ -14,6 +14,7 @@ gabriel.c.cox@intel.com
 #define _OPENDRONEID_H_
 
 #include <stdint.h>
+
 #define ODID_MESSAGE_SIZE 25
 #define ODID_ID_SIZE 20
 #define ODID_STR_SIZE 23
@@ -23,55 +24,55 @@ gabriel.c.cox@intel.com
 #define ODID_SUCCESS    0
 #define ODID_FAIL       1
 
-typedef enum ODID_messagetype {
-    ODID_MESSAGETYPE_BASIC_ID = 0,
-    ODID_MESSAGETYPE_LOCATION = 1,
-    ODID_MESSAGETYPE_AUTH = 2,
-    ODID_MESSAGETYPE_SELF_ID = 3,
-    ODID_MESSAGETYPE_SYSTEM = 4,
-    ODID_MESSAGETYPE_INVALID = 0xFF,
-} ODID_messagetype_t;
+typedef enum {
+    ODID_MESSAGE_TYPE_BASIC_ID = 0,
+    ODID_MESSAGE_TYPE_LOCATION = 1,
+    ODID_MESSAGE_TYPE_AUTH = 2,
+    ODID_MESSAGE_TYPE_SELF_ID = 3,
+    ODID_MESSAGE_TYPE_SYSTEM = 4,
+    ODID_MESSAGE_TYPE_INVALID = 0xff,
+} odid_message_type_t;
 
-typedef enum ODID_idtype {
-    ODID_IDTYPE_NONE = 0,
-    ODID_IDTYPE_SERIAL_NUMBER = 1,
-    ODID_IDTYPE_CAA_ASSIGNED_ID = 2,
-    ODID_IDTYPE_UTM_ASSIGNED_ID = 3,
+typedef enum {
+    ODID_ID_TYPE_NONE = 0,
+    ODID_ID_TYPE_SERIAL_NUMBER = 1,
+    ODID_ID_TYPE_CAA_ASSIGNED_ID = 2,
+    ODID_ID_TYPE_UTM_ASSIGNED_ID = 3,
     // 4 to 15 reserved
-} ODID_idtype_t;
+} odid_id_type_t;
 
-typedef enum ODID_uatype {
-    ODID_UATYPE_NONE = 0,
-    ODID_UATYPE_AEROPLANE = 1,
-    ODID_UATYPE_ROTORCRAFT = 2, // Including Multirotor
-    ODID_UATYPE_GYROPLANE = 3,
-    ODID_UATYPE_VTOL = 4, // Fixed wing aircraft that can take off vertically
-    ODID_UATYPE_ORNITHOPTER = 5,
-    ODID_UATYPE_GLIDER = 6,
-    ODID_UATYPE_KITE = 7,
-    ODID_UATYPE_FREE_BALLOON = 8,
-    ODID_UATYPE_CAPTIVE_BALLOON = 9,
-    ODID_UATYPE_AIRSHIP = 10,
-    ODID_UATYPE_FREE_FALL_PARACHUTE = 11,
-    ODID_UATYPE_ROCKET = 12,
-    ODID_UATYPE_GROUND_OBSTACLE = 13,
-    ODID_UATYPE_RESERVED = 14,
-    ODID_UATYPE_OTHER = 15,
-} ODID_uatype_t;
+typedef enum {
+    ODID_UA_TYPE_NONE = 0,
+    ODID_UA_TYPE_AEROPLANE = 1,
+    ODID_UA_TYPE_ROTORCRAFT = 2, // Including Multirotor
+    ODID_UA_TYPE_GYROPLANE = 3,
+    ODID_UA_TYPE_VTOL = 4, // Fixed wing aircraft that can take off vertically
+    ODID_UA_TYPE_ORNITHOPTER = 5,
+    ODID_UA_TYPE_GLIDER = 6,
+    ODID_UA_TYPE_KITE = 7,
+    ODID_UA_TYPE_FREE_BALLOON = 8,
+    ODID_UA_TYPE_CAPTIVE_BALLOON = 9,
+    ODID_UA_TYPE_AIRSHIP = 10,
+    ODID_UA_TYPE_FREE_FALL_PARACHUTE = 11,
+    ODID_UA_TYPE_ROCKET = 12,
+    ODID_UA_TYPE_GROUND_OBSTACLE = 13,
+    ODID_UA_TYPE_RESERVED = 14,
+    ODID_UA_TYPE_OTHER = 15,
+} odid_ua_type_t;
 
-typedef enum ODID_status {
+typedef enum {
     ODID_STATUS_UNDECLARED = 0,
     ODID_STATUS_GROUND = 1,
     ODID_STATUS_AIRBORNE = 2,
     // 3 to 15 reserved
-} ODID_status_t;
+} odid_status_t;
 
-typedef enum ODID_Height_reference {
+typedef enum {
     ODID_HEIGHT_REF_OVER_TAKEOFF = 0,
     ODID_HEIGHT_REF_OVER_GROUND = 1,
-} ODID_Height_reference_t;
+} odid_height_ref_t;
 
-typedef enum ODID_Horizontal_accuracy {
+typedef enum {
     ODID_HOR_ACC_UNKNOWN = 0,
     ODID_HOR_ACC_10NM = 1, // Nautical Miles
     ODID_HOR_ACC_4NM = 2,
@@ -86,9 +87,9 @@ typedef enum ODID_Horizontal_accuracy {
     ODID_HOR_ACC_3_METER = 11,
     ODID_HOR_ACC_1_METER = 12,
     // 13 to 15 reserved
-} ODID_Horizontal_accuracy_t;
+} odid_horizontal_accuracy_t;
 
-typedef enum ODID_Vertical_accuracy {
+typedef enum {
     ODID_VER_ACC_UNKNOWN = 0,
     ODID_VER_ACC_150_METER = 1,
     ODID_VER_ACC_45_METER = 2,
@@ -97,18 +98,18 @@ typedef enum ODID_Vertical_accuracy {
     ODID_VER_ACC_3_METER = 5,
     ODID_VER_ACC_1_METER = 6,
     // 7 to 15 reserved
-} ODID_Vertical_accuracy_t;
+} odid_vertical_accuracy_t;
 
-typedef enum ODID_Speed_accuracy {
+typedef enum {
     ODID_SPEED_ACC_UNKNOWN = 0,
     ODID_SPEED_ACC_10_METERS_SECOND = 1,
     ODID_SPEED_ACC_3_METERS_SECOND = 2,
     ODID_SPEED_ACC_1_METERS_SECOND = 3,
     ODID_SPEED_ACC_0_3_METERS_SECOND = 4,
     // 5 to 15 reserved
-} ODID_Speed_accuracy_t;
+} odid_speed_accuracy_t;
 
-typedef enum ODID_Timestamp_accuracy {
+typedef enum {
     ODID_TIME_ACC_UNKNOWN = 0,
     ODID_TIME_ACC_0_1_SECONDS = 1,
     ODID_TIME_ACC_0_2_SECONDS = 2,
@@ -125,26 +126,26 @@ typedef enum ODID_Timestamp_accuracy {
     ODID_TIME_ACC_1_3_SECONDS = 13,
     ODID_TIME_ACC_1_4_SECONDS = 14,
     ODID_TIME_ACC_1_5_SECONDS = 15,
-} ODID_Timestamp_accuracy_t;
+} odid_timestamp_accuracy_t;
 
-typedef enum ODID_authtype {
-    ODID_AUTH_NONE = 0,
-    ODID_AUTH_MPUID = 1, // Manufacturer Programmed Unique ID
+typedef enum {
+    ODID_AUTH_TYPE_NONE = 0,
+    ODID_AUTH_TYPE_MPUID = 1, // Manufacturer Programmed Unique ID
     // 2 to 9 reserved. 0xA to 0xF reserved for private use
-} ODID_authtype_t;
+} odid_auth_type_t;
 
-typedef enum ODID_desctype {
+typedef enum {
     ODID_DESC_TYPE_TEXT = 0,
     ODID_DESC_TYPE_REMOTE_PILOT_ID = 1,
     // 2 to 255 reserved
-} ODID_desctype_t;
+} odid_desc_type_t;
 
-typedef enum ODID_location_source {
+typedef enum {
     ODID_LOCATION_SRC_TAKEOFF = 0,
     ODID_LOCATION_SRC_LIVE_GNSS = 1,
     ODID_LOCATION_SRC_FIXED = 2,
     // 3 to 255 reserved
-} ODID_location_source_t;
+} odid_location_source_t;
 
  /*
  * @name ODID_DataStructs
@@ -153,13 +154,13 @@ typedef enum ODID_location_source {
  * let the encoders put the data into encoded form.
  */
 typedef struct {
-    ODID_uatype_t UAType;
-    ODID_idtype_t IDType;
-    char UASID[ODID_ID_SIZE+1];
-} ODID_BasicID_data;
+    odid_ua_type_t ua_type;
+    odid_id_type_t id_type;
+    char uas_id[ODID_ID_SIZE + 1];
+} odid_data_basic_id_t;
 
 typedef struct {
-    ODID_status_t Status;
+    odid_status_t Status;
     float Direction;          // Degrees. 0 <= x < 360. Route course based on true North
     float SpeedHorizontal;    // m/s. Positive only
     float SpeedVertical;      // m/s
@@ -167,44 +168,44 @@ typedef struct {
     double Longitude;
     float AltitudeBaro;       // meter (Ref 29.92 inHg, 1013.24 mb)
     float AltitudeGeo;        // meter (WGS84-HAE)
-    ODID_Height_reference_t HeightType;
+    odid_height_ref_t HeightType;
     float Height;             // meter
-    ODID_Horizontal_accuracy_t HorizAccuracy;
-    ODID_Vertical_accuracy_t VertAccuracy;
-    ODID_Vertical_accuracy_t BaroAccuracy;
-    ODID_Speed_accuracy_t SpeedAccuracy;
-    ODID_Timestamp_accuracy_t TSAccuracy;
+    odid_horizontal_accuracy_t HorizAccuracy;
+    odid_vertical_accuracy_t VertAccuracy;
+    odid_vertical_accuracy_t BaroAccuracy;
+    odid_speed_accuracy_t SpeedAccuracy;
+    odid_timestamp_accuracy_t TSAccuracy;
     float TimeStamp;          // seconds after the full hour
-} ODID_Location_data;
+} odid_data_location_t;
 
 typedef struct {
     uint8_t DataPage;
-    ODID_authtype_t AuthType;
+    odid_auth_type_t AuthType;
     char AuthData[ODID_STR_SIZE+1];  // additional byte to allow for null term in normative form
-} ODID_Auth_data;
+} odid_data_auth_t;
 
 typedef struct {
-    ODID_desctype_t DescType;
+    odid_desc_type_t DescType;
     char Desc[ODID_STR_SIZE+1];
-} ODID_SelfID_data;
+} odid_data_self_id_t;
 
 typedef struct {
-    ODID_location_source_t LocationSource;
+    odid_location_source_t LocationSource;
     double remotePilotLatitude;
     double remotePilotLongitude;
     uint16_t GroupCount;
     uint16_t GroupRadius;     // meter
     float GroupCeiling;       // meter
     float GroupFloor;         // meter
-} ODID_System_data;
+} odid_data_system_t;
 
 typedef struct {
-    ODID_BasicID_data BasicID;
-    ODID_Location_data Location;
-    ODID_Auth_data Auth;
-    ODID_SelfID_data SelfID;
-    ODID_System_data System;
-} ODID_UAS_Data;
+    odid_data_basic_id_t basic_id;
+    odid_data_location_t location;
+    odid_data_auth_t auth;
+    odid_data_self_id_t self_id;
+    odid_data_system_t system;
+} odid_data_uas_t;
 
 /**
 * @Name ODID_PackedStructs
@@ -217,7 +218,7 @@ typedef struct __attribute__((__packed__)) {
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
 
-    // Byte 1 [IDType][UAType]  -- must define LSb first
+    // Byte 1 [id_type][ua_type]  -- must define LSb first
     uint8_t UAType: 4;
     uint8_t IDType: 4;
 
@@ -226,7 +227,7 @@ typedef struct __attribute__((__packed__)) {
 
     // 22-24
     char Reserved[3];
-} ODID_BasicID_encoded;
+} odid_encoded_basic_id_t;
 
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -267,7 +268,7 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 24
     char Reserved3;
-} ODID_Location_encoded;
+} odid_encoded_location_t;
 
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -280,7 +281,7 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 2-24
     char AuthData[ODID_STR_SIZE];
-} ODID_Auth_encoded;
+} odid_encoded_auth_t;
 
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -292,7 +293,7 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 2-24
     char Desc[ODID_STR_SIZE];
-} ODID_SelfID_encoded;
+} odid_encoded_self_id_t;
 
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -315,11 +316,11 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 17-24
     char Reserved2[8];
-} ODID_System_encoded;
+} odid_encoded_system_t;
 
 typedef struct {
-    uint8_t msgData[ODID_MESSAGE_SIZE];
-} ODID_Message;
+    uint8_t data[ODID_MESSAGE_SIZE];
+} odid_message_t;
 
 // TODO: Encoding/Decoding message pack
 typedef struct __attribute__((__packed__)) {
@@ -328,48 +329,50 @@ typedef struct __attribute__((__packed__)) {
     uint8_t MessageType : 4;
     uint8_t SingleMessageSize;
     uint8_t MsgPackSize; // No of messages in pack (NOT number of bytes)
-    ODID_Message Messages[];
-} ODID_Message_Pack;
+    odid_message_t Messages[];
+} odid_message_pack_t;
 
 // API Calls
-int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
-int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);
-int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
-int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
-int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
+int odid_encode_message_basic_id(odid_encoded_basic_id_t *out, odid_data_basic_id_t *in);
+int odid_encode_message_location(odid_encoded_location_t *out, odid_data_location_t *in);
+int odid_encode_message_auth(odid_encoded_auth_t *out, odid_data_auth_t *in);
+int odid_encode_message_self_id(odid_encoded_self_id_t *out, odid_data_self_id_t *in);
+int odid_encode_message_system(odid_encoded_system_t *out, odid_data_system_t *in);
 
-int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
-int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
-int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
-int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
-int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
-ODID_messagetype_t decodeMessageType(uint8_t byte);
-ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);
+int odid_decode_message_basic_id(odid_data_basic_id_t *out, odid_encoded_basic_id_t *in);
+int odid_decode_message_location(odid_data_location_t *out, odid_encoded_location_t *in);
+int odid_decode_message_auth(odid_data_auth_t *out, odid_encoded_auth_t *in);
+int odid_decode_message_self_id(odid_data_self_id_t *out, odid_encoded_self_id_t *in);
+int odid_decode_message_system(odid_data_system_t *out, odid_encoded_system_t *in);
+
+odid_message_type_t odid_decode_message_type(uint8_t byte);
+odid_message_type_t odid_decode_open_drone_id(odid_data_uas_t *uas_data, uint8_t *msg_data);
 
 // Helper Functions
-char *safe_copyfill(char *dstStr, const char *srcStr, int dstSize);
-char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize);
-int intRangeMax(int64_t inValue, int startRange, int endRange);
-int intInRange(int inValue, int startRange, int endRange);
+char *odid_safe_copy_fill(char *dst_str, const char *src_str, int dst_size);
+char *odid_safe_dec_copy_fill(char *dst_str, const char *src_str, int dst_size);
+int odid_int_range_max(int64_t value, int start_range, int end_range);
+int odid_int_in_range(int inValue, int start_range, int end_range);
 
-ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy);
-ODID_Vertical_accuracy_t createEnumVerticalAccuracy(float Accuracy);
-ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy);
-ODID_Timestamp_accuracy_t createEnumTimestampAccuracy(float Accuracy);
+odid_horizontal_accuracy_t odid_create_enum_horizontal_accuracy(float accuracy);
+odid_vertical_accuracy_t odid_create_enum_vertical_accuracy(float accuracy);
+odid_speed_accuracy_t odid_create_enum_speed_accuracy(float accuracy);
+odid_timestamp_accuracy_t odid_create_enum_timestamp_accuracy(float accuracy);
 
-float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy);
-float decodeVerticalAccuracy(ODID_Vertical_accuracy_t Accuracy);
-float decodeSpeedAccuracy(ODID_Speed_accuracy_t Accuracy);
-float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
+float odid_decode_horizontal_accuracy(odid_horizontal_accuracy_t accuracy);
+float odid_decode_vertical_accuracy(odid_vertical_accuracy_t accuracy);
+float odid_decode_speed_accuracy(odid_speed_accuracy_t accuracy);
+float odid_decode_timestamp_accuracy(odid_timestamp_accuracy_t accuracy);
 
 #ifndef ODID_DISABLE_PRINTF
-void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
-void printBasicID_data(ODID_BasicID_data *BasicID);
-void printLocation_data(ODID_Location_data *Location);
-void printAuth_data(ODID_Auth_data *Auth);
-void printSelfID_data(ODID_SelfID_data *SelfID);
-void printSystem_data(ODID_System_data *System_data);
+
+void odid_print_byte_array(uint8_t *byte_array, uint16_t asize, int spaced);
+void odid_print_data_basic_id(odid_data_basic_id_t *basic_id);
+void odid_print_data_location(odid_data_location_t *location);
+void odid_print_data_auth(odid_data_auth_t *auth);
+void odid_print_data_self_id(odid_data_self_id_t *self_id);
+void odid_print_data_system(odid_data_system_t *system_data);
+
 #endif // ODID_DISABLE_PRINTF
 
 #endif // _OPENDRONEID_H_
-

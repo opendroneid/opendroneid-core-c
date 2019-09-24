@@ -8,12 +8,14 @@ libopendroneid/Makefile
 libopendroneid/cmake_install.cmake
 libopendroneid/libopendroneid.pc
 libopendroneid/libopendroneid.so
+libopendroneid/libopendroneid.dylib
 
 libmav2odid/CMakeFiles/
 libmav2odid/Makefile
 libmav2odid/cmake_install.cmake
 libmav2odid/libmav2odid.pc
 libmav2odid/libmav2odid.so
+libmav2odid/libmav2odid.dylib
 
 test/CMakeFiles/
 test/Makefile

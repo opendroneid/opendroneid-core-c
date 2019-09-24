@@ -14,35 +14,35 @@ gabriel.c.cox@intel.com
 #include <stdio.h>
 #include <opendroneid.h>
 
-ODID_BasicID_encoded BasicID_enc;
-ODID_BasicID_data BasicID;
-ODID_BasicID_data BasicID_out;
+odid_encoded_basic_id_t BasicID_enc;
+odid_data_basic_id_t BasicID;
+odid_data_basic_id_t BasicID_out;
 
-ODID_Location_encoded Location_enc;
-ODID_Location_data Location;
-ODID_Location_data Location_out;
+odid_encoded_location_t Location_enc;
+odid_data_location_t Location;
+odid_data_location_t Location_out;
 
-ODID_Auth_encoded Auth_enc;
-ODID_Auth_data Auth;
-ODID_Auth_data Auth_out;
+odid_encoded_auth_t Auth_enc;
+odid_data_auth_t Auth;
+odid_data_auth_t Auth_out;
 
-ODID_SelfID_encoded SelfID_enc;
-ODID_SelfID_data SelfID;
-ODID_SelfID_data SelfID_out;
+odid_encoded_self_id_t SelfID_enc;
+odid_data_self_id_t SelfID;
+odid_data_self_id_t SelfID_out;
 
-ODID_System_encoded System_enc;
-ODID_System_data System_data;
-ODID_System_data System_out;
+odid_encoded_system_t System_enc;
+odid_data_system_t System_data;
+odid_data_system_t System_out;
 
 void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
-    BasicID.IDType = ODID_IDTYPE_CAA_ASSIGNED_ID;
-    BasicID.UAType = ODID_UATYPE_ROTORCRAFT;
-    safe_copyfill(BasicID.UASID,"123456789012345678901", sizeof(BasicID.UASID));
-    printf("BasicID\n-------\n");
-    printBasicID_data(&BasicID);
-    encodeBasicIDMessage(&BasicID_enc, &BasicID);
+    BasicID.id_type = ODID_ID_TYPE_CAA_ASSIGNED_ID;
+    BasicID.ua_type = ODID_UA_TYPE_ROTORCRAFT;
+    odid_safe_copy_fill(BasicID.uas_id, "123456789012345678901", sizeof(BasicID.uas_id));
+    printf("basic_id\n-------\n");
+    odid_print_data_basic_id(&BasicID);
+    odid_encode_message_basic_id(&BasicID_enc, &BasicID);
 
     Location.Status = ODID_STATUS_AIRBORNE;
     Location.Direction = 215.7;
@@ -54,28 +54,28 @@ void test_InOut()
     Location.AltitudeGeo = 110;
     Location.HeightType = ODID_HEIGHT_REF_OVER_GROUND;
     Location.Height = 80;
-    Location.HorizAccuracy = createEnumHorizontalAccuracy(2.5f);
-    Location.VertAccuracy = createEnumVerticalAccuracy(0.5f);
-    Location.BaroAccuracy = createEnumVerticalAccuracy(1.5f);
-    Location.SpeedAccuracy = createEnumSpeedAccuracy(0.5f);
-    Location.TSAccuracy = createEnumTimestampAccuracy(0.2f);
+    Location.HorizAccuracy = odid_create_enum_horizontal_accuracy(2.5f);
+    Location.VertAccuracy = odid_create_enum_vertical_accuracy(0.5f);
+    Location.BaroAccuracy = odid_create_enum_vertical_accuracy(1.5f);
+    Location.SpeedAccuracy = odid_create_enum_speed_accuracy(0.5f);
+    Location.TSAccuracy = odid_create_enum_timestamp_accuracy(0.2f);
     Location.TimeStamp = 3600.52;
-    printf("\nLocation\n--------\n");
-    printLocation_data(&Location);
-    encodeLocationMessage(&Location_enc, &Location);
+    printf("\nlocation\n--------\n");
+    odid_print_data_location(&Location);
+    odid_encode_message_location(&Location_enc, &Location);
 
-    Auth.AuthType = ODID_AUTH_MPUID;
+    Auth.AuthType = ODID_AUTH_TYPE_MPUID;
     Auth.DataPage = 0;
-    safe_copyfill(Auth.AuthData, "1234567890123456789012", ODID_STR_SIZE);
-    printf("\nAuth\n--------------\n");
-    printAuth_data(&Auth);
-    encodeAuthMessage(&Auth_enc, &Auth);
+    odid_safe_copy_fill(Auth.AuthData, "1234567890123456789012", ODID_STR_SIZE);
+    printf("\nauth\n--------------\n");
+    odid_print_data_auth(&Auth);
+    odid_encode_message_auth(&Auth_enc, &Auth);
 
     SelfID.DescType = ODID_DESC_TYPE_TEXT;
-    safe_copyfill(SelfID.Desc,"DronesRUS: Real Estate",sizeof(SelfID.Desc));
-    printf("\nSelfID\n------\n");
-    printSelfID_data(&SelfID);
-    encodeSelfIDMessage(&SelfID_enc, &SelfID);
+    odid_safe_copy_fill(SelfID.Desc, "DronesRUS: Real Estate", sizeof(SelfID.Desc));
+    printf("\nself_id\n------\n");
+    odid_print_data_self_id(&SelfID);
+    odid_encode_message_self_id(&SelfID_enc, &SelfID);
 
     System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
     System_data.remotePilotLatitude = Location.Latitude + 0.00001;
@@ -84,47 +84,47 @@ void test_InOut()
     System_data.GroupRadius = 75;
     System_data.GroupCeiling = 176.9;
     System_data.GroupFloor = 41.7;
-    printf("\nSystem\n------\n");
-    printSystem_data(&System_data);
-    encodeSystemMessage(&System_enc, &System_data);
+    printf("\nsystem\n------\n");
+    odid_print_data_system(&System_data);
+    odid_encode_message_system(&System_enc, &System_data);
     printf("\n-------------------------------------Encoded Data-----------------------------------\n");
     printf("          0- 1- 2- 3- 4- 5- 6- 7- 8- 9- 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24\n");
-    printf("BasicID:  ");
-    printByteArray((uint8_t*) &BasicID_enc, ODID_MESSAGE_SIZE, 1);
+    printf("basic_id:  ");
+    odid_print_byte_array((uint8_t * ) & BasicID_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("Location: ");
-    printByteArray((uint8_t*) &Location_enc, ODID_MESSAGE_SIZE, 1);
+    printf("location: ");
+    odid_print_byte_array((uint8_t * ) & Location_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("Auth:     ");
-    printByteArray((uint8_t*) &Auth_enc, ODID_MESSAGE_SIZE, 1);
+    printf("auth:     ");
+    odid_print_byte_array((uint8_t * ) & Auth_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("SelfID:   ");
-    printByteArray((uint8_t*) &SelfID_enc, ODID_MESSAGE_SIZE, 1);
+    printf("self_id:   ");
+    odid_print_byte_array((uint8_t * ) & SelfID_enc, ODID_MESSAGE_SIZE, 1);
 
-    printf("System:   ");
-    printByteArray((uint8_t*) &System_enc, ODID_MESSAGE_SIZE, 1);
+    printf("system:   ");
+    odid_print_byte_array((uint8_t * ) & System_enc, ODID_MESSAGE_SIZE, 1);
 
     printf("\n-------------------------------------Decoded Data-----------------------------------\n");
     // Now for the reverse -- decode test
-    decodeBasicIDMessage(&BasicID_out, &BasicID_enc);
-    printf("BasicID\n-------\n");
-    printBasicID_data(&BasicID_out);
+    odid_decode_message_basic_id(&BasicID_out, &BasicID_enc);
+    printf("basic_id\n-------\n");
+    odid_print_data_basic_id(&BasicID_out);
 
-    decodeLocationMessage(&Location_out, &Location_enc);
-    printf("\nLocation\n--------\n");
-    printLocation_data(&Location_out);
+    odid_decode_message_location(&Location_out, &Location_enc);
+    printf("\nlocation\n--------\n");
+    odid_print_data_location(&Location_out);
 
-    decodeAuthMessage(&Auth_out, &Auth_enc);
-    printf("\nAuth\n-------\n");
-    printAuth_data(&Auth_out);
+    odid_decode_message_auth(&Auth_out, &Auth_enc);
+    printf("\nauth\n-------\n");
+    odid_print_data_auth(&Auth_out);
 
-    decodeSelfIDMessage(&SelfID_out, &SelfID_enc);
-    printf("\nSelfID\n------\n");
-    printSelfID_data(&SelfID_out);
+    odid_decode_message_self_id(&SelfID_out, &SelfID_enc);
+    printf("\nself_id\n------\n");
+    odid_print_data_self_id(&SelfID_out);
 
-    decodeSystemMessage(&System_out, &System_enc);
-    printf("\nSystem\n------\n");
-    printSystem_data(&System_out);
+    odid_decode_message_system(&System_out, &System_enc);
+    printf("\nsystem\n------\n");
+    odid_print_data_system(&System_out);
     printf("\n-------------------------------------------------------------------------------\n");
     printf("-------------------------------------  End  -----------------------------------\n");
     printf("-------------------------------------------------------------------------------\n\n");

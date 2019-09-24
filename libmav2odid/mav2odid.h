@@ -42,31 +42,31 @@ typedef struct {
     uint8_t droneidSchedule[DRONEID_SCHEDULER_SIZE];
     uint8_t scheduleIdx;
 
-    ODID_BasicID_data basicId;
-    ODID_BasicID_encoded basicIdEnc;
-    ODID_Location_data location;
-    ODID_Location_encoded locationEnc;
-    ODID_Auth_data authentication;
-    ODID_Auth_encoded authenticationEnc;
-    ODID_SelfID_data selfId;
-    ODID_SelfID_encoded selfIdEnc;
-    ODID_System_data system;
-    ODID_System_encoded systemEnc;
+    odid_data_basic_id_t basicId;
+    odid_encoded_basic_id_t basicIdEnc;
+    odid_data_location_t location;
+    odid_encoded_location_t locationEnc;
+    odid_data_auth_t authentication;
+    odid_encoded_auth_t authenticationEnc;
+    odid_data_self_id_t selfId;
+    odid_encoded_self_id_t selfIdEnc;
+    odid_data_system_t system;
+    odid_encoded_system_t systemEnc;
 } mav2odid_t;
 
 int m2o_init(mav2odid_t *m2o);
 int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data);
-ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data);
+odid_message_type_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data);
 
 void m2o_basicId2Mavlink(mavlink_open_drone_id_basic_id_t *mavBasicId,
-                         ODID_BasicID_data *basicId);
+                         odid_data_basic_id_t *basicId);
 void m2o_location2Mavlink(mavlink_open_drone_id_location_t *mavLocation,
-                          ODID_Location_data *location);
+                          odid_data_location_t *location);
 void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
-                                ODID_Auth_data *Auth);
+                                odid_data_auth_t *Auth);
 void m2o_selfId2Mavlink(mavlink_open_drone_id_selfid_t *mavSelfID,
-                        ODID_SelfID_data *selfID);
+                        odid_data_self_id_t *selfID);
 void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
-                        ODID_System_data *system);
+                        odid_data_system_t *system);
 
 #endif /* _MAV2ODID_H_ */
