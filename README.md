@@ -29,6 +29,8 @@ ODID_Location_data
 ODID_Auth_data
 ODID_SelfID_data
 ODID_System_data
+ODID_OperatorID_data
+ODID_MessagePack_data
 ```
 
 The SDK functions will encode to (or decode from) the following structures:
@@ -39,6 +41,8 @@ ODID_Location_encoded
 ODID_Auth_encoded
 ODID_SelfID_encoded
 ODID_System_encoded
+ODID_OperatorID_encoded
+ODID_MessagePack_encoded
 ```
 
 Once you have the encoded data, then you are ready to assemble and transmit over any of the acceptable broadcast methods in Open Drone ID.
@@ -51,12 +55,16 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
+int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData);
+int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_data *inData);
 
 int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
 int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
 int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
 int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
+int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded);
+int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
 ```
 
 Specific messages have been added to the Mavlink message set to accomodate data for Open Drone ID implementations:
