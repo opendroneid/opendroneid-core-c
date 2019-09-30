@@ -57,7 +57,7 @@ static void print_mavlink_selfID(mavlink_open_drone_id_selfid_t *self_id)
 
 static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
 {
-    printf("Location Source: %d\nLat/Lon: %d, %d degE7, Group Count, Radius: %d, %d, \n"\
+    printf("Location Source: %d\nLat/Lon: %d, %d degE7, Area Count, Radius: %d, %d, \n"\
            "Ceiling, Floor: %.2f, %.2f m\n",
            system->flags, system->remote_pilot_latitude,
            system->remote_pilot_longitude, system->group_count,
@@ -136,7 +136,7 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 
     printBasicID_data(&uas_data->BasicID);
 
-    // The received data is transferred into a Mavlink structure    
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_basic_id_t basic_id2 = { 0 };
     m2o_basicId2Mavlink(&basic_id2, &uas_data->BasicID);
     printf("\n");
@@ -179,8 +179,8 @@ static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         printf("ERROR: Open Drone ID message type was not Location\n");
 
     printLocation_data(&uas_data->Location);
-    
-    // The received data is transferred into a Mavlink structure    
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_location_t location2 = { 0 };
     m2o_location2Mavlink(&location2, &uas_data->Location);
     printf("\n");
@@ -208,11 +208,13 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     if (msgType != ODID_MESSAGETYPE_AUTH)
         printf("ERROR: Open Drone ID message type was not Authentication\n");
 
-    printAuth_data(&uas_data->Auth);
-    
-    // The received data is transferred into a Mavlink structure    
+    if (uas_data->AuthValid[0])
+        printAuth_data(&uas_data->Auth[0]);
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_authentication_t auth2 = { 0 };
-    m2o_authentication2Mavlink(&auth2, &uas_data->Auth);
+    if (uas_data->AuthValid[0])
+        m2o_authentication2Mavlink(&auth2, &uas_data->Auth[0]);
     printf("\n");
     print_mavlink_auth(&auth2);
 }
@@ -239,8 +241,8 @@ static void test_selfID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         printf("ERROR: Open Drone ID message type was not Self ID\n");
 
     printSelfID_data(&uas_data->SelfID);
-    
-    // The received data is transferred into a Mavlink structure    
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_selfid_t selfID2 = { 0 };
     m2o_selfId2Mavlink(&selfID2, &uas_data->SelfID);
     printf("\n");
@@ -274,8 +276,8 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         printf("ERROR: Open Drone ID message type was not System\n");
 
     printSystem_data(&uas_data->System);
-    
-    // The received data is transferred into a Mavlink structure    
+
+    // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_system_t system2 = { 0 };
     m2o_system2Mavlink(&system2, &uas_data->System);
     printf("\n");
@@ -287,7 +289,7 @@ void test_mav2odid()
     mav2odid_t m2o;
     if (m2o_init(&m2o))
         printf("ERROR: Initialising mav2odid data failed\n");
-    
+
     ODID_UAS_Data uas_data;
     memset(&uas_data, 0, sizeof(ODID_UAS_Data));
 

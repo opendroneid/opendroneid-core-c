@@ -22,12 +22,14 @@ ODID_Location_encoded location_enc;
 ODID_Auth_encoded auth_enc;
 ODID_SelfID_encoded selfID_enc;
 ODID_System_encoded system_enc;
+ODID_OperatorID_encoded operatorID_enc;
 
 ODID_BasicID_data basicID_data;
 ODID_Location_data location_data;
 ODID_Auth_data auth_data;
 ODID_SelfID_data selfID_data;
 ODID_System_data system_data;
+ODID_OperatorID_data operatorID_data;
 
 const int SIM_STEPS = 20;
 const float SIM_STEP_SIZE = 0.0001;
@@ -92,7 +94,8 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
             basicID_data.UAType = ODID_UATYPE_ROTORCRAFT;
             // 4 chr mfg code, 1chr Len, 15chr serial
-            safe_copyfill(basicID_data.UASID, "INTCE123456789012345", sizeof(basicID_data.UASID));
+            char id[] = "INTCE123456789012345";
+            strncpy(basicID_data.UASID, id, sizeof(id));
 
             encodeBasicIDMessage(&basicID_enc, &basicID_data);
             memcpy(message, &basicID_enc, ODID_MESSAGE_SIZE);
@@ -122,9 +125,13 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 2:
-            auth_data.AuthType = ODID_AUTH_MPUID;
+            auth_data.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
             auth_data.DataPage = 0;
-            safe_copyfill(auth_data.AuthData, "030a0cd033a3",sizeof(auth_data.AuthData));
+            auth_data.PageCount = 1;
+            auth_data.Length = 12;
+            auth_data.Timestamp = 23000000;
+            char data[] = "030a0cd033a3";
+            strncpy(auth_data.AuthData, data, sizeof(data));
 
             encodeAuthMessage(&auth_enc, &auth_data);
             memcpy(message, &auth_enc, ODID_MESSAGE_SIZE);
@@ -132,21 +139,30 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 
         case 3:
             selfID_data.DescType = ODID_DESC_TYPE_TEXT;
-            safe_copyfill(selfID_data.Desc, "Real Estate Photos", sizeof(selfID_data.Desc));
+            char description[] = "Real Estate Photos";
+            strncpy(selfID_data.Desc, description, sizeof(description));
             encodeSelfIDMessage(&selfID_enc, &selfID_data);
             memcpy(message, &selfID_enc, ODID_MESSAGE_SIZE);
             break;
 
         case 4:
             system_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
-            system_data.remotePilotLatitude = simGndLat;
-            system_data.remotePilotLongitude = simGndLon;
-            system_data.GroupCount = 35;
-            system_data.GroupRadius = 75;
-            system_data.GroupCeiling = 176.9;
-            system_data.GroupFloor = 41.7;
+            system_data.OperatorLatitude = simGndLat;
+            system_data.OperatorLongitude = simGndLon;
+            system_data.AreaCount = 35;
+            system_data.AreaRadius = 75;
+            system_data.AreaCeiling = 176.9;
+            system_data.AreaFloor = 41.7;
             encodeSystemMessage(&system_enc, &system_data);
             memcpy(message, &system_enc, ODID_MESSAGE_SIZE);
+            break;
+
+        case 5:
+            operatorID_data.OperatorIdType = ODID_OPERATOR_ID;
+            char operatorId[] = "98765432100123456789";
+            strncpy(operatorID_data.OperatorId, operatorId, sizeof(operatorId));
+            encodeOperatorIDMessage(&operatorID_enc, &operatorID_data);
+            memcpy(message, &operatorID_enc, ODID_MESSAGE_SIZE);
             break;
     }
 }
@@ -157,7 +173,7 @@ void test_sim()
     int x;
     while (1)
     {
-        for (x=0; x<=4; x++) {
+        for (x = 0; x <= 5; x++) {
             memset(testBytes,0,ODID_MESSAGE_SIZE);
             ODID_getSimData(testBytes,x);
             printByteArray(testBytes,ODID_MESSAGE_SIZE,1);

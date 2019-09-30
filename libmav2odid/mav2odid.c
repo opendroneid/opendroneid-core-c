@@ -166,12 +166,12 @@ static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_selfid_t *selfId)
 static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *system)
 {
     m2o->system.LocationSource = (ODID_location_source_t) system->flags;
-    m2o->system.remotePilotLatitude = (float) system->remote_pilot_latitude / 1E7;
-    m2o->system.remotePilotLongitude = (float) system->remote_pilot_longitude / 1E7;
-    m2o->system.GroupCount = system->group_count;
-    m2o->system.GroupRadius = system->group_radius;
-    m2o->system.GroupCeiling = system->group_ceiling;
-    m2o->system.GroupFloor = system->group_floor;
+    m2o->system.OperatorLatitude = (float) system->remote_pilot_latitude / 1E7;
+    m2o->system.OperatorLongitude = (float) system->remote_pilot_longitude / 1E7;
+    m2o->system.AreaCount = system->group_count;
+    m2o->system.AreaRadius = system->group_radius;
+    m2o->system.AreaCeiling = system->group_ceiling;
+    m2o->system.AreaFloor = system->group_floor;
 
     return encodeSystemMessage(&m2o->systemEnc, &m2o->system);
 }
@@ -309,11 +309,10 @@ void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
                         ODID_System_data *system)
 {
     mavSystem->flags = (MAV_ODID_LOCATION_SRC) system->LocationSource;
-    mavSystem->remote_pilot_latitude = (int32_t) (system->remotePilotLatitude * 1E7);
-    mavSystem->remote_pilot_longitude = (int32_t) (system->remotePilotLongitude * 1E7);
-    mavSystem->group_count = system->GroupCount;
-    mavSystem->group_radius = system->GroupRadius;
-    mavSystem->group_ceiling = system->GroupCeiling;
-    mavSystem->group_floor = system->GroupFloor;
+    mavSystem->remote_pilot_latitude = (int32_t) (system->OperatorLatitude * 1E7);
+    mavSystem->remote_pilot_longitude = (int32_t) (system->OperatorLongitude * 1E7);
+    mavSystem->group_count = system->AreaCount;
+    mavSystem->group_radius = system->AreaRadius;
+    mavSystem->group_ceiling = system->AreaCeiling;
+    mavSystem->group_floor = system->AreaFloor;
 }
-
