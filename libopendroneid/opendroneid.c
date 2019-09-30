@@ -710,23 +710,23 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
 
     switch (decodeMessageType(msgData[0]))
     {
-    case ODID_MESSAGETYPE_BASIC_ID:;
+    case ODID_MESSAGETYPE_BASIC_ID: {
         ODID_BasicID_encoded *basicId = (ODID_BasicID_encoded *) msgData;
         if (decodeBasicIDMessage(&uasData->BasicID, basicId) == ODID_SUCCESS) {
             uasData->BasicIDValid = 1;
             return ODID_MESSAGETYPE_BASIC_ID;
         }
         break;
-
-    case ODID_MESSAGETYPE_LOCATION:;
+    }
+    case ODID_MESSAGETYPE_LOCATION: {
         ODID_Location_encoded *location = (ODID_Location_encoded *) msgData;
         if (decodeLocationMessage(&uasData->Location, location) == ODID_SUCCESS) {
             uasData->LocationValid = 1;
             return ODID_MESSAGETYPE_LOCATION;
         }
         break;
-
-    case ODID_MESSAGETYPE_AUTH:;
+    }
+    case ODID_MESSAGETYPE_AUTH: {
         ODID_Auth_encoded *inEncoded = (ODID_Auth_encoded *) msgData;
         int pageNum;
         if (getAuthPageNum(inEncoded, &pageNum) == ODID_SUCCESS) {
@@ -737,37 +737,37 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
             }
         }
         break;
-
-    case ODID_MESSAGETYPE_SELF_ID:;
+    }
+    case ODID_MESSAGETYPE_SELF_ID: {
         ODID_SelfID_encoded *selfId = (ODID_SelfID_encoded *) msgData;
         if (decodeSelfIDMessage(&uasData->SelfID, selfId) == ODID_SUCCESS) {
             uasData->SelfIDValid = 1;
             return ODID_MESSAGETYPE_SELF_ID;
         }
         break;
-
-    case ODID_MESSAGETYPE_SYSTEM:;
+    }
+    case ODID_MESSAGETYPE_SYSTEM: {
         ODID_System_encoded *system = (ODID_System_encoded *) msgData;
         if (decodeSystemMessage(&uasData->System, system) == ODID_SUCCESS) {
             uasData->SystemValid = 1;
             return ODID_MESSAGETYPE_SYSTEM;
         }
         break;
-
-    case ODID_MESSAGETYPE_OPERATOR_ID:;
+    }
+    case ODID_MESSAGETYPE_OPERATOR_ID: {
         ODID_OperatorID_encoded *operatorId = (ODID_OperatorID_encoded *) msgData;
         if (decodeOperatorIDMessage(&uasData->OperatorID, operatorId) == ODID_SUCCESS) {
             uasData->OperatorIDValid = 1;
             return ODID_MESSAGETYPE_OPERATOR_ID;
         }
         break;
-
-    case ODID_MESSAGETYPE_PACKED:;
+    }
+    case ODID_MESSAGETYPE_PACKED: {
         ODID_MessagePack_encoded *pack = (ODID_MessagePack_encoded *) msgData;
         if (decodeMessagePack(uasData, pack) == ODID_SUCCESS)
             return ODID_MESSAGETYPE_PACKED;
         break;
-
+    }
     default:
         break;
     }
