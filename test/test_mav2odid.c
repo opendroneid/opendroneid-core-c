@@ -46,9 +46,17 @@ static void print_mavlink_location(mavlink_open_drone_id_location_t *location)
 
 static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
 {
-    printf("Data page: %d, auth type: %d, data: ",
+    printf("Data page: %d, auth type: %d, ",
            auth->data_page, auth->authentication_type);
-    for (int i = 0; i < MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN; i++)
+    int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
+    if (auth->data_page == 0)
+    {
+        size -= ODID_AUTH_PAGE_0_DATA_SIZE;
+        printf("page_count: %d, length: %d, timestamp: %d, ",
+               auth->page_count, auth->length, auth->timestamp);
+    }
+    printf("\n");
+    for (int i = 0; i < size; i++)
         printf("0x%02X ", auth->authentication_data[i]);
     printf("\n");
 }
@@ -211,7 +219,10 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     mavlink_open_drone_id_authentication_t auth = {
         .data_page = 0,
         .authentication_type = MAV_ODID_AUTH_TYPE_UAS_ID_SIGNATURE,
-        .authentication_data = "987654321" };
+        .authentication_data = "98765432101234567",
+        .page_count = 0,
+        .length = 17,
+        .timestamp = 23000000 };
     printf("\n\n---------------------Authentication---------------------\n\n");
     print_mavlink_auth(&auth);
 
