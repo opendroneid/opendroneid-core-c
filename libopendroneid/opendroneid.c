@@ -1131,10 +1131,13 @@ void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced)
 */
 void printBasicID_data(ODID_BasicID_data *BasicID)
 {
+    // Ensure the ID is null-terminated
+    char buf[ODID_ID_SIZE + 1] = { 0 };
+    memcpy(buf, BasicID->UASID, ODID_ID_SIZE);
+
     const char ODID_BasicID_data_format[] =
         "UAType: %d\nIDType: %d\nUASID: %s\n";
-    printf(ODID_BasicID_data_format, BasicID->IDType, BasicID->UAType,
-        BasicID->UASID);
+    printf(ODID_BasicID_data_format, BasicID->IDType, BasicID->UAType, buf);
 }
 
 /**
@@ -1170,16 +1173,20 @@ void printAuth_data(ODID_Auth_data *Auth)
 {
     if (Auth->DataPage == 0) {
         const char ODID_Auth_data_format[] =
-            "AuthType: %d\nDataPage: %d\nPageCount: %d\nLenght: %d\nTimestamp:"\
-            " %d\nAuthData: %s\n";
+            "AuthType: %d\nDataPage: %d\nPageCount: %d\nLength: %d\nTimestamp:"\
+            " %d\nAuthData: ";
         printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
-            Auth->PageCount, Auth->Length, Auth->Timestamp, Auth->AuthData);
+            Auth->PageCount, Auth->Length, Auth->Timestamp);
+        for (int i = 0; i < ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE; i++)
+            printf("0x%02X ", Auth->AuthData[i]);
     } else {
         const char ODID_Auth_data_format[] =
-            "AuthType: %d\nDataPage: %d\nAuthData: %s\n";
-        printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
-            Auth->AuthData);
+            "AuthType: %d\nDataPage: %d\nAuthData: ";
+        printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage);
+        for (int i = 0; i < ODID_STR_SIZE; i++)
+            printf("0x%02X ", Auth->AuthData[i]);
     }
+    printf("\n");
 }
 
 /**
@@ -1189,8 +1196,12 @@ void printAuth_data(ODID_Auth_data *Auth)
 */
 void printSelfID_data(ODID_SelfID_data *SelfID)
 {
+    // Ensure the description is null-terminated
+    char buf[ODID_STR_SIZE + 1] = { 0 };
+    memcpy(buf, SelfID->Desc, ODID_STR_SIZE);
+
     const char ODID_SelfID_data_format[] = "DescType: %d\nDesc: %s\n";
-    printf(ODID_SelfID_data_format, SelfID->DescType, SelfID->Desc);
+    printf(ODID_SelfID_data_format, SelfID->DescType, buf);
 }
 
 /**
@@ -1215,8 +1226,13 @@ void printSystem_data(ODID_System_data *System_data)
 */
 void printOperatorID_data(ODID_OperatorID_data *operatorID)
 {
-    const char ODID_OperatorID_data_format[] = "OperatorIdType: %d\nOperatorId: %s\n";
-    printf(ODID_OperatorID_data_format, operatorID->OperatorIdType, operatorID->OperatorId);
+    // Ensure the ID is null-terminated
+    char buf[ODID_ID_SIZE + 1] = { 0 };
+    memcpy(buf, operatorID->OperatorId, ODID_ID_SIZE);
+
+    const char ODID_OperatorID_data_format[] =
+        "OperatorIdType: %d\nOperatorId: %s\n";
+    printf(ODID_OperatorID_data_format, operatorID->OperatorIdType, buf);
 }
 
 #endif // ODID_DISABLE_PRINTF

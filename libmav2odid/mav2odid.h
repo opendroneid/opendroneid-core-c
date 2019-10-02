@@ -36,7 +36,7 @@ mavlink_status_t m_mavlink_status[MAVLINK_COMM_NUM_BUFFERS];
 
 #include <common/mavlink.h>
 
-#define DRONEID_SCHEDULER_SIZE 8
+#define DRONEID_SCHEDULER_SIZE 10
 
 typedef struct {
     uint8_t droneidSchedule[DRONEID_SCHEDULER_SIZE];
@@ -52,6 +52,8 @@ typedef struct {
     ODID_SelfID_encoded selfIdEnc;
     ODID_System_data system;
     ODID_System_encoded systemEnc;
+    ODID_OperatorID_data operatorId;
+    ODID_OperatorID_encoded operatorIdEnc;
 } mav2odid_t;
 
 int m2o_init(mav2odid_t *m2o);
@@ -68,5 +70,7 @@ void m2o_selfId2Mavlink(mavlink_open_drone_id_self_id_t *mavSelfID,
                         ODID_SelfID_data *selfID);
 void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
                         ODID_System_data *system);
+void m2o_operatorId2Mavlink(mavlink_open_drone_id_operator_id_t *mavOperatorID,
+                            ODID_OperatorID_data *operatorID);
 
 #endif /* _MAV2ODID_H_ */

@@ -21,8 +21,12 @@ soren.friis@intel.com
 
 static void print_mavlink_basicID(mavlink_open_drone_id_basic_id_t *basic_id)
 {
+    // Ensure the ID is null-terminated
+    char buf[MAVLINK_MSG_OPEN_DRONE_ID_BASIC_ID_FIELD_UAS_ID_LEN + 1] = { 0 };
+    memcpy(buf, basic_id->uas_id, MAVLINK_MSG_OPEN_DRONE_ID_BASIC_ID_FIELD_UAS_ID_LEN);
+
     printf("ID type: %d, UA type: %d, UAS ID: %s\n",
-           basic_id->id_type, basic_id->ua_type, basic_id->uas_id);
+           basic_id->id_type, basic_id->ua_type, buf);
 }
 
 static void print_mavlink_location(mavlink_open_drone_id_location_t *location)
@@ -51,8 +55,12 @@ static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
 
 static void print_mavlink_selfID(mavlink_open_drone_id_self_id_t *self_id)
 {
+    // Ensure the description is null-terminated
+    char buf[MAVLINK_MSG_OPEN_DRONE_ID_SELF_ID_FIELD_DESCRIPTION_LEN + 1] = { 0 };
+    memcpy(buf, self_id->description, MAVLINK_MSG_OPEN_DRONE_ID_SELF_ID_FIELD_DESCRIPTION_LEN);
+
     printf("Type: %d, description: %s\n",
-           self_id->description_type, self_id->description);
+           self_id->description_type, buf);
 }
 
 static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
@@ -62,6 +70,16 @@ static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
            system->flags, system->operator_latitude,
            system->operator_longitude, system->area_count,
            system->area_radius, system->area_ceiling, system->area_floor);
+}
+
+static void print_mavlink_operatorID(mavlink_open_drone_id_operator_id_t *operator_id)
+{
+    // Ensure the ID is null-terminated
+    char buf[MAVLINK_MSG_OPEN_DRONE_ID_OPERATOR_ID_FIELD_OPERATOR_ID_LEN + 1] = { 0 };
+    memcpy(buf, operator_id->operator_id, MAVLINK_MSG_OPEN_DRONE_ID_OPERATOR_ID_FIELD_OPERATOR_ID_LEN);
+
+    printf("Type: %d, operator ID: %s\n",
+           operator_id->operator_id_type, buf);
 }
 
 /**
@@ -118,7 +136,7 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     mavlink_open_drone_id_basic_id_t basic_id = {
         .ua_type = MAV_ODID_UA_TYPE_ROTORCRAFT,
         .id_type = MAV_ODID_ID_TYPE_SERIAL_NUMBER,
-        .uas_id = "987654321ABCDEFGHJK" };
+        .uas_id = "9876543210ABCDEFGHJK" };
 
     printf("\n--------------------------Basic ID------------------------\n\n");
     print_mavlink_basicID(&basic_id);
@@ -284,6 +302,36 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     print_mavlink_system(&system2);
 }
 
+static void test_operatorID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+{
+    mavlink_message_t msg = { 0 };
+    mavlink_open_drone_id_operator_id_t operatorID = {
+        .operator_id_type = MAV_ODID_OPERATOR_ID_TYPE_CAA,
+        .operator_id = "ABCDEFGHJK0123456789" };
+
+    printf("\n\n----------------------Operator ID-----------------------\n\n");
+    print_mavlink_operatorID(&operatorID);
+
+    mavlink_msg_open_drone_id_operator_id_encode(MAVLINK_SYSTEM_ID,
+                                                 MAVLINK_COMPONENT_ID,
+                                                 &msg, &operatorID);
+
+    ODID_messagetype_t msgType;
+    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->operatorIdEnc,
+                     uas_data, &msgType);
+
+    if (msgType != ODID_MESSAGETYPE_OPERATOR_ID)
+        printf("ERROR: Open Drone ID message type was not Operator ID\n");
+
+    printOperatorID_data(&uas_data->OperatorID);
+
+    // The received data is transferred into a Mavlink structure
+    mavlink_open_drone_id_operator_id_t operatorID2 = { 0 };
+    m2o_operatorId2Mavlink(&operatorID2, &uas_data->OperatorID);
+    printf("\n");
+    print_mavlink_operatorID(&operatorID2);
+}
+
 void test_mav2odid()
 {
     mav2odid_t m2o;
@@ -298,6 +346,7 @@ void test_mav2odid()
     test_authentication(&m2o, &uas_data);
     test_selfID(&m2o, &uas_data);
     test_system(&m2o, &uas_data);
+    test_operatorID(&m2o, &uas_data);
 
     printf("\n-------------------------------------------------------------------------------\n");
     printf("-------------------------------------  End  -----------------------------------\n");

@@ -19,9 +19,9 @@ soren.friis@intel.com
 * Every second message is a Location message, since it is declared dynamic
 * in the specification and thus must be broadcast more often than the rest.
 *
-* If one or more of the optional message types (Authentication, SelfID, System)
-* are not used in a particular implementation, they should be excluded from
-* the schedule list.
+* If one or more of the optional message types (Authentication, SelfID, System,
+* OperatorID) are not used in a particular implementation, they should be
+* excluded from the schedule list.
 *
 * @param m2o    Instance structure containing working buffers/structures
 * @return       Success or fail
@@ -38,6 +38,7 @@ int m2o_init(mav2odid_t *m2o)
     m2o->droneidSchedule[2] = ODID_MESSAGETYPE_AUTH;
     m2o->droneidSchedule[4] = ODID_MESSAGETYPE_SELF_ID;
     m2o->droneidSchedule[6] = ODID_MESSAGETYPE_SYSTEM;
+    m2o->droneidSchedule[8] = ODID_MESSAGETYPE_OPERATOR_ID;
 
     if (encodeBasicIDMessage(&m2o->basicIdEnc, &m2o->basicId))
         return ODID_FAIL;
@@ -49,6 +50,8 @@ int m2o_init(mav2odid_t *m2o)
         return ODID_FAIL;
     if (encodeSystemMessage(&m2o->systemEnc, &m2o->system))
         return ODID_FAIL;
+    if (encodeOperatorIDMessage(&m2o->operatorIdEnc, &m2o->operatorId))
+        return ODID_FAIL;
     return ODID_SUCCESS;
 }
 
@@ -57,7 +60,7 @@ int m2o_init(mav2odid_t *m2o)
 * in droneidSchedule.
 *
 * It is expected that this function is called with an interval faster than
-* (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) = 3 / 8 = 375 ms
+* (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) = 3 / 10 = 333 ms
 * in order to comply with the timing restraints in the specification.
 *
 * This function will copy the relevant DroneID data to the provided data buffer.
@@ -88,6 +91,9 @@ int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data)
         break;
     case ODID_MESSAGETYPE_SYSTEM:
         memcpy(data, &m2o->systemEnc, sizeof(ODID_System_encoded));
+        break;
+    case ODID_MESSAGETYPE_OPERATOR_ID:
+        memcpy(data, &m2o->operatorIdEnc, sizeof(ODID_OperatorID_encoded));
         break;
     default:
         return ODID_FAIL;
@@ -177,6 +183,18 @@ static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *system)
 }
 
 /**
+* Convert operator ID Mavlink message to encoded Open Drone ID structure
+*/
+static int m2o_operatorId(mav2odid_t *m2o, mavlink_open_drone_id_operator_id_t *operatorId)
+{
+    m2o->operatorId.OperatorIdType = (ODID_operatorIdType_t) operatorId->operator_id_type;
+    for (int i = 0; i < MAVLINK_MSG_OPEN_DRONE_ID_OPERATOR_ID_FIELD_OPERATOR_ID_LEN; i++)
+        m2o->operatorId.OperatorId[i] = operatorId->operator_id[i];
+
+    return encodeOperatorIDMessage(&m2o->operatorIdEnc, &m2o->operatorId);
+}
+
+/**
 * Parse incoming data for detecting Mavlink messages
 *
 * This function must be called for each byte of data received.
@@ -201,6 +219,7 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
     mavlink_open_drone_id_authentication_t authentication;
     mavlink_open_drone_id_self_id_t selfId;
     mavlink_open_drone_id_system_t system;
+    mavlink_open_drone_id_operator_id_t operatorId;
 
     if (mavlink_parse_char(MAVLINK_COMM_0, data, &message, &status))
     {
@@ -234,6 +253,12 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
             mavlink_msg_open_drone_id_system_decode(&message, &system);
             if (m2o_system(m2o, &system) == ODID_SUCCESS)
                 return ODID_MESSAGETYPE_SYSTEM;
+            break;
+
+        case MAVLINK_MSG_ID_OPEN_DRONE_ID_OPERATOR_ID:
+            mavlink_msg_open_drone_id_operator_id_decode(&message, &operatorId);
+            if (m2o_operatorId(m2o, &operatorId) == ODID_SUCCESS)
+                return ODID_MESSAGETYPE_OPERATOR_ID;
             break;
 
         default:
@@ -315,4 +340,15 @@ void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
     mavSystem->area_radius = system->AreaRadius;
     mavSystem->area_ceiling = system->AreaCeiling;
     mavSystem->area_floor = system->AreaFloor;
+}
+
+/**
+* Convert non-encoded Open Drone ID operator ID structure to Mavlink message
+*/
+void m2o_operatorId2Mavlink(mavlink_open_drone_id_operator_id_t *mavOperatorID,
+                            ODID_OperatorID_data *operatorID)
+{
+    mavOperatorID->operator_id_type = (MAV_ODID_OPERATOR_ID_TYPE) operatorID->OperatorIdType;
+    for (int i = 0; i < ODID_ID_SIZE; i++)
+        mavOperatorID->operator_id[i] = operatorID->OperatorId[i];
 }
