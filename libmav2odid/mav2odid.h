@@ -64,7 +64,7 @@ void m2o_location2Mavlink(mavlink_open_drone_id_location_t *mavLocation,
                           ODID_Location_data *location);
 void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
                                 ODID_Auth_data *Auth);
-void m2o_selfId2Mavlink(mavlink_open_drone_id_selfid_t *mavSelfID,
+void m2o_selfId2Mavlink(mavlink_open_drone_id_self_id_t *mavSelfID,
                         ODID_SelfID_data *selfID);
 void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
                         ODID_System_data *system);

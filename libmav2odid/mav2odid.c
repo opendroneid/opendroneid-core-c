@@ -151,10 +151,10 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
 /**
 * Convert self ID Mavlink message to encoded Open Drone ID structure
 */
-static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_selfid_t *selfId)
+static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *selfId)
 {
     m2o->selfId.DescType = (ODID_desctype_t) selfId->description_type;
-    for (int i = 0; i < MAVLINK_MSG_OPEN_DRONE_ID_SELFID_FIELD_DESCRIPTION_LEN; i++)
+    for (int i = 0; i < MAVLINK_MSG_OPEN_DRONE_ID_SELF_ID_FIELD_DESCRIPTION_LEN; i++)
         m2o->selfId.Desc[i] = selfId->description[i];
 
     return encodeSelfIDMessage(&m2o->selfIdEnc, &m2o->selfId);
@@ -166,12 +166,12 @@ static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_selfid_t *selfId)
 static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *system)
 {
     m2o->system.LocationSource = (ODID_location_source_t) system->flags;
-    m2o->system.OperatorLatitude = (float) system->remote_pilot_latitude / 1E7;
-    m2o->system.OperatorLongitude = (float) system->remote_pilot_longitude / 1E7;
-    m2o->system.AreaCount = system->group_count;
-    m2o->system.AreaRadius = system->group_radius;
-    m2o->system.AreaCeiling = system->group_ceiling;
-    m2o->system.AreaFloor = system->group_floor;
+    m2o->system.OperatorLatitude = (float) system->operator_latitude / 1E7;
+    m2o->system.OperatorLongitude = (float) system->operator_longitude / 1E7;
+    m2o->system.AreaCount = system->area_count;
+    m2o->system.AreaRadius = system->area_radius;
+    m2o->system.AreaCeiling = system->area_ceiling;
+    m2o->system.AreaFloor = system->area_floor;
 
     return encodeSystemMessage(&m2o->systemEnc, &m2o->system);
 }
@@ -199,7 +199,7 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
     mavlink_open_drone_id_basic_id_t basicId;
     mavlink_open_drone_id_location_t location;
     mavlink_open_drone_id_authentication_t authentication;
-    mavlink_open_drone_id_selfid_t selfId;
+    mavlink_open_drone_id_self_id_t selfId;
     mavlink_open_drone_id_system_t system;
 
     if (mavlink_parse_char(MAVLINK_COMM_0, data, &message, &status))
@@ -224,8 +224,8 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
                 return ODID_MESSAGETYPE_AUTH;
             break;
 
-        case MAVLINK_MSG_ID_OPEN_DRONE_ID_SELFID:
-            mavlink_msg_open_drone_id_selfid_decode(&message, &selfId);
+        case MAVLINK_MSG_ID_OPEN_DRONE_ID_SELF_ID:
+            mavlink_msg_open_drone_id_self_id_decode(&message, &selfId);
             if (m2o_selfId(m2o, &selfId) == ODID_SUCCESS)
                 return ODID_MESSAGETYPE_SELF_ID;
             break;
@@ -249,8 +249,8 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
 void m2o_basicId2Mavlink(mavlink_open_drone_id_basic_id_t *mavBasicId,
                          ODID_BasicID_data *basicId)
 {
-    mavBasicId->id_type = (MAV_ODID_IDTYPE) basicId->IDType;
-    mavBasicId->ua_type = (MAV_ODID_UATYPE) basicId->UAType;
+    mavBasicId->id_type = (MAV_ODID_ID_TYPE) basicId->IDType;
+    mavBasicId->ua_type = (MAV_ODID_UA_TYPE) basicId->UAType;
     for (int i = 0; i < ODID_ID_SIZE; i++)
         mavBasicId->uas_id[i] = basicId->UASID[i];
 }
@@ -285,7 +285,7 @@ void m2o_location2Mavlink(mavlink_open_drone_id_location_t *mavLocation,
 void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
                                 ODID_Auth_data *Auth)
 {
-    mavAuth->authentication_type = (MAV_ODID_AUTH) Auth->AuthType;
+    mavAuth->authentication_type = (MAV_ODID_AUTH_TYPE) Auth->AuthType;
     mavAuth->data_page = Auth->DataPage;
     for (int i = 0; i < ODID_STR_SIZE; i++)
         mavAuth->authentication_data[i] = Auth->AuthData[i];
@@ -294,7 +294,7 @@ void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
 /**
 * Convert non-encoded Open Drone ID self ID structure to Mavlink message
 */
-void m2o_selfId2Mavlink(mavlink_open_drone_id_selfid_t *mavSelfID,
+void m2o_selfId2Mavlink(mavlink_open_drone_id_self_id_t *mavSelfID,
                         ODID_SelfID_data *selfID)
 {
     mavSelfID->description_type = (MAV_ODID_DESC_TYPE) selfID->DescType;
@@ -309,10 +309,10 @@ void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
                         ODID_System_data *system)
 {
     mavSystem->flags = (MAV_ODID_LOCATION_SRC) system->LocationSource;
-    mavSystem->remote_pilot_latitude = (int32_t) (system->OperatorLatitude * 1E7);
-    mavSystem->remote_pilot_longitude = (int32_t) (system->OperatorLongitude * 1E7);
-    mavSystem->group_count = system->AreaCount;
-    mavSystem->group_radius = system->AreaRadius;
-    mavSystem->group_ceiling = system->AreaCeiling;
-    mavSystem->group_floor = system->AreaFloor;
+    mavSystem->operator_latitude = (int32_t) (system->OperatorLatitude * 1E7);
+    mavSystem->operator_longitude = (int32_t) (system->OperatorLongitude * 1E7);
+    mavSystem->area_count = system->AreaCount;
+    mavSystem->area_radius = system->AreaRadius;
+    mavSystem->area_ceiling = system->AreaCeiling;
+    mavSystem->area_floor = system->AreaFloor;
 }
