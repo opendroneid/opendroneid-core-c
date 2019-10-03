@@ -50,12 +50,12 @@ void odid_initLocationData(ODID_Location_data *data)
     if (!data)
         return;
     memset(data, 0, sizeof(ODID_Location_data));
-    data->Direction = 361;
-    data->SpeedHorizontal = 255;
-    data->SpeedVertical = 63;
-    data->AltitudeBaro = -1000;
-    data->AltitudeGeo = -1000;
-    data->Height = -1000;
+    data->Direction = INV_DIR;
+    data->SpeedHorizontal = INV_SPEED_H;
+    data->SpeedVertical = INV_SPEED_V;
+    data->AltitudeBaro = INV_ALT;
+    data->AltitudeGeo = INV_ALT;
+    data->Height = INV_ALT;
 }
 
 /**
@@ -94,8 +94,8 @@ void odid_initSystemData(ODID_System_data *data)
         return;
     memset(data, 0, sizeof(ODID_System_data));
     data->AreaCount = 1;
-    data->AreaCeiling = -1000;
-    data->AreaFloor = -1000;
+    data->AreaCeiling = MIN_ALT;
+    data->AreaFloor = MIN_ALT;
 }
 
 /**
@@ -138,12 +138,6 @@ void odid_initMessagePackData(ODID_MessagePack_data *data)
 */
 static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
 {
-    if (Direction < 0)
-        Direction = 0;
-
-    if (Direction > 361)
-        Direction = 361;
-
     unsigned int direction_int = (unsigned int) roundf(Direction);
     if (direction_int < 180) {
         *EWDirection = 0;
@@ -168,12 +162,6 @@ static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
 */
 static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
 {
-    if (Speed_data < 0)
-        Speed_data = 0;
-
-    if (Speed_data > 255)
-        Speed_data = 255;
-
     if (Speed_data <= UINT8_MAX * SPEED_DIV[0]) {
         *mult = 0;
         return (uint8_t) (Speed_data / SPEED_DIV[0]);
@@ -192,12 +180,6 @@ static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
 */
 static int8_t encodeSpeedVertical(float SpeedVertical_data)
 {
-    if (SpeedVertical_data < -63)
-        SpeedVertical_data = -63;
-
-    if (SpeedVertical_data > 63)
-        SpeedVertical_data = 63;
-
     int encValue = (int) (SpeedVertical_data / VSPEED_DIV);
     return (int8_t) intRangeMax(encValue, INT8_MIN, INT8_MAX);
 }
@@ -227,12 +209,6 @@ static int32_t encodeLatLon(double LatLon_data)
 */
 static int16_t encodeAltitude(float Alt_data)
 {
-    if (Alt_data < -1000)
-        Alt_data = -1000;
-
-    if (Alt_data > 31767.5)
-        Alt_data = 31767.5;
-
     return (uint16_t) intRangeMax( (int) ((Alt_data + ALT_ADDER) / ALT_DIV), 0, UINT16_MAX);
 }
 
@@ -298,11 +274,36 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
     uint8_t bitflag;
     if (!outEncoded || !inData ||
         !intInRange(inData->Status, 0, 15) ||
+        !intInRange(inData->HeightType, 0, 1) ||
         !intInRange(inData->HorizAccuracy, 0, 15) ||
         !intInRange(inData->VertAccuracy, 0, 15) ||
         !intInRange(inData->BaroAccuracy, 0, 15) ||
         !intInRange(inData->SpeedAccuracy, 0, 15) ||
         !intInRange(inData->TSAccuracy, 0, 15))
+        return ODID_FAIL;
+
+    if (inData->Direction < MIN_DIR || inData->Direction > INV_DIR ||
+        (inData->Direction > MAX_DIR && inData->Direction < INV_DIR))
+        return ODID_FAIL;
+
+    if (inData->SpeedHorizontal < MIN_SPEED_H || inData->SpeedHorizontal > INV_SPEED_H ||
+        (inData->SpeedHorizontal > MAX_SPEED_H && inData->SpeedHorizontal < INV_SPEED_H))
+        return ODID_FAIL;
+
+    if (inData->SpeedVertical < MIN_SPEED_V || inData->SpeedVertical > INV_SPEED_V ||
+        (inData->SpeedVertical > MAX_SPEED_V && inData->SpeedVertical < INV_SPEED_V))
+        return ODID_FAIL;
+
+    if (inData->Latitude < MIN_LATLON || inData->Latitude > MAX_LATLON ||
+        inData->Longitude < MIN_LATLON || inData->Longitude > MAX_LATLON)
+        return ODID_FAIL;
+
+    if (inData->AltitudeBaro < MIN_ALT || inData->AltitudeBaro > MAX_ALT ||
+        inData->AltitudeGeo < MIN_ALT || inData->AltitudeGeo > MAX_ALT ||
+        inData->Height < MIN_ALT || inData->Height > MAX_ALT)
+        return ODID_FAIL;
+
+    if (inData->TimeStamp < 0 || inData->TimeStamp > MAX_TIMESTAMP)
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
@@ -343,11 +344,20 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
     if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15))
         return ODID_FAIL;
 
+    if (inData->DataPage >= ODID_AUTH_MAX_PAGES)
+        return ODID_FAIL;
+
     outEncoded->page_0.MessageType = ODID_MESSAGETYPE_AUTH;
     outEncoded->page_0.ProtoVersion = ODID_PROTOCOL_VERSION;
     outEncoded->page_0.AuthType = inData->AuthType;
     outEncoded->page_0.DataPage = inData->DataPage;
     if (inData->DataPage == 0) {
+        if (inData->PageCount > ODID_AUTH_MAX_PAGES)
+            return ODID_FAIL;
+
+        if (inData->Length > MAX_AUTH_LENGTH)
+            return ODID_FAIL;
+
         outEncoded->page_0.PageCount = inData->PageCount;
         outEncoded->page_0.Length = inData->Length;
         outEncoded->page_0.Timestamp = inData->Timestamp;
@@ -369,7 +379,7 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 */
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData)
 {
-    if (!outEncoded || !inData)
+    if (!outEncoded || !inData || !intInRange(inData->DescType, 0, 255))
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
@@ -388,7 +398,18 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
 */
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
 {
-    if (!outEncoded || !inData)
+    if (!outEncoded || !inData || !intInRange(inData->LocationSource, 0, 3))
+        return ODID_FAIL;
+
+    if (inData->OperatorLatitude < MIN_LATLON || inData->OperatorLatitude > MAX_LATLON ||
+        inData->OperatorLongitude < MIN_LATLON || inData->OperatorLongitude > MAX_LATLON)
+        return ODID_FAIL;
+
+    if (inData->AreaRadius > MAX_AREA_RADIUS)
+        return ODID_FAIL;
+
+    if (inData->AreaCeiling < MIN_ALT || inData->AreaCeiling > MAX_ALT ||
+        inData->AreaFloor < MIN_ALT || inData->AreaFloor > MAX_ALT)
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
@@ -414,7 +435,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
 */
 int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData)
 {
-    if (!outEncoded || !inData)
+    if (!outEncoded || !inData || !intInRange(inData->OperatorIdType, 0, 255))
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_OPERATOR_ID;

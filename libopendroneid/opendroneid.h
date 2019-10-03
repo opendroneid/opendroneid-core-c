@@ -26,6 +26,25 @@ gabriel.c.cox@intel.com
 #define ODID_SUCCESS    0
 #define ODID_FAIL       1
 
+#define MIN_DIR         0       // Minimum direction
+#define MAX_DIR         360     // Maximum direction
+#define INV_DIR         361     // Invalid direction
+#define MIN_SPEED_H     0       // Minimum speed horizontal
+#define MAX_SPEED_H     254.25  // Maximum speed horizontal
+#define INV_SPEED_H     255     // Invalid speed horizontal
+#define MIN_SPEED_V     0       // Minimum speed vertical
+#define MAX_SPEED_V     62      // Maximum speed vertical
+#define INV_SPEED_V     63      // Invalid speed vertical
+#define MIN_LATLON      -180    // Minimum latitude/longitude
+#define MAX_LATLON      180     // Maximum latitude/longitude
+#define MIN_ALT         -1000   // Minimum altitude
+#define MAX_ALT         31767.5 // Maximum altitude
+#define INV_ALT         MIN_ALT // Invalid altitude
+#define MAX_TIMESTAMP   (60 * 60 * 10)
+#define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE) + \
+                         ODID_STR_SIZE * (ODID_AUTH_MAX_PAGES - 1))
+#define MAX_AREA_RADIUS 2550
+
 typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_BASIC_ID = 0,
     ODID_MESSAGETYPE_LOCATION = 1,
