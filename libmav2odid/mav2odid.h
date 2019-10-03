@@ -42,19 +42,12 @@ typedef struct {
     uint8_t droneidSchedule[DRONEID_SCHEDULER_SIZE];
     uint8_t scheduleIdx;
 
-    ODID_BasicID_data basicId;
     ODID_BasicID_encoded basicIdEnc;
-    ODID_Location_data location;
     ODID_Location_encoded locationEnc;
-    ODID_Auth_data authentication;
     ODID_Auth_encoded authenticationEnc;
-    ODID_SelfID_data selfId;
     ODID_SelfID_encoded selfIdEnc;
-    ODID_System_data system;
     ODID_System_encoded systemEnc;
-    ODID_OperatorID_data operatorId;
     ODID_OperatorID_encoded operatorIdEnc;
-    ODID_MessagePack_data messagePack;
     ODID_MessagePack_encoded messagePackEnc;
 } mav2odid_t;
 
