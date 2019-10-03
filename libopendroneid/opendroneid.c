@@ -29,6 +29,103 @@ static int intRangeMax(int64_t inValue, int startRange, int endRange);
 static int intInRange(int inValue, int startRange, int endRange);
 
 /**
+* Initialize basic ID data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initBasicIDData(ODID_BasicID_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_BasicID_data));
+}
+
+/**
+* Initialize location data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initLocationData(ODID_Location_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_Location_data));
+    data->Direction = 361;
+    data->SpeedHorizontal = 255;
+    data->SpeedVertical = 63;
+    data->AltitudeBaro = -1000;
+    data->AltitudeGeo = -1000;
+    data->Height = -1000;
+}
+
+/**
+* Initialize authorization data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initAuthData(ODID_Auth_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_Auth_data));
+}
+
+/**
+* Initialize self ID data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initSelfIDData(ODID_SelfID_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_SelfID_data));
+}
+
+/**
+* Initialize system data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initSystemData(ODID_System_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_System_data));
+    data->AreaCount = 1;
+    data->AreaCeiling = -1000;
+    data->AreaFloor = -1000;
+}
+
+/**
+* Initialize operator ID data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initOperatorIDData(ODID_OperatorID_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_OperatorID_data));
+}
+
+/**
+* Initialize message pack data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initMessagePackData(ODID_MessagePack_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_MessagePack_data));
+    data->SingleMessageSize = ODID_MESSAGE_SIZE;
+}
+
+/**
 * Encode direction as defined by Open Drone ID
 *
 * The encoding method uses 8 bits for the direction in degrees and
@@ -701,6 +798,10 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
 *
 * This function assumes that msgData points to a buffer conaining all
 * ODID_MESSAGE_SIZE bytes of an Open Drone ID message.
+*
+* The various Valid flags in uasData are set true whenever a message has been
+* decoded and the corresponding data structure has been filled. The caller must
+* clear these flags before calling decodeOpenDroneID().
 *
 * @param uasData    Structure containing buffers for all message data
 * @param msgData    Pointer to a buffer containing a full encoded Open Drone ID
