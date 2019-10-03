@@ -54,6 +54,8 @@ typedef struct {
     ODID_System_encoded systemEnc;
     ODID_OperatorID_data operatorId;
     ODID_OperatorID_encoded operatorIdEnc;
+    ODID_MessagePack_data messagePack;
+    ODID_MessagePack_encoded messagePackEnc;
 } mav2odid_t;
 
 int m2o_init(mav2odid_t *m2o);
@@ -72,5 +74,7 @@ void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
                         ODID_System_data *system);
 void m2o_operatorId2Mavlink(mavlink_open_drone_id_operator_id_t *mavOperatorID,
                             ODID_OperatorID_data *operatorID);
+void m2o_messagePack2Mavlink(mavlink_open_drone_id_message_pack_t *mavMessagePack,
+                             ODID_MessagePack_data *messagePack);
 
 #endif /* _MAV2ODID_H_ */

@@ -353,10 +353,14 @@ static int checkPackContent(ODID_Messages_encoded *msgs, int amount)
     }
 
     // Allow max one of each message except Authorization, of which there can
-    // be five. The OpenDroneID specification is slightly less restrictive but
-    // this implementation does not support anything else
-    if (numMessages[0] > 1 || numMessages[1] > 1 || numMessages[2] > 5 ||
-        numMessages[3] > 1 || numMessages[4] > 1 || numMessages[5] > 1)
+    // be ODID_AUTH_MAX_PAGES. The OpenDroneID specification is slightly less
+    // restrictive but this implementation does not support anything else
+    if (numMessages[ODID_MESSAGETYPE_BASIC_ID] > 1 ||
+        numMessages[ODID_MESSAGETYPE_LOCATION] > 1 ||
+        numMessages[ODID_MESSAGETYPE_AUTH] > ODID_AUTH_MAX_PAGES ||
+        numMessages[ODID_MESSAGETYPE_SELF_ID] > 1 ||
+        numMessages[ODID_MESSAGETYPE_SYSTEM] > 1 ||
+        numMessages[ODID_MESSAGETYPE_OPERATOR_ID] > 1)
         return ODID_FAIL;
 
     return ODID_SUCCESS;

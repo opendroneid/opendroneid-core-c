@@ -23,6 +23,10 @@ soren.friis@intel.com
 * OperatorID) are not used in a particular implementation, they should be
 * excluded from the schedule list.
 *
+* Note: The MessagePack message type is not included, since the pack already
+* contains all the message data and there is no need to cycle through individual
+* messages then.
+*
 * @param m2o    Instance structure containing working buffers/structures
 * @return       Success or fail
 */
@@ -104,7 +108,7 @@ int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data)
 }
 
 /**
-* Convert basic ID Mavlink message to encoded Open Drone ID structure
+* Convert a basic ID Mavlink message to an encoded Open Drone ID structure
 */
 static int m2o_basicId(mav2odid_t *m2o, mavlink_open_drone_id_basic_id_t *basicId)
 {
@@ -117,7 +121,7 @@ static int m2o_basicId(mav2odid_t *m2o, mavlink_open_drone_id_basic_id_t *basicI
 }
 
 /**
-* Convert location Mavlink message to encoded Open Drone ID structure
+* Convert a location Mavlink message to an encoded Open Drone ID structure
 */
 static int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *location)
 {
@@ -142,7 +146,7 @@ static int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *locat
 }
 
 /**
-* Convert authentication Mavlink message to encoded Open Drone ID structure
+* Convert an authentication Mavlink message to an encoded Open Drone ID structure
 */
 static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authentication_t *authentication)
 {
@@ -165,7 +169,7 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
 }
 
 /**
-* Convert self ID Mavlink message to encoded Open Drone ID structure
+* Convert a self ID Mavlink message to an encoded Open Drone ID structure
 */
 static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *selfId)
 {
@@ -177,7 +181,7 @@ static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *selfId)
 }
 
 /**
-* Convert system Mavlink message to encoded Open Drone ID structure
+* Convert a system Mavlink message to an encoded Open Drone ID structure
 */
 static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *system)
 {
@@ -193,7 +197,7 @@ static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *system)
 }
 
 /**
-* Convert operator ID Mavlink message to encoded Open Drone ID structure
+* Convert an operator ID Mavlink message to an encoded Open Drone ID structure
 */
 static int m2o_operatorId(mav2odid_t *m2o, mavlink_open_drone_id_operator_id_t *operatorId)
 {
@@ -202,6 +206,19 @@ static int m2o_operatorId(mav2odid_t *m2o, mavlink_open_drone_id_operator_id_t *
         m2o->operatorId.OperatorId[i] = operatorId->operator_id[i];
 
     return encodeOperatorIDMessage(&m2o->operatorIdEnc, &m2o->operatorId);
+}
+
+/**
+* Convert a message pack Mavlink message to an encoded Open Drone ID structure
+*/
+static int m2o_messagePack(mav2odid_t *m2o, mavlink_open_drone_id_message_pack_t *messagePack)
+{
+    m2o->messagePack.SingleMessageSize = messagePack->single_message_size;
+    m2o->messagePack.MsgPackSize = messagePack->msg_pack_size;
+    for (int i = 0; i < messagePack->msg_pack_size; i++)
+        for (int j = 0; j < ODID_MESSAGE_SIZE; j++)
+            m2o->messagePack.Messages[i].rawData[j] = messagePack->messages[i*ODID_MESSAGE_SIZE + j];
+    return encodeMessagePack(&m2o->messagePackEnc, &m2o->messagePack);
 }
 
 /**
@@ -230,7 +247,9 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
     mavlink_open_drone_id_self_id_t selfId;
     mavlink_open_drone_id_system_t system;
     mavlink_open_drone_id_operator_id_t operatorId;
+    mavlink_open_drone_id_message_pack_t messagePack;
 
+    // Enhance this, if used in a system transmitting on other than channel 0
     if (mavlink_parse_char(MAVLINK_COMM_0, data, &message, &status))
     {
         switch (message.msgid)
@@ -269,6 +288,12 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
             mavlink_msg_open_drone_id_operator_id_decode(&message, &operatorId);
             if (m2o_operatorId(m2o, &operatorId) == ODID_SUCCESS)
                 return ODID_MESSAGETYPE_OPERATOR_ID;
+            break;
+
+        case MAVLINK_MSG_ID_OPEN_DRONE_ID_MESSAGE_PACK:
+            mavlink_msg_open_drone_id_message_pack_decode(&message, &messagePack);
+            if (m2o_messagePack(m2o, &messagePack) == ODID_SUCCESS)
+                return ODID_MESSAGETYPE_PACKED;
             break;
 
         default:
@@ -371,4 +396,17 @@ void m2o_operatorId2Mavlink(mavlink_open_drone_id_operator_id_t *mavOperatorID,
     mavOperatorID->operator_id_type = (MAV_ODID_OPERATOR_ID_TYPE) operatorID->OperatorIdType;
     for (int i = 0; i < ODID_ID_SIZE; i++)
         mavOperatorID->operator_id[i] = operatorID->OperatorId[i];
+}
+
+/**
+* Convert non-encoded Open Drone ID message pack structure to Mavlink message
+*/
+void m2o_messagePack2Mavlink(mavlink_open_drone_id_message_pack_t *mavMessagePack,
+                             ODID_MessagePack_data *messagePack)
+{
+    mavMessagePack->single_message_size = messagePack->SingleMessageSize;
+    mavMessagePack->msg_pack_size = messagePack->MsgPackSize;
+    for (int i = 0; i < messagePack->MsgPackSize; i++)
+        for (int j = 0; j < ODID_MESSAGE_SIZE; j++)
+            mavMessagePack->messages[i*ODID_MESSAGE_SIZE + j] = messagePack->Messages[i].rawData[j];
 }
