@@ -231,7 +231,7 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                                     &msg, &auth);
 
     ODID_messagetype_t msgType;
-    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->authenticationEnc,
+    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->authEnc,
                      uas_data, &msgType);
 
     if (msgType != ODID_MESSAGETYPE_AUTH)

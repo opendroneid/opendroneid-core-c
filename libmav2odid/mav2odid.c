@@ -39,10 +39,14 @@ int m2o_init(mav2odid_t *m2o)
 
     memset(m2o->droneidSchedule, ODID_MESSAGETYPE_LOCATION, DRONEID_SCHEDULER_SIZE);
     m2o->droneidSchedule[0] = ODID_MESSAGETYPE_BASIC_ID;
-    m2o->droneidSchedule[2] = ODID_MESSAGETYPE_AUTH;
-    m2o->droneidSchedule[4] = ODID_MESSAGETYPE_SELF_ID;
-    m2o->droneidSchedule[6] = ODID_MESSAGETYPE_SYSTEM;
-    m2o->droneidSchedule[8] = ODID_MESSAGETYPE_OPERATOR_ID;
+    m2o->droneidSchedule[2] = ODID_MESSAGETYPE_AUTH; // Add an amount of
+    m2o->droneidSchedule[4] = ODID_MESSAGETYPE_AUTH; // auth messages equal to
+    m2o->droneidSchedule[6] = ODID_MESSAGETYPE_AUTH; // ODID_AUTH_MAX_PAGES
+    m2o->droneidSchedule[8] = ODID_MESSAGETYPE_AUTH;
+    m2o->droneidSchedule[10] = ODID_MESSAGETYPE_AUTH;
+    m2o->droneidSchedule[12] = ODID_MESSAGETYPE_SELF_ID;
+    m2o->droneidSchedule[14] = ODID_MESSAGETYPE_SYSTEM;
+    m2o->droneidSchedule[16] = ODID_MESSAGETYPE_OPERATOR_ID;
 
     union {
         ODID_BasicID_data basicId;
@@ -62,8 +66,11 @@ int m2o_init(mav2odid_t *m2o)
         return ODID_FAIL;
 
     odid_initAuthData(&data.auth);
-    if (encodeAuthMessage(&m2o->authenticationEnc, &data.auth))
-        return ODID_FAIL;
+    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++) {
+        data.auth.DataPage = i;
+        if (encodeAuthMessage(&m2o->authEnc[i], &data.auth))
+            return ODID_FAIL;
+    }
 
     odid_initSelfIDData(&data.selfId);
     if (encodeSelfIDMessage(&m2o->selfIdEnc, &data.selfId))
@@ -85,7 +92,7 @@ int m2o_init(mav2odid_t *m2o)
 * in droneidSchedule.
 *
 * It is expected that this function is called with an interval faster than
-* (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) = 3 / 10 = 333 ms
+* (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) = 3 / 18 = 166 ms
 * in order to comply with the timing restraints in the specification.
 *
 * This function will copy the relevant DroneID data to the provided data buffer.
@@ -100,25 +107,36 @@ int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data)
     if (!m2o || !data)
         return ODID_FAIL;
 
+    static uint8_t authIndex = 0;
+
     switch (m2o->droneidSchedule[m2o->scheduleIdx])
     {
     case ODID_MESSAGETYPE_BASIC_ID:
-        memcpy(data, &m2o->basicIdEnc, sizeof(ODID_BasicID_encoded));
+        if (m2o->basicIDEncValid)
+            memcpy(data, &m2o->basicIdEnc, sizeof(ODID_BasicID_encoded));
         break;
     case ODID_MESSAGETYPE_LOCATION:
-        memcpy(data, &m2o->locationEnc, sizeof(ODID_Location_encoded));
+        if (m2o->locationEncValid)
+            memcpy(data, &m2o->locationEnc, sizeof(ODID_Location_encoded));
         break;
     case ODID_MESSAGETYPE_AUTH:
-        memcpy(data, &m2o->authenticationEnc, sizeof(ODID_Auth_encoded));
+        if (m2o->authEncValid[authIndex])
+            memcpy(data, &m2o->authEnc[authIndex], sizeof(ODID_Auth_encoded));
+        authIndex++;
+        if (authIndex == ODID_AUTH_MAX_PAGES)
+            authIndex = 0;
         break;
     case ODID_MESSAGETYPE_SELF_ID:
-        memcpy(data, &m2o->selfIdEnc, sizeof(ODID_SelfID_encoded));
+        if (m2o->selfIDEncValid)
+            memcpy(data, &m2o->selfIdEnc, sizeof(ODID_SelfID_encoded));
         break;
     case ODID_MESSAGETYPE_SYSTEM:
-        memcpy(data, &m2o->systemEnc, sizeof(ODID_System_encoded));
+        if (m2o->systemEncValid)
+            memcpy(data, &m2o->systemEnc, sizeof(ODID_System_encoded));
         break;
     case ODID_MESSAGETYPE_OPERATOR_ID:
-        memcpy(data, &m2o->operatorIdEnc, sizeof(ODID_OperatorID_encoded));
+        if (m2o->operatorIDEncValid)
+            memcpy(data, &m2o->operatorIdEnc, sizeof(ODID_OperatorID_encoded));
         break;
     default:
         return ODID_FAIL;
@@ -189,7 +207,16 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
     for (int i = 0; i < size; i++)
         authentication.AuthData[i] = mavAuthentication->authentication_data[i];
 
-    return encodeAuthMessage(&m2o->authenticationEnc, &authentication);
+    if (mavAuthentication->data_page >= ODID_AUTH_MAX_PAGES)
+        return ODID_FAIL;
+
+    uint8_t ret = encodeAuthMessage(&m2o->authEnc[mavAuthentication->data_page],
+                                    &authentication);
+    if (ret != ODID_SUCCESS)
+        return ret;
+
+    m2o->authEncValid[mavAuthentication->data_page] = 1;
+    return ODID_SUCCESS;
 }
 
 /**
@@ -290,14 +317,18 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
         {
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_BASIC_ID:
             mavlink_msg_open_drone_id_basic_id_decode(&message, &msg.basicId);
-            if (m2o_basicId(m2o, &msg.basicId) == ODID_SUCCESS)
+            if (m2o_basicId(m2o, &msg.basicId) == ODID_SUCCESS) {
+                m2o->basicIDEncValid = 1;
                 return ODID_MESSAGETYPE_BASIC_ID;
+            }
             break;
 
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_LOCATION:
             mavlink_msg_open_drone_id_location_decode(&message, &msg.location);
-            if (m2o_location(m2o, &msg.location) == ODID_SUCCESS)
+            if (m2o_location(m2o, &msg.location) == ODID_SUCCESS) {
+                m2o->locationEncValid = 1;
                 return ODID_MESSAGETYPE_LOCATION;
+            }
             break;
 
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_AUTHENTICATION:
@@ -308,26 +339,34 @@ ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data)
 
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_SELF_ID:
             mavlink_msg_open_drone_id_self_id_decode(&message, &msg.selfId);
-            if (m2o_selfId(m2o, &msg.selfId) == ODID_SUCCESS)
+            if (m2o_selfId(m2o, &msg.selfId) == ODID_SUCCESS) {
+                m2o->selfIDEncValid = 1;
                 return ODID_MESSAGETYPE_SELF_ID;
+            }
             break;
 
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_SYSTEM:
             mavlink_msg_open_drone_id_system_decode(&message, &msg.system);
-            if (m2o_system(m2o, &msg.system) == ODID_SUCCESS)
+            if (m2o_system(m2o, &msg.system) == ODID_SUCCESS) {
+                m2o->systemEncValid = 1;
                 return ODID_MESSAGETYPE_SYSTEM;
+            }
             break;
 
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_OPERATOR_ID:
             mavlink_msg_open_drone_id_operator_id_decode(&message, &msg.operatorId);
-            if (m2o_operatorId(m2o, &msg.operatorId) == ODID_SUCCESS)
+            if (m2o_operatorId(m2o, &msg.operatorId) == ODID_SUCCESS) {
+                m2o->operatorIDEncValid = 1;
                 return ODID_MESSAGETYPE_OPERATOR_ID;
+            }
             break;
 
         case MAVLINK_MSG_ID_OPEN_DRONE_ID_MESSAGE_PACK:
             mavlink_msg_open_drone_id_message_pack_decode(&message, &msg.messagePack);
-            if (m2o_messagePack(m2o, &msg.messagePack) == ODID_SUCCESS)
+            if (m2o_messagePack(m2o, &msg.messagePack) == ODID_SUCCESS) {
+                m2o->messagePackEncValid = 1;
                 return ODID_MESSAGETYPE_PACKED;
+            }
             break;
 
         default:
