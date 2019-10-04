@@ -347,10 +347,10 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
     if (inData->DataPage >= ODID_AUTH_MAX_PAGES)
         return ODID_FAIL;
 
-    outEncoded->page_0.MessageType = ODID_MESSAGETYPE_AUTH;
-    outEncoded->page_0.ProtoVersion = ODID_PROTOCOL_VERSION;
-    outEncoded->page_0.AuthType = inData->AuthType;
-    outEncoded->page_0.DataPage = inData->DataPage;
+    outEncoded->page_zero.MessageType = ODID_MESSAGETYPE_AUTH;
+    outEncoded->page_zero.ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->page_zero.AuthType = inData->AuthType;
+    outEncoded->page_zero.DataPage = inData->DataPage;
     if (inData->DataPage == 0) {
         if (inData->PageCount > ODID_AUTH_MAX_PAGES)
             return ODID_FAIL;
@@ -358,14 +358,14 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
         if (inData->Length > MAX_AUTH_LENGTH)
             return ODID_FAIL;
 
-        outEncoded->page_0.PageCount = inData->PageCount;
-        outEncoded->page_0.Length = inData->Length;
-        outEncoded->page_0.Timestamp = inData->Timestamp;
-        strncpy(outEncoded->page_0.AuthData, inData->AuthData,
-                sizeof(outEncoded->page_0.AuthData));
+        outEncoded->page_zero.PageCount = inData->PageCount;
+        outEncoded->page_zero.Length = inData->Length;
+        outEncoded->page_zero.Timestamp = inData->Timestamp;
+        strncpy(outEncoded->page_zero.AuthData, inData->AuthData,
+                sizeof(outEncoded->page_zero.AuthData));
     } else {
-        strncpy(outEncoded->page_1_4.AuthData, inData->AuthData,
-                sizeof(outEncoded->page_1_4.AuthData));
+        strncpy(outEncoded->page_non_zero.AuthData, inData->AuthData,
+                sizeof(outEncoded->page_non_zero.AuthData));
     }
     return ODID_SUCCESS;
 }
@@ -662,12 +662,12 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 {
     if (!inEncoded ||
-        inEncoded->page_0.MessageType != ODID_MESSAGETYPE_AUTH ||
-        !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_0.DataPage, 0, 4))
+        inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
+        !intInRange(inEncoded->page_zero.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_zero.DataPage, 0, 4))
         return ODID_FAIL;
 
-    *pageNum = inEncoded->page_0.DataPage;
+    *pageNum = inEncoded->page_zero.DataPage;
     return ODID_SUCCESS;
 }
 
@@ -681,21 +681,21 @@ int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
-        inEncoded->page_0.MessageType != ODID_MESSAGETYPE_AUTH ||
-        !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_0.DataPage, 0, 4))
+        inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
+        !intInRange(inEncoded->page_zero.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_zero.DataPage, 0, 4))
         return ODID_FAIL;
 
-    outData->AuthType = (ODID_authtype_t) inEncoded->page_0.AuthType;
-    outData->DataPage = inEncoded->page_0.DataPage;
-    if (inEncoded->page_0.DataPage == 0) {
-        outData->PageCount = inEncoded->page_0.PageCount;
-        outData->Length = inEncoded->page_0.Length;
-        outData->Timestamp = inEncoded->page_0.Timestamp;
-        safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData,
-                          sizeof(outData->AuthData) - ODID_AUTH_PAGE_0_DATA_SIZE);
+    outData->AuthType = (ODID_authtype_t) inEncoded->page_zero.AuthType;
+    outData->DataPage = inEncoded->page_zero.DataPage;
+    if (inEncoded->page_zero.DataPage == 0) {
+        outData->PageCount = inEncoded->page_zero.PageCount;
+        outData->Length = inEncoded->page_zero.Length;
+        outData->Timestamp = inEncoded->page_zero.Timestamp;
+        safe_dec_copyfill(outData->AuthData, inEncoded->page_zero.AuthData,
+                          sizeof(outData->AuthData) - ODID_AUTH_PAGE_ZERO_DATA_SIZE);
     } else {
-        safe_dec_copyfill(outData->AuthData, inEncoded->page_1_4.AuthData,
+        safe_dec_copyfill(outData->AuthData, inEncoded->page_non_zero.AuthData,
                           sizeof(outData->AuthData));
     }
     return ODID_SUCCESS;
@@ -1303,7 +1303,7 @@ void printAuth_data(ODID_Auth_data *Auth)
             " %d\nAuthData: ";
         printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
             Auth->PageCount, Auth->Length, Auth->Timestamp);
-        for (int i = 0; i < ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE; i++)
+        for (int i = 0; i < ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE; i++)
             printf("0x%02X ", Auth->AuthData[i]);
     } else {
         const char ODID_Auth_data_format[] =

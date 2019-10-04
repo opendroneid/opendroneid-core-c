@@ -180,7 +180,7 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
     int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
     if (authentication.DataPage == 0)
     {
-        size -= ODID_AUTH_PAGE_0_DATA_SIZE;
+        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
         authentication.PageCount = mavAuthentication->page_count;
         authentication.Length = mavAuthentication->length;
         authentication.Timestamp = mavAuthentication->timestamp;
@@ -385,7 +385,7 @@ void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
     int size = ODID_STR_SIZE;
     if (Auth->DataPage == 0)
     {
-        size -= ODID_AUTH_PAGE_0_DATA_SIZE;
+        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
         mavAuth->page_count = Auth->PageCount;
         mavAuth->length = Auth->Length;
         mavAuth->timestamp = Auth->Timestamp;

@@ -20,7 +20,7 @@ gabriel.c.cox@intel.com
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.8
 #define ODID_AUTH_MAX_PAGES 5
-#define ODID_AUTH_PAGE_0_DATA_SIZE 6
+#define ODID_AUTH_PAGE_ZERO_DATA_SIZE 6
 #define ODID_PACK_MAX_MESSAGES 10
 
 #define ODID_SUCCESS    0
@@ -41,7 +41,7 @@ gabriel.c.cox@intel.com
 #define MAX_ALT         31767.5 // Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
 #define MAX_TIMESTAMP   (60 * 60 * 10)
-#define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE) + \
+#define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE) + \
                          ODID_STR_SIZE * (ODID_AUTH_MAX_PAGES - 1))
 #define MAX_AREA_RADIUS 2550
 
@@ -341,8 +341,8 @@ typedef struct __attribute__((__packed__)) {
     uint32_t Timestamp;
 
     // Byte 8-24
-    char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE];
-} ODID_Auth_encoded_page_0;
+    char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE];
+} ODID_Auth_encoded_page_zero;
 
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -355,11 +355,11 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 2-24
     char AuthData[ODID_STR_SIZE];
-} ODID_Auth_encoded_page_1_4;
+} ODID_Auth_encoded_page_non_zero;
 
 typedef union {
-    ODID_Auth_encoded_page_0 page_0;
-    ODID_Auth_encoded_page_1_4 page_1_4;
+    ODID_Auth_encoded_page_zero page_zero;
+    ODID_Auth_encoded_page_non_zero page_non_zero;
 } ODID_Auth_encoded;
 
 typedef struct __attribute__((__packed__)) {
