@@ -5,7 +5,14 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector -fno-d
 
 cmake_minimum_required(VERSION 2.6.3)
 
+option(BUILD_MAVLINK "Build with mavlink support" ON)
+option(BUILD_WIFI "Build with WiFi support" ON)
+
 add_subdirectory(libopendroneid)
-add_subdirectory(libmav2odid)
+if(BUILD_MAVLINK)
+	add_subdirectory(libmav2odid)
+endif()
 add_subdirectory(test)
-add_subdirectory(wifi)
+if(BUILD_WIFI)
+	add_subdirectory(wifi)
+endif()
