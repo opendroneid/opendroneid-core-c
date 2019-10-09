@@ -91,6 +91,9 @@ int m2o_init(mav2odid_t *m2o)
 * Cycle through the various DroneID messages according to the schedule defined
 * in droneidSchedule.
 *
+* This is useful e.g. when transmitting on Bluetooth Legacy broadcast where
+* only one message at a time can be transmitted.
+*
 * It is expected that this function is called with an interval faster than
 * (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) = 3 / 18 = 166 ms
 * in order to comply with the timing restraints in the specification.
@@ -143,6 +146,50 @@ int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data)
     }
 
     m2o->scheduleIdx = ((m2o->scheduleIdx + 1) % DRONEID_SCHEDULER_SIZE);
+    return ODID_SUCCESS;
+}
+
+/**
+* Collect individual encoded messages into a single encoded message pack.
+*
+* This is useful e.g. when transmitting on Bluetooth Long Range broadcast or
+* WiFi Neighbor Awareness Networking, where it is mandated that all transmitted
+* messages are packed into a message pack and transmitted at the same time.
+*
+* @param m2o    Instance structure containing encoded data
+* @output       m2o->messagePackEnc
+* @return       Success or fail
+*/
+int m2o_collectMessagePack(mav2odid_t *m2o)
+{
+    if (!m2o)
+        return ODID_FAIL;
+
+    m2o->messagePackEnc.MessageType = ODID_MESSAGETYPE_PACKED;
+    m2o->messagePackEnc.ProtoVersion = ODID_PROTOCOL_VERSION;
+
+    int i = 0;
+    if (m2o->basicIDEncValid)
+        memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->basicIdEnc, ODID_MESSAGE_SIZE);
+
+    if (m2o->locationEncValid)
+        memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->locationEnc, ODID_MESSAGE_SIZE);
+
+    for (int j = 0; j < ODID_AUTH_MAX_PAGES; j++)
+        if (m2o->authEncValid[j])
+            memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->authEnc[j], ODID_MESSAGE_SIZE);
+
+    if (m2o->selfIDEncValid)
+        memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->selfIdEnc, ODID_MESSAGE_SIZE);
+
+    if (m2o->systemEncValid)
+        memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->systemEnc, ODID_MESSAGE_SIZE);
+
+    if (m2o->operatorIDEncValid)
+        memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->operatorIdEnc, ODID_MESSAGE_SIZE);
+
+    m2o->messagePackEnc.SingleMessageSize = ODID_MESSAGE_SIZE;
+    m2o->messagePackEnc.MsgPackSize = i;
     return ODID_SUCCESS;
 }
 

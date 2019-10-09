@@ -61,6 +61,8 @@ typedef struct {
 
 int m2o_init(mav2odid_t *m2o);
 int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data);
+int m2o_collectMessagePack(mav2odid_t *m2o);
+
 ODID_messagetype_t m2o_parseMavlink(mav2odid_t *m2o, uint8_t data);
 
 void m2o_basicId2Mavlink(mavlink_open_drone_id_basic_id_t *mavBasicId,
