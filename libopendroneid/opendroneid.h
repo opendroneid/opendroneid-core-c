@@ -433,9 +433,6 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 3 - 252
     ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
-
-    // Byte 253 - 255
-    char Reserved[3];
 } ODID_MessagePack_encoded;
 
 typedef struct {
