@@ -20,11 +20,30 @@ gabriel.c.cox@intel.com
 #define ODID_PROTOCOL_VERSION 0
 #define ODID_SPEC_VERSION 0.8
 #define ODID_AUTH_MAX_PAGES 5
-#define ODID_AUTH_PAGE_0_DATA_SIZE 6
+#define ODID_AUTH_PAGE_ZERO_DATA_SIZE 6
 #define ODID_PACK_MAX_MESSAGES 10
 
 #define ODID_SUCCESS    0
 #define ODID_FAIL       1
+
+#define MIN_DIR         0       // Minimum direction
+#define MAX_DIR         360     // Maximum direction
+#define INV_DIR         361     // Invalid direction
+#define MIN_SPEED_H     0       // Minimum speed horizontal
+#define MAX_SPEED_H     254.25  // Maximum speed horizontal
+#define INV_SPEED_H     255     // Invalid speed horizontal
+#define MIN_SPEED_V     0       // Minimum speed vertical
+#define MAX_SPEED_V     62      // Maximum speed vertical
+#define INV_SPEED_V     63      // Invalid speed vertical
+#define MIN_LATLON      -180    // Minimum latitude/longitude
+#define MAX_LATLON      180     // Maximum latitude/longitude
+#define MIN_ALT         -1000   // Minimum altitude
+#define MAX_ALT         31767.5 // Maximum altitude
+#define INV_ALT         MIN_ALT // Invalid altitude
+#define MAX_TIMESTAMP   (60 * 60 * 10)
+#define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE) + \
+                         ODID_STR_SIZE * (ODID_AUTH_MAX_PAGES - 1))
+#define MAX_AREA_RADIUS 2550
 
 typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_BASIC_ID = 0,
@@ -322,8 +341,8 @@ typedef struct __attribute__((__packed__)) {
     uint32_t Timestamp;
 
     // Byte 8-24
-    char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_0_DATA_SIZE];
-} ODID_Auth_encoded_page_0;
+    char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE];
+} ODID_Auth_encoded_page_zero;
 
 typedef struct __attribute__((__packed__)) {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -336,11 +355,11 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 2-24
     char AuthData[ODID_STR_SIZE];
-} ODID_Auth_encoded_page_1_4;
+} ODID_Auth_encoded_page_non_zero;
 
 typedef union {
-    ODID_Auth_encoded_page_0 page_0;
-    ODID_Auth_encoded_page_1_4 page_1_4;
+    ODID_Auth_encoded_page_zero page_zero;
+    ODID_Auth_encoded_page_non_zero page_non_zero;
 } ODID_Auth_encoded;
 
 typedef struct __attribute__((__packed__)) {
@@ -414,9 +433,6 @@ typedef struct __attribute__((__packed__)) {
 
     // Byte 3 - 252
     ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
-
-    // Byte 253 - 255
-    char Reserved[3];
 } ODID_MessagePack_encoded;
 
 typedef struct {
@@ -427,6 +443,14 @@ typedef struct {
 } ODID_MessagePack_data;
 
 // API Calls
+void odid_initBasicIDData(ODID_BasicID_data *data);
+void odid_initLocationData(ODID_Location_data *data);
+void odid_initAuthData(ODID_Auth_data *data);
+void odid_initSelfIDData(ODID_SelfID_data *data);
+void odid_initSystemData(ODID_System_data *data);
+void odid_initOperatorIDData(ODID_OperatorID_data *data);
+void odid_initMessagePackData(ODID_MessagePack_data *data);
+
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);
 int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);

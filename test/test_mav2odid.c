@@ -21,8 +21,12 @@ soren.friis@intel.com
 
 static void print_mavlink_basicID(mavlink_open_drone_id_basic_id_t *basic_id)
 {
+    // Ensure the ID is null-terminated
+    char buf[MAVLINK_MSG_OPEN_DRONE_ID_BASIC_ID_FIELD_UAS_ID_LEN + 1] = { 0 };
+    memcpy(buf, basic_id->uas_id, MAVLINK_MSG_OPEN_DRONE_ID_BASIC_ID_FIELD_UAS_ID_LEN);
+
     printf("ID type: %d, UA type: %d, UAS ID: %s\n",
-           basic_id->id_type, basic_id->ua_type, basic_id->uas_id);
+           basic_id->id_type, basic_id->ua_type, buf);
 }
 
 static void print_mavlink_location(mavlink_open_drone_id_location_t *location)
@@ -42,26 +46,48 @@ static void print_mavlink_location(mavlink_open_drone_id_location_t *location)
 
 static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
 {
-    printf("Data page: %d, auth type: %d, data: ",
+    printf("Data page: %d, auth type: %d, ",
            auth->data_page, auth->authentication_type);
-    for (int i = 0; i < MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN; i++)
+    int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
+    if (auth->data_page == 0)
+    {
+        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
+        printf("page_count: %d, length: %d, timestamp: %d, ",
+               auth->page_count, auth->length, auth->timestamp);
+    }
+    printf("\n");
+    for (int i = 0; i < size; i++)
         printf("0x%02X ", auth->authentication_data[i]);
     printf("\n");
 }
 
-static void print_mavlink_selfID(mavlink_open_drone_id_selfid_t *self_id)
+static void print_mavlink_selfID(mavlink_open_drone_id_self_id_t *self_id)
 {
+    // Ensure the description is null-terminated
+    char buf[MAVLINK_MSG_OPEN_DRONE_ID_SELF_ID_FIELD_DESCRIPTION_LEN + 1] = { 0 };
+    memcpy(buf, self_id->description, MAVLINK_MSG_OPEN_DRONE_ID_SELF_ID_FIELD_DESCRIPTION_LEN);
+
     printf("Type: %d, description: %s\n",
-           self_id->description_type, self_id->description);
+           self_id->description_type, buf);
 }
 
 static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
 {
     printf("Location Source: %d\nLat/Lon: %d, %d degE7, Area Count, Radius: %d, %d, \n"\
            "Ceiling, Floor: %.2f, %.2f m\n",
-           system->flags, system->remote_pilot_latitude,
-           system->remote_pilot_longitude, system->group_count,
-           system->group_radius, system->group_ceiling, system->group_floor);
+           system->flags, system->operator_latitude,
+           system->operator_longitude, system->area_count,
+           system->area_radius, system->area_ceiling, system->area_floor);
+}
+
+static void print_mavlink_operatorID(mavlink_open_drone_id_operator_id_t *operator_id)
+{
+    // Ensure the ID is null-terminated
+    char buf[MAVLINK_MSG_OPEN_DRONE_ID_OPERATOR_ID_FIELD_OPERATOR_ID_LEN + 1] = { 0 };
+    memcpy(buf, operator_id->operator_id, MAVLINK_MSG_OPEN_DRONE_ID_OPERATOR_ID_FIELD_OPERATOR_ID_LEN);
+
+    printf("Type: %d, operator ID: %s\n",
+           operator_id->operator_id_type, buf);
 }
 
 /**
@@ -116,9 +142,9 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_basic_id_t basic_id = {
-        .ua_type = MAV_ODID_UATYPE_ROTORCRAFT,
-        .id_type = MAV_ODID_IDTYPE_SERIAL_NUMBER,
-        .uas_id = "987654321ABCDEFGHJK" };
+        .ua_type = MAV_ODID_UA_TYPE_ROTORCRAFT,
+        .id_type = MAV_ODID_ID_TYPE_SERIAL_NUMBER,
+        .uas_id = "9876543210ABCDEFGHJK" };
 
     printf("\n--------------------------Basic ID------------------------\n\n");
     print_mavlink_basicID(&basic_id);
@@ -160,7 +186,7 @@ static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .horizontal_accuracy = MAV_ODID_HOR_ACC_3_METER,
         .vertical_accuracy = MAV_ODID_VER_ACC_1_METER,
         .barometer_accuracy = MAV_ODID_VER_ACC_3_METER,
-        .speed_accuracy = MAV_ODID_SPEED_ACC_1_METER_PER_SECOND,
+        .speed_accuracy = MAV_ODID_SPEED_ACC_1_METERS_PER_SECOND,
         .timestamp_accuracy = MAV_ODID_TIME_ACC_0_1_SECOND,
         .timestamp = 3243.4f };
 
@@ -192,8 +218,11 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_authentication_t auth = {
         .data_page = 0,
-        .authentication_type = MAV_ODID_AUTH_MPUID,
-        .authentication_data = "987654321" };
+        .authentication_type = MAV_ODID_AUTH_TYPE_UAS_ID_SIGNATURE,
+        .authentication_data = "98765432101234567",
+        .page_count = 1,
+        .length = 17,
+        .timestamp = 23000000 };
     printf("\n\n---------------------Authentication---------------------\n\n");
     print_mavlink_auth(&auth);
 
@@ -202,7 +231,7 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                                     &msg, &auth);
 
     ODID_messagetype_t msgType;
-    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->authenticationEnc,
+    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->authEnc,
                      uas_data, &msgType);
 
     if (msgType != ODID_MESSAGETYPE_AUTH)
@@ -222,16 +251,16 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 static void test_selfID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 {
     mavlink_message_t msg = { 0 };
-    mavlink_open_drone_id_selfid_t selfID = {
+    mavlink_open_drone_id_self_id_t selfID = {
         .description_type = MAV_ODID_DESC_TYPE_TEXT,
         .description = "Description of flight" };
 
     printf("\n\n------------------------Self ID------------------------\n\n");
     print_mavlink_selfID(&selfID);
 
-    mavlink_msg_open_drone_id_selfid_encode(MAVLINK_SYSTEM_ID,
-                                            MAVLINK_COMPONENT_ID,
-                                            &msg, &selfID);
+    mavlink_msg_open_drone_id_self_id_encode(MAVLINK_SYSTEM_ID,
+                                             MAVLINK_COMPONENT_ID,
+                                             &msg, &selfID);
 
     ODID_messagetype_t msgType;
     send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->selfIdEnc,
@@ -243,7 +272,7 @@ static void test_selfID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     printSelfID_data(&uas_data->SelfID);
 
     // The received data is transferred into a Mavlink structure
-    mavlink_open_drone_id_selfid_t selfID2 = { 0 };
+    mavlink_open_drone_id_self_id_t selfID2 = { 0 };
     m2o_selfId2Mavlink(&selfID2, &uas_data->SelfID);
     printf("\n");
     print_mavlink_selfID(&selfID2);
@@ -254,12 +283,12 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_system_t system = {
         .flags = MAV_ODID_LOCATION_SRC_TAKEOFF,
-        .remote_pilot_latitude = (int32_t) (51.477f * 1E7),
-        .remote_pilot_longitude = (int32_t) (0.0005f * 1E7),
-        .group_count = 350,
-        .group_radius = 55,
-        .group_ceiling = 75.5f,
-        .group_floor = 26.5f };
+        .operator_latitude = (int32_t) (51.477f * 1E7),
+        .operator_longitude = (int32_t) (0.0005f * 1E7),
+        .area_count = 350,
+        .area_radius = 55,
+        .area_ceiling = 75.5f,
+        .area_floor = 26.5f };
 
     printf("\n\n------------------------System------------------------\n\n");
     print_mavlink_system(&system);
@@ -284,6 +313,36 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     print_mavlink_system(&system2);
 }
 
+static void test_operatorID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
+{
+    mavlink_message_t msg = { 0 };
+    mavlink_open_drone_id_operator_id_t operatorID = {
+        .operator_id_type = MAV_ODID_OPERATOR_ID_TYPE_CAA,
+        .operator_id = "ABCDEFGHJK0123456789" };
+
+    printf("\n\n----------------------Operator ID-----------------------\n\n");
+    print_mavlink_operatorID(&operatorID);
+
+    mavlink_msg_open_drone_id_operator_id_encode(MAVLINK_SYSTEM_ID,
+                                                 MAVLINK_COMPONENT_ID,
+                                                 &msg, &operatorID);
+
+    ODID_messagetype_t msgType;
+    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->operatorIdEnc,
+                     uas_data, &msgType);
+
+    if (msgType != ODID_MESSAGETYPE_OPERATOR_ID)
+        printf("ERROR: Open Drone ID message type was not Operator ID\n");
+
+    printOperatorID_data(&uas_data->OperatorID);
+
+    // The received data is transferred into a Mavlink structure
+    mavlink_open_drone_id_operator_id_t operatorID2 = { 0 };
+    m2o_operatorId2Mavlink(&operatorID2, &uas_data->OperatorID);
+    printf("\n");
+    print_mavlink_operatorID(&operatorID2);
+}
+
 void test_mav2odid()
 {
     mav2odid_t m2o;
@@ -298,6 +357,7 @@ void test_mav2odid()
     test_authentication(&m2o, &uas_data);
     test_selfID(&m2o, &uas_data);
     test_system(&m2o, &uas_data);
+    test_operatorID(&m2o, &uas_data);
 
     printf("\n-------------------------------------------------------------------------------\n");
     printf("-------------------------------------  End  -----------------------------------\n");

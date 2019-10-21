@@ -29,6 +29,103 @@ static int intRangeMax(int64_t inValue, int startRange, int endRange);
 static int intInRange(int inValue, int startRange, int endRange);
 
 /**
+* Initialize basic ID data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initBasicIDData(ODID_BasicID_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_BasicID_data));
+}
+
+/**
+* Initialize location data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initLocationData(ODID_Location_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_Location_data));
+    data->Direction = INV_DIR;
+    data->SpeedHorizontal = INV_SPEED_H;
+    data->SpeedVertical = INV_SPEED_V;
+    data->AltitudeBaro = INV_ALT;
+    data->AltitudeGeo = INV_ALT;
+    data->Height = INV_ALT;
+}
+
+/**
+* Initialize authorization data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initAuthData(ODID_Auth_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_Auth_data));
+}
+
+/**
+* Initialize self ID data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+void odid_initSelfIDData(ODID_SelfID_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_SelfID_data));
+}
+
+/**
+* Initialize system data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initSystemData(ODID_System_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_System_data));
+    data->AreaCount = 1;
+    data->AreaCeiling = MIN_ALT;
+    data->AreaFloor = MIN_ALT;
+}
+
+/**
+* Initialize operator ID data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initOperatorIDData(ODID_OperatorID_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_OperatorID_data));
+}
+
+/**
+* Initialize message pack data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initMessagePackData(ODID_MessagePack_data *data)
+{
+    if (!data)
+        return;
+    memset(data, 0, sizeof(ODID_MessagePack_data));
+    data->SingleMessageSize = ODID_MESSAGE_SIZE;
+}
+
+/**
 * Encode direction as defined by Open Drone ID
 *
 * The encoding method uses 8 bits for the direction in degrees and
@@ -41,12 +138,6 @@ static int intInRange(int inValue, int startRange, int endRange);
 */
 static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
 {
-    if (Direction < 0)
-        Direction = 0;
-
-    if (Direction > 361)
-        Direction = 361;
-
     unsigned int direction_int = (unsigned int) roundf(Direction);
     if (direction_int < 180) {
         *EWDirection = 0;
@@ -71,12 +162,6 @@ static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
 */
 static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
 {
-    if (Speed_data < 0)
-        Speed_data = 0;
-
-    if (Speed_data > 255)
-        Speed_data = 255;
-
     if (Speed_data <= UINT8_MAX * SPEED_DIV[0]) {
         *mult = 0;
         return (uint8_t) (Speed_data / SPEED_DIV[0]);
@@ -95,12 +180,6 @@ static uint8_t encodeSpeedHorizontal(float Speed_data, uint8_t *mult)
 */
 static int8_t encodeSpeedVertical(float SpeedVertical_data)
 {
-    if (SpeedVertical_data < -63)
-        SpeedVertical_data = -63;
-
-    if (SpeedVertical_data > 63)
-        SpeedVertical_data = 63;
-
     int encValue = (int) (SpeedVertical_data / VSPEED_DIV);
     return (int8_t) intRangeMax(encValue, INT8_MIN, INT8_MAX);
 }
@@ -130,12 +209,6 @@ static int32_t encodeLatLon(double LatLon_data)
 */
 static int16_t encodeAltitude(float Alt_data)
 {
-    if (Alt_data < -1000)
-        Alt_data = -1000;
-
-    if (Alt_data > 31767.5)
-        Alt_data = 31767.5;
-
     return (uint16_t) intRangeMax( (int) ((Alt_data + ALT_ADDER) / ALT_DIV), 0, UINT16_MAX);
 }
 
@@ -201,11 +274,36 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
     uint8_t bitflag;
     if (!outEncoded || !inData ||
         !intInRange(inData->Status, 0, 15) ||
+        !intInRange(inData->HeightType, 0, 1) ||
         !intInRange(inData->HorizAccuracy, 0, 15) ||
         !intInRange(inData->VertAccuracy, 0, 15) ||
         !intInRange(inData->BaroAccuracy, 0, 15) ||
         !intInRange(inData->SpeedAccuracy, 0, 15) ||
         !intInRange(inData->TSAccuracy, 0, 15))
+        return ODID_FAIL;
+
+    if (inData->Direction < MIN_DIR || inData->Direction > INV_DIR ||
+        (inData->Direction > MAX_DIR && inData->Direction < INV_DIR))
+        return ODID_FAIL;
+
+    if (inData->SpeedHorizontal < MIN_SPEED_H || inData->SpeedHorizontal > INV_SPEED_H ||
+        (inData->SpeedHorizontal > MAX_SPEED_H && inData->SpeedHorizontal < INV_SPEED_H))
+        return ODID_FAIL;
+
+    if (inData->SpeedVertical < MIN_SPEED_V || inData->SpeedVertical > INV_SPEED_V ||
+        (inData->SpeedVertical > MAX_SPEED_V && inData->SpeedVertical < INV_SPEED_V))
+        return ODID_FAIL;
+
+    if (inData->Latitude < MIN_LATLON || inData->Latitude > MAX_LATLON ||
+        inData->Longitude < MIN_LATLON || inData->Longitude > MAX_LATLON)
+        return ODID_FAIL;
+
+    if (inData->AltitudeBaro < MIN_ALT || inData->AltitudeBaro > MAX_ALT ||
+        inData->AltitudeGeo < MIN_ALT || inData->AltitudeGeo > MAX_ALT ||
+        inData->Height < MIN_ALT || inData->Height > MAX_ALT)
+        return ODID_FAIL;
+
+    if (inData->TimeStamp < 0 || inData->TimeStamp > MAX_TIMESTAMP)
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
@@ -246,19 +344,28 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
     if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15))
         return ODID_FAIL;
 
-    outEncoded->page_0.MessageType = ODID_MESSAGETYPE_AUTH;
-    outEncoded->page_0.ProtoVersion = ODID_PROTOCOL_VERSION;
-    outEncoded->page_0.AuthType = inData->AuthType;
-    outEncoded->page_0.DataPage = inData->DataPage;
+    if (inData->DataPage >= ODID_AUTH_MAX_PAGES)
+        return ODID_FAIL;
+
+    outEncoded->page_zero.MessageType = ODID_MESSAGETYPE_AUTH;
+    outEncoded->page_zero.ProtoVersion = ODID_PROTOCOL_VERSION;
+    outEncoded->page_zero.AuthType = inData->AuthType;
+    outEncoded->page_zero.DataPage = inData->DataPage;
     if (inData->DataPage == 0) {
-        outEncoded->page_0.PageCount = inData->PageCount;
-        outEncoded->page_0.Length = inData->Length;
-        outEncoded->page_0.Timestamp = inData->Timestamp;
-        strncpy(outEncoded->page_0.AuthData, inData->AuthData,
-                sizeof(outEncoded->page_0.AuthData));
+        if (inData->PageCount > ODID_AUTH_MAX_PAGES)
+            return ODID_FAIL;
+
+        if (inData->Length > MAX_AUTH_LENGTH)
+            return ODID_FAIL;
+
+        outEncoded->page_zero.PageCount = inData->PageCount;
+        outEncoded->page_zero.Length = inData->Length;
+        outEncoded->page_zero.Timestamp = inData->Timestamp;
+        strncpy(outEncoded->page_zero.AuthData, inData->AuthData,
+                sizeof(outEncoded->page_zero.AuthData));
     } else {
-        strncpy(outEncoded->page_1_4.AuthData, inData->AuthData,
-                sizeof(outEncoded->page_1_4.AuthData));
+        strncpy(outEncoded->page_non_zero.AuthData, inData->AuthData,
+                sizeof(outEncoded->page_non_zero.AuthData));
     }
     return ODID_SUCCESS;
 }
@@ -272,7 +379,7 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 */
 int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData)
 {
-    if (!outEncoded || !inData)
+    if (!outEncoded || !inData || !intInRange(inData->DescType, 0, 255))
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_SELF_ID;
@@ -291,7 +398,18 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
 */
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
 {
-    if (!outEncoded || !inData)
+    if (!outEncoded || !inData || !intInRange(inData->LocationSource, 0, 3))
+        return ODID_FAIL;
+
+    if (inData->OperatorLatitude < MIN_LATLON || inData->OperatorLatitude > MAX_LATLON ||
+        inData->OperatorLongitude < MIN_LATLON || inData->OperatorLongitude > MAX_LATLON)
+        return ODID_FAIL;
+
+    if (inData->AreaRadius > MAX_AREA_RADIUS)
+        return ODID_FAIL;
+
+    if (inData->AreaCeiling < MIN_ALT || inData->AreaCeiling > MAX_ALT ||
+        inData->AreaFloor < MIN_ALT || inData->AreaFloor > MAX_ALT)
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
@@ -317,7 +435,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
 */
 int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData)
 {
-    if (!outEncoded || !inData)
+    if (!outEncoded || !inData || !intInRange(inData->OperatorIdType, 0, 255))
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_OPERATOR_ID;
@@ -353,10 +471,14 @@ static int checkPackContent(ODID_Messages_encoded *msgs, int amount)
     }
 
     // Allow max one of each message except Authorization, of which there can
-    // be five. The OpenDroneID specification is slightly less restrictive but
-    // this implementation does not support anything else
-    if (numMessages[0] > 1 || numMessages[1] > 1 || numMessages[2] > 5 ||
-        numMessages[3] > 1 || numMessages[4] > 1 || numMessages[5] > 1)
+    // be ODID_AUTH_MAX_PAGES. The OpenDroneID specification is slightly less
+    // restrictive but this implementation does not support anything else
+    if (numMessages[ODID_MESSAGETYPE_BASIC_ID] > 1 ||
+        numMessages[ODID_MESSAGETYPE_LOCATION] > 1 ||
+        numMessages[ODID_MESSAGETYPE_AUTH] > ODID_AUTH_MAX_PAGES ||
+        numMessages[ODID_MESSAGETYPE_SELF_ID] > 1 ||
+        numMessages[ODID_MESSAGETYPE_SYSTEM] > 1 ||
+        numMessages[ODID_MESSAGETYPE_OPERATOR_ID] > 1)
         return ODID_FAIL;
 
     return ODID_SUCCESS;
@@ -540,12 +662,12 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 {
     if (!inEncoded ||
-        inEncoded->page_0.MessageType != ODID_MESSAGETYPE_AUTH ||
-        !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_0.DataPage, 0, 4))
+        inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
+        !intInRange(inEncoded->page_zero.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_zero.DataPage, 0, 4))
         return ODID_FAIL;
 
-    *pageNum = inEncoded->page_0.DataPage;
+    *pageNum = inEncoded->page_zero.DataPage;
     return ODID_SUCCESS;
 }
 
@@ -559,21 +681,21 @@ int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
-        inEncoded->page_0.MessageType != ODID_MESSAGETYPE_AUTH ||
-        !intInRange(inEncoded->page_0.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_0.DataPage, 0, 4))
+        inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
+        !intInRange(inEncoded->page_zero.AuthType, 0, 15) ||
+        !intInRange(inEncoded->page_zero.DataPage, 0, 4))
         return ODID_FAIL;
 
-    outData->AuthType = (ODID_authtype_t) inEncoded->page_0.AuthType;
-    outData->DataPage = inEncoded->page_0.DataPage;
-    if (inEncoded->page_0.DataPage == 0) {
-        outData->PageCount = inEncoded->page_0.PageCount;
-        outData->Length = inEncoded->page_0.Length;
-        outData->Timestamp = inEncoded->page_0.Timestamp;
-        safe_dec_copyfill(outData->AuthData, inEncoded->page_0.AuthData,
-                          sizeof(outData->AuthData) - ODID_AUTH_PAGE_0_DATA_SIZE);
+    outData->AuthType = (ODID_authtype_t) inEncoded->page_zero.AuthType;
+    outData->DataPage = inEncoded->page_zero.DataPage;
+    if (inEncoded->page_zero.DataPage == 0) {
+        outData->PageCount = inEncoded->page_zero.PageCount;
+        outData->Length = inEncoded->page_zero.Length;
+        outData->Timestamp = inEncoded->page_zero.Timestamp;
+        safe_dec_copyfill(outData->AuthData, inEncoded->page_zero.AuthData,
+                          sizeof(outData->AuthData) - ODID_AUTH_PAGE_ZERO_DATA_SIZE);
     } else {
-        safe_dec_copyfill(outData->AuthData, inEncoded->page_1_4.AuthData,
+        safe_dec_copyfill(outData->AuthData, inEncoded->page_non_zero.AuthData,
                           sizeof(outData->AuthData));
     }
     return ODID_SUCCESS;
@@ -697,6 +819,10 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
 *
 * This function assumes that msgData points to a buffer conaining all
 * ODID_MESSAGE_SIZE bytes of an Open Drone ID message.
+*
+* The various Valid flags in uasData are set true whenever a message has been
+* decoded and the corresponding data structure has been filled. The caller must
+* clear these flags before calling decodeOpenDroneID().
 *
 * @param uasData    Structure containing buffers for all message data
 * @param msgData    Pointer to a buffer containing a full encoded Open Drone ID
@@ -1131,10 +1257,13 @@ void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced)
 */
 void printBasicID_data(ODID_BasicID_data *BasicID)
 {
+    // Ensure the ID is null-terminated
+    char buf[ODID_ID_SIZE + 1] = { 0 };
+    memcpy(buf, BasicID->UASID, ODID_ID_SIZE);
+
     const char ODID_BasicID_data_format[] =
         "UAType: %d\nIDType: %d\nUASID: %s\n";
-    printf(ODID_BasicID_data_format, BasicID->IDType, BasicID->UAType,
-        BasicID->UASID);
+    printf(ODID_BasicID_data_format, BasicID->IDType, BasicID->UAType, buf);
 }
 
 /**
@@ -1170,16 +1299,20 @@ void printAuth_data(ODID_Auth_data *Auth)
 {
     if (Auth->DataPage == 0) {
         const char ODID_Auth_data_format[] =
-            "AuthType: %d\nDataPage: %d\nPageCount: %d\nLenght: %d\nTimestamp:"\
-            " %d\nAuthData: %s\n";
+            "AuthType: %d\nDataPage: %d\nPageCount: %d\nLength: %d\nTimestamp:"\
+            " %d\nAuthData: ";
         printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
-            Auth->PageCount, Auth->Length, Auth->Timestamp, Auth->AuthData);
+            Auth->PageCount, Auth->Length, Auth->Timestamp);
+        for (int i = 0; i < ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE; i++)
+            printf("0x%02X ", Auth->AuthData[i]);
     } else {
         const char ODID_Auth_data_format[] =
-            "AuthType: %d\nDataPage: %d\nAuthData: %s\n";
-        printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
-            Auth->AuthData);
+            "AuthType: %d\nDataPage: %d\nAuthData: ";
+        printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage);
+        for (int i = 0; i < ODID_STR_SIZE; i++)
+            printf("0x%02X ", Auth->AuthData[i]);
     }
+    printf("\n");
 }
 
 /**
@@ -1189,8 +1322,12 @@ void printAuth_data(ODID_Auth_data *Auth)
 */
 void printSelfID_data(ODID_SelfID_data *SelfID)
 {
+    // Ensure the description is null-terminated
+    char buf[ODID_STR_SIZE + 1] = { 0 };
+    memcpy(buf, SelfID->Desc, ODID_STR_SIZE);
+
     const char ODID_SelfID_data_format[] = "DescType: %d\nDesc: %s\n";
-    printf(ODID_SelfID_data_format, SelfID->DescType, SelfID->Desc);
+    printf(ODID_SelfID_data_format, SelfID->DescType, buf);
 }
 
 /**
@@ -1215,8 +1352,13 @@ void printSystem_data(ODID_System_data *System_data)
 */
 void printOperatorID_data(ODID_OperatorID_data *operatorID)
 {
-    const char ODID_OperatorID_data_format[] = "OperatorIdType: %d\nOperatorId: %s\n";
-    printf(ODID_OperatorID_data_format, operatorID->OperatorIdType, operatorID->OperatorId);
+    // Ensure the ID is null-terminated
+    char buf[ODID_ID_SIZE + 1] = { 0 };
+    memcpy(buf, operatorID->OperatorId, ODID_ID_SIZE);
+
+    const char ODID_OperatorID_data_format[] =
+        "OperatorIdType: %d\nOperatorId: %s\n";
+    printf(ODID_OperatorID_data_format, operatorID->OperatorIdType, buf);
 }
 
 #endif // ODID_DISABLE_PRINTF
