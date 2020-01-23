@@ -1,6 +1,6 @@
 # opendroneid-core-c
 
-Open Drone ID Core C Library
+## Open Drone ID Core C Library
 
 This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the specification.
 
@@ -18,6 +18,40 @@ The outputs will be `libopendroneid/libopendroneid.so` and the `test/odidtest` s
 The sample application will do a test encode/decode, then continuously generate sample messages.
 
 The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in `libopendroneid/opendroneid.h`.
+
+## Build Options
+
+### MavLink
+
+MavLink OpenDroneID support is included by default.
+
+To disable, use the ```BUILD_MAVLINK``` parameter, i.e.:
+
+```
+cmake -DBUILD_MAVLINK=off .
+```
+
+MavLinks requires the mavlink_c_library_v2 to be installed in the respective folder
+
+### WiFi reference implementation
+
+WiFi reference implementation is built by default.
+
+To disable, use the ```BUILD_WIFI``` parameter, i.e.:
+
+```
+cmake -DBUILD_WIFI=off .
+```
+
+It requires the libgps, libnl-3 and libnl-genl-3 support. Install the dependencies on your build host, e.g. on Debian/Ubuntu use
+
+```
+sudo apt-get install libgps-dev libnl-genl-3-dev
+```
+
+If available, the WiFi reference implementation will link against libnl-tiny instead of libnl*-3 if available.
+
+## Architecture
 
 ![Core SDK Scope](img/core-arch.png "Core SDK Scope")
 

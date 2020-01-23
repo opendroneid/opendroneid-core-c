@@ -20,5 +20,7 @@ test/Makefile
 test/cmake_install.cmake
 test/odidtest
 
+wifi/sender/sender
+
 .idea/
 cmake-build-debug/
