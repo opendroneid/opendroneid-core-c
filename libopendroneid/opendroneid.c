@@ -294,8 +294,8 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         (inData->SpeedVertical > MAX_SPEED_V && inData->SpeedVertical < INV_SPEED_V))
         return ODID_FAIL;
 
-    if (inData->Latitude < MIN_LATLON || inData->Latitude > MAX_LATLON ||
-        inData->Longitude < MIN_LATLON || inData->Longitude > MAX_LATLON)
+    if (inData->Latitude < MIN_LAT || inData->Latitude > MAX_LAT ||
+        inData->Longitude < MIN_LON || inData->Longitude > MAX_LON)
         return ODID_FAIL;
 
     if (inData->AltitudeBaro < MIN_ALT || inData->AltitudeBaro > MAX_ALT ||
@@ -401,8 +401,8 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
     if (!outEncoded || !inData || !intInRange(inData->LocationSource, 0, 3))
         return ODID_FAIL;
 
-    if (inData->OperatorLatitude < MIN_LATLON || inData->OperatorLatitude > MAX_LATLON ||
-        inData->OperatorLongitude < MIN_LATLON || inData->OperatorLongitude > MAX_LATLON)
+    if (inData->OperatorLatitude < MIN_LAT || inData->OperatorLatitude > MAX_LAT ||
+        inData->OperatorLongitude < MIN_LON || inData->OperatorLongitude > MAX_LON)
         return ODID_FAIL;
 
     if (inData->AreaRadius > MAX_AREA_RADIUS)

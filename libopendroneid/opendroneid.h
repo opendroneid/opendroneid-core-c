@@ -36,8 +36,10 @@ gabriel.c.cox@intel.com
 #define MIN_SPEED_V     0       // Minimum speed vertical
 #define MAX_SPEED_V     62      // Maximum speed vertical
 #define INV_SPEED_V     63      // Invalid speed vertical
-#define MIN_LATLON      -180    // Minimum latitude/longitude
-#define MAX_LATLON      180     // Maximum latitude/longitude
+#define MIN_LAT         -90     // Minimum latitude
+#define MAX_LAT         90      // Maximum latitude
+#define MIN_LON         -180    // Minimum longitude
+#define MAX_LON         180     // Maximum longitude
 #define MIN_ALT         -1000   // Minimum altitude
 #define MAX_ALT         31767.5 // Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
