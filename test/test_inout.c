@@ -49,7 +49,7 @@ void test_InOut()
 {
     printf("\n-------------------------------------Source Data-----------------------------------\n");
     BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
-    BasicID.UAType = ODID_UATYPE_ROTORCRAFT;
+    BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
     char id[] = "12345678901234567890";
     strncpy(BasicID.UASID, id, sizeof(id));
     printf("BasicID\n-------\n");

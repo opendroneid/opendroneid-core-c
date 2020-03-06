@@ -92,7 +92,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
     switch (msgType) {
         case 0:
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
-            basicID_data.UAType = ODID_UATYPE_ROTORCRAFT;
+            basicID_data.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
             // 4 chr mfg code, 1chr Len, 15chr serial
             char id[] = "INTCE123456789012345";
             strncpy(basicID_data.UASID, id, sizeof(id));
