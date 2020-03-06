@@ -247,7 +247,7 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 static void drone_set_mock_data(ODID_UAS_Data *drone)
 {
 	/* Basic ID */
-	drone->BasicID.UAType = ODID_UATYPE_ROTORCRAFT;
+	drone->BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
 	drone->BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
 	char id[] = "12345678901234567890";
 	strncpy(drone->BasicID.UASID, id, sizeof(*id));

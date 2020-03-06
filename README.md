@@ -2,7 +2,13 @@
 
 ## Open Drone ID Core C Library
 
-This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the specification.
+This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available at https://www.astm.org/Standards/F3411.htm.
+
+The opendroneid-core-c code is primarily meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi NaN. If you are looking for code related to Network Remoted ID, please take a look at https://github.com/interuss and https://github.com/uastech/standards.
+
+For an example Android receiver application, see https://github.com/opendroneid/receiver-android.
+
+Related Mavlink messages are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID.
 
 To build the library and the sample app:
 

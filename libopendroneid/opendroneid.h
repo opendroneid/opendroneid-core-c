@@ -70,16 +70,16 @@ typedef enum ODID_idtype {
 typedef enum ODID_uatype {
     ODID_UATYPE_NONE = 0,
     ODID_UATYPE_AEROPLANE = 1, // Fixed wing
-    ODID_UATYPE_ROTORCRAFT = 2, // Including Multirotor
+    ODID_UATYPE_HELICOPTER_OR_MULTIROTOR = 2,
     ODID_UATYPE_GYROPLANE = 3,
-    ODID_UATYPE_VTOL = 4, // Fixed wing aircraft that can take off vertically
+    ODID_UATYPE_HYBRID_LIFT = 4, // Fixed wing aircraft that can take off vertically
     ODID_UATYPE_ORNITHOPTER = 5,
     ODID_UATYPE_GLIDER = 6,
     ODID_UATYPE_KITE = 7,
     ODID_UATYPE_FREE_BALLOON = 8,
     ODID_UATYPE_CAPTIVE_BALLOON = 9,
     ODID_UATYPE_AIRSHIP = 10, // Such as a blimp
-    ODID_UATYPE_FREE_FALL_PARACHUTE = 11,
+    ODID_UATYPE_FREE_FALL_PARACHUTE = 11, // Unpowered
     ODID_UATYPE_ROCKET = 12,
     ODID_UATYPE_TETHERED_POWERED_AIRCRAFT = 13,
     ODID_UATYPE_GROUND_OBSTACLE = 14,
