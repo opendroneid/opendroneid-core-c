@@ -965,27 +965,27 @@ ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy)
 {
     if (Accuracy >= 18520)
         return ODID_HOR_ACC_UNKNOWN;
-    else if (Accuracy > 7408)
+    else if (Accuracy >= 7408)
         return ODID_HOR_ACC_10NM;
-    else if (Accuracy > 3704)
+    else if (Accuracy >= 3704)
         return ODID_HOR_ACC_4NM;
-    else if (Accuracy > 1852)
+    else if (Accuracy >= 1852)
         return ODID_HOR_ACC_2NM;
-    else if (Accuracy > 926)
+    else if (Accuracy >= 926)
         return ODID_HOR_ACC_1NM;
-    else if (Accuracy > 555.6f)
+    else if (Accuracy >= 555.6f)
         return ODID_HOR_ACC_0_5NM;
-    else if (Accuracy > 185.2f)
+    else if (Accuracy >= 185.2f)
         return ODID_HOR_ACC_0_3NM;
-    else if (Accuracy > 92.6f)
+    else if (Accuracy >= 92.6f)
         return ODID_HOR_ACC_0_1NM;
-    else if (Accuracy > 30)
+    else if (Accuracy >= 30)
         return ODID_HOR_ACC_0_05NM;
-    else if (Accuracy > 10)
+    else if (Accuracy >= 10)
         return ODID_HOR_ACC_30_METER;
-    else if (Accuracy > 3)
+    else if (Accuracy >= 3)
         return ODID_HOR_ACC_10_METER;
-    else if (Accuracy > 1)
+    else if (Accuracy >= 1)
         return ODID_HOR_ACC_3_METER;
     else if (Accuracy > 0)
         return ODID_HOR_ACC_1_METER;
@@ -1003,15 +1003,15 @@ ODID_Vertical_accuracy_t createEnumVerticalAccuracy(float Accuracy)
 {
     if (Accuracy >= 150)
         return ODID_VER_ACC_UNKNOWN;
-    else if (Accuracy > 45)
+    else if (Accuracy >= 45)
         return ODID_VER_ACC_150_METER;
-    else if (Accuracy > 25)
+    else if (Accuracy >= 25)
         return ODID_VER_ACC_45_METER;
-    else if (Accuracy > 10)
+    else if (Accuracy >= 10)
         return ODID_VER_ACC_25_METER;
-    else if (Accuracy > 3)
+    else if (Accuracy >= 3)
         return ODID_VER_ACC_10_METER;
-    else if (Accuracy > 1)
+    else if (Accuracy >= 1)
         return ODID_VER_ACC_3_METER;
     else if (Accuracy > 0)
         return ODID_VER_ACC_1_METER;
@@ -1029,11 +1029,11 @@ ODID_Speed_accuracy_t createEnumSpeedAccuracy(float Accuracy)
 {
     if (Accuracy >= 10)
         return ODID_SPEED_ACC_UNKNOWN;
-    else if (Accuracy > 3)
+    else if (Accuracy >= 3)
         return ODID_SPEED_ACC_10_METERS_PER_SECOND;
-    else if (Accuracy > 1)
+    else if (Accuracy >= 1)
         return ODID_SPEED_ACC_3_METERS_PER_SECOND;
-    else if (Accuracy > 0.3f)
+    else if (Accuracy >= 0.3f)
         return ODID_SPEED_ACC_1_METERS_PER_SECOND;
     else if (Accuracy > 0)
         return ODID_SPEED_ACC_0_3_METERS_PER_SECOND;
