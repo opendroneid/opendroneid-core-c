@@ -33,7 +33,7 @@ gabriel.c.cox@intel.com
 #define MIN_SPEED_H     0       // Minimum speed horizontal
 #define MAX_SPEED_H     254.25  // Maximum speed horizontal
 #define INV_SPEED_H     255     // Invalid speed horizontal
-#define MIN_SPEED_V     0       // Minimum speed vertical
+#define MIN_SPEED_V     -62       // Minimum speed vertical
 #define MAX_SPEED_V     62      // Maximum speed vertical
 #define INV_SPEED_V     63      // Invalid speed vertical
 #define MIN_LAT         -90     // Minimum latitude
