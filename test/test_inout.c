@@ -102,13 +102,16 @@ void test_InOut()
     printSelfID_data(&SelfID);
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
 
-    System_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
+    System_data.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
+    System_data.ClassificationType = ODID_CLASSIFICATION_TYPE_EU;
     System_data.OperatorLatitude = Location.Latitude + 0.00001;
     System_data.OperatorLongitude = Location.Longitude + 0.00001;
     System_data.AreaCount = 35;
     System_data.AreaRadius = 75;
     System_data.AreaCeiling = 176.9;
     System_data.AreaFloor = 41.7;
+    System_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
+    System_data.ClassEU = ODID_CLASS_EU_CLASS_3;
     printf("\nSystem\n------\n");
     printSystem_data(&System_data);
     encodeSystemMessage(&System_enc, &System_data);

@@ -146,13 +146,16 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case 4:
-            system_data.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
+            system_data.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
+            system_data.ClassificationType = ODID_CLASSIFICATION_TYPE_EU;
             system_data.OperatorLatitude = simGndLat;
             system_data.OperatorLongitude = simGndLon;
             system_data.AreaCount = 35;
             system_data.AreaRadius = 75;
             system_data.AreaCeiling = 176.9;
             system_data.AreaFloor = 41.7;
+            system_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
+            system_data.ClassEU = ODID_CLASS_EU_CLASS_3;
             encodeSystemMessage(&system_enc, &system_data);
             memcpy(message, &system_enc, ODID_MESSAGE_SIZE);
             break;

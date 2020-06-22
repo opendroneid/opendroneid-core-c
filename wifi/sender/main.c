@@ -283,13 +283,16 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
 	strncpy(drone->SelfID.Desc, description, sizeof(description));
 
 	/* System data */
-	drone->System.LocationSource = ODID_LOCATION_SRC_TAKEOFF;
+	drone->System.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
+	drone->System.ClassificationType = ODID_CLASSIFICATION_TYPE_UNDECLARED;
 	drone->System.OperatorLatitude = drone->Location.Latitude + 0.00001;
 	drone->System.OperatorLongitude = drone->Location.Longitude + 0.00001;
 	drone->System.AreaCount = 20;
 	drone->System.AreaRadius = 50;
 	drone->System.AreaCeiling = 150.0;
 	drone->System.AreaFloor = 25.0;
+	drone->System.CategoryEU = ODID_CATEGORY_EU_UNDECLARED;
+	drone->System.ClassEU = ODID_CLASS_EU_UNDECLARED;
 
 	/* Operator ID */
 	drone->OperatorID.OperatorIdType = ODID_OPERATOR_ID;

@@ -86,13 +86,16 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 	mprintf("\t\t},\n");
 
 	mprintf("\t\t\"Operator\": {\n");
-	mprintf("\t\t\t\"LocationSource\": %d,\n", UAS_Data->System.LocationSource);
+	mprintf("\t\t\t\"OperatorLocationType\": %d,\n", UAS_Data->System.OperatorLocationType);
+	mprintf("\t\t\t\"ClassificationType\": %d,\n", UAS_Data->System.ClassificationType);
 	mprintf("\t\t\t\"OperatorLatitude\": %f,\n", UAS_Data->System.OperatorLatitude);
 	mprintf("\t\t\t\"OperatorLongitude\": %f,\n", UAS_Data->System.OperatorLongitude);
 	mprintf("\t\t\t\"AreaCount\": %d,\n", UAS_Data->System.AreaCount);
 	mprintf("\t\t\t\"AreaRadius\": %d,\n", UAS_Data->System.AreaRadius);
 	mprintf("\t\t\t\"AreaCeiling\": %f\n", UAS_Data->System.AreaCeiling);
 	mprintf("\t\t\t\"AreaFloor\": %f\n", UAS_Data->System.AreaFloor);
+	mprintf("\t\t\t\"CategoryEU\": %d,\n", UAS_Data->System.CategoryEU);
+	mprintf("\t\t\t\"ClassEU\": %d,\n", UAS_Data->System.ClassEU);
 	mprintf("\t\t}\n");
 
 	mprintf("\t\t\"OperatorID\": {\n");
