@@ -18,9 +18,9 @@ gabriel.c.cox@intel.com
 #define ENABLE_DEBUG 1
 
 const float SPEED_DIV[2] = {0.25f, 0.75f};
-const float VSPEED_DIV = 0.5;
+const float VSPEED_DIV = 0.5f;
 const int32_t LATLON_MULT = 10000000;
-const float ALT_DIV = 0.5;
+const float ALT_DIV = 0.5f;
 const int ALT_ADDER = 1000;
 const int DATA_AGE_DIV = 10;
 

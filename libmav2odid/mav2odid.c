@@ -217,8 +217,8 @@ static int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *mavLo
     location.Direction = (float) mavLocation->direction / 100;
     location.SpeedHorizontal = (float) mavLocation->speed_horizontal / 100;
     location.SpeedVertical = (float) mavLocation->speed_vertical / 100;
-    location.Latitude = (float) mavLocation->latitude / 1E7;
-    location.Longitude = (float) mavLocation->longitude / 1E7;
+    location.Latitude = (double) mavLocation->latitude / 1E7;
+    location.Longitude = (double) mavLocation->longitude / 1E7;
     location.AltitudeBaro = mavLocation->altitude_barometric;
     location.AltitudeGeo = mavLocation->altitude_geodetic;
     location.HeightType = (ODID_Height_reference_t) mavLocation->height_reference;
@@ -289,8 +289,8 @@ static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem
         (ODID_operator_location_type_t) mavSystem->operator_location_type;
     system.ClassificationType =
         (ODID_classification_type_t) mavSystem->classification_type;
-    system.OperatorLatitude = (float) mavSystem->operator_latitude / 1E7;
-    system.OperatorLongitude = (float) mavSystem->operator_longitude / 1E7;
+    system.OperatorLatitude = (double) mavSystem->operator_latitude / 1E7;
+    system.OperatorLongitude = (double) mavSystem->operator_longitude / 1E7;
     system.AreaCount = mavSystem->area_count;
     system.AreaRadius = mavSystem->area_radius;
     system.AreaCeiling = mavSystem->area_ceiling;

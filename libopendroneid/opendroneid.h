@@ -31,7 +31,7 @@ gabriel.c.cox@intel.com
 #define MAX_DIR         360     // Maximum direction
 #define INV_DIR         361     // Invalid direction
 #define MIN_SPEED_H     0       // Minimum speed horizontal
-#define MAX_SPEED_H     254.25  // Maximum speed horizontal
+#define MAX_SPEED_H     254.25f // Maximum speed horizontal
 #define INV_SPEED_H     255     // Invalid speed horizontal
 #define MIN_SPEED_V     -62     // Minimum speed vertical
 #define MAX_SPEED_V     62      // Maximum speed vertical
@@ -41,7 +41,7 @@ gabriel.c.cox@intel.com
 #define MIN_LON         -180    // Minimum longitude
 #define MAX_LON         180     // Maximum longitude
 #define MIN_ALT         -1000   // Minimum altitude
-#define MAX_ALT         31767.5 // Maximum altitude
+#define MAX_ALT         31767.5f// Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
 #define MAX_TIMESTAMP   (60 * 60 * 10)
 #define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE) + \
