@@ -103,7 +103,7 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
                              ODID_messagetype_t *msgType)
 {
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-    uint16_t length = mavlink_msg_to_send_buffer(buf, msg);
+    mavlink_msg_to_send_buffer(buf, msg);
 
     ODID_messagetype_t msg_type = ODID_MESSAGETYPE_INVALID;
     int i = 0;
