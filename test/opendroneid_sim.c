@@ -32,8 +32,8 @@ ODID_System_data system_data;
 ODID_OperatorID_data operatorID_data;
 
 const int SIM_STEPS = 20;
-const float SIM_STEP_SIZE = 0.0001;
-const float DISTANCE_PER_LAT = 111699.0;
+const double SIM_STEP_SIZE = 0.0001;
+const double DISTANCE_PER_LAT = 111699.0;
 
 
 double simLat = 45.5393092;

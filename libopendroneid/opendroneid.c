@@ -1290,16 +1290,18 @@ void printLocation_data(ODID_Location_data *Location)
         "%.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, "\
         "%.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, "\
         "%.1f, %.1f\nTimeStamp: %.2f\n";
-    printf(ODID_Location_data_format, Location->Status, Location->Direction,
-        Location->SpeedHorizontal, Location->SpeedVertical, Location->Latitude,
+    printf(ODID_Location_data_format, Location->Status,
+        (double) Location->Direction, (double) Location->SpeedHorizontal,
+        (double) Location->SpeedVertical, Location->Latitude,
         Location->Longitude, Location->HeightType ? "Ground" : "TakeOff",
-        Location->AltitudeBaro, Location->AltitudeGeo, Location->Height,
-        decodeHorizontalAccuracy(Location->HorizAccuracy),
-        decodeVerticalAccuracy(Location->VertAccuracy),
-        decodeVerticalAccuracy(Location->BaroAccuracy),
-        decodeSpeedAccuracy(Location->SpeedAccuracy),
-        decodeTimestampAccuracy(Location->TSAccuracy),
-        Location->TimeStamp);
+        (double) Location->AltitudeBaro, (double) Location->AltitudeGeo,
+        (double) Location->Height,
+        (double) decodeHorizontalAccuracy(Location->HorizAccuracy),
+        (double) decodeVerticalAccuracy(Location->VertAccuracy),
+        (double) decodeVerticalAccuracy(Location->BaroAccuracy),
+        (double) decodeSpeedAccuracy(Location->SpeedAccuracy),
+        (double) decodeTimestampAccuracy(Location->TSAccuracy),
+        (double) Location->TimeStamp);
 }
 
 /**
@@ -1357,7 +1359,7 @@ void printSystem_data(ODID_System_data *System_data)
         System_data->ClassificationType,
         System_data->OperatorLatitude, System_data->OperatorLongitude,
         System_data->AreaCount, System_data->AreaRadius,
-        System_data->AreaCeiling, System_data->AreaFloor,
+        (double) System_data->AreaCeiling, (double) System_data->AreaFloor,
         System_data->CategoryEU, System_data->ClassEU);
 }
 

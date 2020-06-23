@@ -234,8 +234,10 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 	       "TimeStamp: %f, time since last hour (100ms): %ld, TSAccuracy: %d\n\t"
 	       "Direction: %f, SpeedHorizontal: %f, SpeedVertical: %f\n\t"
 	       "Latitude: %f, Longitude: %f\n",
-	       drone->Location.TimeStamp, (uint64_t)(drone->Location.TimeStamp*10)%36000, drone->Location.TSAccuracy,
-	       drone->Location.Direction, drone->Location.SpeedHorizontal, drone->Location.SpeedVertical,
+	       (double) drone->Location.TimeStamp,
+		   (uint64_t)(drone->Location.TimeStamp*10)%36000, drone->Location.TSAccuracy,
+	       (double) drone->Location.Direction, (double) drone->Location.SpeedHorizontal,
+		   (double) drone->Location.SpeedVertical,
 	       drone->Location.Latitude, drone->Location.Longitude
 	);
 }
