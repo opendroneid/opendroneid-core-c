@@ -18,9 +18,9 @@ gabriel.c.cox@intel.com
 #define ENABLE_DEBUG 1
 
 const float SPEED_DIV[2] = {0.25f, 0.75f};
-const float VSPEED_DIV = 0.5;
+const float VSPEED_DIV = 0.5f;
 const int32_t LATLON_MULT = 10000000;
-const float ALT_DIV = 0.5;
+const float ALT_DIV = 0.5f;
 const int ALT_ADDER = 1000;
 const int DATA_AGE_DIV = 10;
 
@@ -398,7 +398,11 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
 */
 int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
 {
-    if (!outEncoded || !inData || !intInRange(inData->LocationSource, 0, 3))
+    if (!outEncoded || !inData ||
+        !intInRange(inData->OperatorLocationType, 0, 3) ||
+        !intInRange(inData->ClassificationType, 0, 7) ||
+        !intInRange(inData->CategoryEU, 0, 15) ||
+        !intInRange(inData->ClassEU, 0, 15))
         return ODID_FAIL;
 
     if (inData->OperatorLatitude < MIN_LAT || inData->OperatorLatitude > MAX_LAT ||
@@ -415,13 +419,16 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
     outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
     outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
     outEncoded->Reserved = 0;
-    outEncoded->LocationSource = inData->LocationSource;
+    outEncoded->OperatorLocationType = inData->OperatorLocationType;
+    outEncoded->ClassificationType = inData->ClassificationType;
     outEncoded->OperatorLatitude = encodeLatLon(inData->OperatorLatitude);
     outEncoded->OperatorLongitude = encodeLatLon(inData->OperatorLongitude);
     outEncoded->AreaCount = inData->AreaCount;
     outEncoded->AreaRadius = encodeAreaRadius(inData->AreaRadius);
     outEncoded->AreaCeiling = encodeAltitude(inData->AreaCeiling);
     outEncoded->AreaFloor = encodeAltitude(inData->AreaFloor);
+    outEncoded->CategoryEU = inData->CategoryEU;
+    outEncoded->ClassEU = inData->ClassEU;
     memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
     return ODID_SUCCESS;
 }
@@ -732,13 +739,18 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
         inEncoded->MessageType != ODID_MESSAGETYPE_SYSTEM)
         return ODID_FAIL;
 
-    outData->LocationSource = (ODID_location_source_t) inEncoded->LocationSource;
+    outData->OperatorLocationType =
+        (ODID_operator_location_type_t) inEncoded->OperatorLocationType;
+    outData->ClassificationType =
+        (ODID_classification_type_t) inEncoded->ClassificationType;
     outData->OperatorLatitude = decodeLatLon(inEncoded->OperatorLatitude);
     outData->OperatorLongitude = decodeLatLon(inEncoded->OperatorLongitude);
     outData->AreaCount = inEncoded->AreaCount;
     outData->AreaRadius = decodeAreaRadius(inEncoded->AreaRadius);
     outData->AreaCeiling = decodeAltitude(inEncoded->AreaCeiling);
     outData->AreaFloor = decodeAltitude(inEncoded->AreaFloor);
+    outData->CategoryEU = (ODID_category_EU_t) inEncoded->CategoryEU;
+    outData->ClassEU = (ODID_class_EU_t) inEncoded->ClassEU;
     return ODID_SUCCESS;
 }
 
@@ -1278,16 +1290,18 @@ void printLocation_data(ODID_Location_data *Location)
         "%.2f\nLat/Lon: %.7f, %.7f\nAlt: Baro, Geo, Height above %s: %.2f, "\
         "%.2f, %.2f\nHoriz, Vert, Baro, Speed, TS Accuracy: %.1f, %.1f, %.1f, "\
         "%.1f, %.1f\nTimeStamp: %.2f\n";
-    printf(ODID_Location_data_format, Location->Status, Location->Direction,
-        Location->SpeedHorizontal, Location->SpeedVertical, Location->Latitude,
+    printf(ODID_Location_data_format, Location->Status,
+        (double) Location->Direction, (double) Location->SpeedHorizontal,
+        (double) Location->SpeedVertical, Location->Latitude,
         Location->Longitude, Location->HeightType ? "Ground" : "TakeOff",
-        Location->AltitudeBaro, Location->AltitudeGeo, Location->Height,
-        decodeHorizontalAccuracy(Location->HorizAccuracy),
-        decodeVerticalAccuracy(Location->VertAccuracy),
-        decodeVerticalAccuracy(Location->BaroAccuracy),
-        decodeSpeedAccuracy(Location->SpeedAccuracy),
-        decodeTimestampAccuracy(Location->TSAccuracy),
-        Location->TimeStamp);
+        (double) Location->AltitudeBaro, (double) Location->AltitudeGeo,
+        (double) Location->Height,
+        (double) decodeHorizontalAccuracy(Location->HorizAccuracy),
+        (double) decodeVerticalAccuracy(Location->VertAccuracy),
+        (double) decodeVerticalAccuracy(Location->BaroAccuracy),
+        (double) decodeSpeedAccuracy(Location->SpeedAccuracy),
+        (double) decodeTimestampAccuracy(Location->TSAccuracy),
+        (double) Location->TimeStamp);
 }
 
 /**
@@ -1337,12 +1351,16 @@ void printSelfID_data(ODID_SelfID_data *SelfID)
 */
 void printSystem_data(ODID_System_data *System_data)
 {
-    const char ODID_System_data_format[] = "Location Source: %d\nLat/Lon: "\
-        "%.7f, %.7f\nArea Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n";
-    printf(ODID_System_data_format, System_data->LocationSource,
+    const char ODID_System_data_format[] = "Operator Location Type: %d\n"
+        "Classification Type: %d\nLat/Lon: %.7f, %.7f\n"
+        "Area Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n"
+        "Category EU: %d, Class EU: %d\n";
+    printf(ODID_System_data_format, System_data->OperatorLocationType,
+        System_data->ClassificationType,
         System_data->OperatorLatitude, System_data->OperatorLongitude,
         System_data->AreaCount, System_data->AreaRadius,
-        System_data->AreaCeiling, System_data->AreaFloor);
+        (double) System_data->AreaCeiling, (double) System_data->AreaFloor,
+        System_data->CategoryEU, System_data->ClassEU);
 }
 
 /**

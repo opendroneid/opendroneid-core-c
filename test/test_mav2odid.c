@@ -37,11 +37,11 @@ static void print_mavlink_location(mavlink_open_drone_id_location_t *location)
            location->status, location->direction, location->speed_horizontal,
            location->speed_vertical, location->latitude, location->longitude,
            location->height_reference ? "Ground" : "TakeOff",
-           location->altitude_barometric, location->altitude_geodetic,
-           location->height,
+           (double) location->altitude_barometric,
+           (double) location->altitude_geodetic, (double) location->height,
            location->horizontal_accuracy, location->vertical_accuracy,
            location->barometer_accuracy, location->speed_accuracy,
-           location->timestamp_accuracy, location->timestamp);
+           location->timestamp_accuracy, (double) location->timestamp);
 }
 
 static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
@@ -73,11 +73,15 @@ static void print_mavlink_selfID(mavlink_open_drone_id_self_id_t *self_id)
 
 static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
 {
-    printf("Location Source: %d\nLat/Lon: %d, %d degE7, Area Count, Radius: %d, %d, \n"\
-           "Ceiling, Floor: %.2f, %.2f m\n",
-           system->flags, system->operator_latitude,
-           system->operator_longitude, system->area_count,
-           system->area_radius, system->area_ceiling, system->area_floor);
+    printf("Operator Location Type: %d, Classification Type: %d\n"
+           "Lat/Lon: %d, %d degE7, \n"
+           "Area Count, Radius: %d, %d, Ceiling, Floor: %.2f, %.2f m\n"
+           "Category EU: %d, Class EU: %d\n",
+           system->operator_location_type, system->classification_type,
+           system->operator_latitude, system->operator_longitude,
+           system->area_count, system->area_radius,
+           (double) system->area_ceiling, (double) system->area_floor,
+           system->category_eu, system->class_eu);
 }
 
 static void print_mavlink_operatorID(mavlink_open_drone_id_operator_id_t *operator_id)
@@ -99,7 +103,7 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
                              ODID_messagetype_t *msgType)
 {
     uint8_t buf[MAVLINK_MAX_PACKET_LEN];
-    uint16_t length = mavlink_msg_to_send_buffer(buf, msg);
+    mavlink_msg_to_send_buffer(buf, msg);
 
     ODID_messagetype_t msg_type = ODID_MESSAGETYPE_INVALID;
     int i = 0;
@@ -142,7 +146,7 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_basic_id_t basic_id = {
-        .ua_type = MAV_ODID_UA_TYPE_ROTORCRAFT,
+        .ua_type = MAV_ODID_UA_TYPE_HELICOPTER_OR_MULTIROTOR,
         .id_type = MAV_ODID_ID_TYPE_SERIAL_NUMBER,
         .uas_id = "9876543210ABCDEFGHJK" };
 
@@ -177,7 +181,7 @@ static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .direction = (uint16_t) (27.4f * 100),
         .speed_horizontal = (uint16_t) (4.25f * 100),
         .speed_vertical = (uint16_t) (4.5f * 100),
-        .latitude = (int32_t) (51.477f * 1E7),
+        .latitude = (int32_t) (51.477 * 1E7),
         .longitude = (int32_t) (0.0005 * 1E7),
         .altitude_barometric = 37.5f,
         .altitude_geodetic = 36.5f,
@@ -282,13 +286,16 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_system_t system = {
-        .flags = MAV_ODID_LOCATION_SRC_TAKEOFF,
-        .operator_latitude = (int32_t) (51.477f * 1E7),
-        .operator_longitude = (int32_t) (0.0005f * 1E7),
+        .operator_location_type = MAV_ODID_OPERATOR_LOCATION_TYPE_TAKEOFF,
+        .classification_type = MAV_ODID_CLASSIFICATION_TYPE_EU,
+        .operator_latitude = (int32_t) (51.477 * 1E7),
+        .operator_longitude = (int32_t) (0.0005 * 1E7),
         .area_count = 350,
         .area_radius = 55,
         .area_ceiling = 75.5f,
-        .area_floor = 26.5f };
+        .area_floor = 26.5f,
+        .category_eu = MAV_ODID_CATEGORY_EU_CERTIFIED,
+        .class_eu = MAV_ODID_CLASS_EU_CLASS_5 };
 
     printf("\n\n------------------------System------------------------\n\n");
     print_mavlink_system(&system);

@@ -217,8 +217,8 @@ static int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *mavLo
     location.Direction = (float) mavLocation->direction / 100;
     location.SpeedHorizontal = (float) mavLocation->speed_horizontal / 100;
     location.SpeedVertical = (float) mavLocation->speed_vertical / 100;
-    location.Latitude = (float) mavLocation->latitude / 1E7;
-    location.Longitude = (float) mavLocation->longitude / 1E7;
+    location.Latitude = (double) mavLocation->latitude / 1E7;
+    location.Longitude = (double) mavLocation->longitude / 1E7;
     location.AltitudeBaro = mavLocation->altitude_barometric;
     location.AltitudeGeo = mavLocation->altitude_geodetic;
     location.HeightType = (ODID_Height_reference_t) mavLocation->height_reference;
@@ -285,13 +285,18 @@ static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *mavSelfI
 static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem)
 {
     ODID_System_data system;
-    system.LocationSource = (ODID_location_source_t) mavSystem->flags;
-    system.OperatorLatitude = (float) mavSystem->operator_latitude / 1E7;
-    system.OperatorLongitude = (float) mavSystem->operator_longitude / 1E7;
+    system.OperatorLocationType =
+        (ODID_operator_location_type_t) mavSystem->operator_location_type;
+    system.ClassificationType =
+        (ODID_classification_type_t) mavSystem->classification_type;
+    system.OperatorLatitude = (double) mavSystem->operator_latitude / 1E7;
+    system.OperatorLongitude = (double) mavSystem->operator_longitude / 1E7;
     system.AreaCount = mavSystem->area_count;
     system.AreaRadius = mavSystem->area_radius;
     system.AreaCeiling = mavSystem->area_ceiling;
     system.AreaFloor = mavSystem->area_floor;
+    system.CategoryEU = (ODID_category_EU_t) mavSystem->category_eu;
+    system.ClassEU = (ODID_class_EU_t) mavSystem->class_eu;
 
     return encodeSystemMessage(&m2o->systemEnc, &system);
 }
@@ -498,13 +503,18 @@ void m2o_selfId2Mavlink(mavlink_open_drone_id_self_id_t *mavSelfID,
 void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
                         ODID_System_data *system)
 {
-    mavSystem->flags = (MAV_ODID_LOCATION_SRC) system->LocationSource;
+    mavSystem->operator_location_type =
+        (MAV_ODID_OPERATOR_LOCATION_TYPE) system->OperatorLocationType;
+    mavSystem->classification_type =
+        (MAV_ODID_CLASSIFICATION_TYPE) system->ClassificationType;
     mavSystem->operator_latitude = (int32_t) (system->OperatorLatitude * 1E7);
     mavSystem->operator_longitude = (int32_t) (system->OperatorLongitude * 1E7);
     mavSystem->area_count = system->AreaCount;
     mavSystem->area_radius = system->AreaRadius;
     mavSystem->area_ceiling = system->AreaCeiling;
     mavSystem->area_floor = system->AreaFloor;
+    mavSystem->category_eu = (ODID_category_EU_t) system->CategoryEU;
+    mavSystem->class_eu = (ODID_class_EU_t) system->ClassEU;
 }
 
 /**

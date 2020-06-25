@@ -31,9 +31,9 @@ gabriel.c.cox@intel.com
 #define MAX_DIR         360     // Maximum direction
 #define INV_DIR         361     // Invalid direction
 #define MIN_SPEED_H     0       // Minimum speed horizontal
-#define MAX_SPEED_H     254.25  // Maximum speed horizontal
+#define MAX_SPEED_H     254.25f // Maximum speed horizontal
 #define INV_SPEED_H     255     // Invalid speed horizontal
-#define MIN_SPEED_V     -62       // Minimum speed vertical
+#define MIN_SPEED_V     -62     // Minimum speed vertical
 #define MAX_SPEED_V     62      // Maximum speed vertical
 #define INV_SPEED_V     63      // Invalid speed vertical
 #define MIN_LAT         -90     // Minimum latitude
@@ -41,7 +41,7 @@ gabriel.c.cox@intel.com
 #define MIN_LON         -180    // Minimum longitude
 #define MAX_LON         180     // Maximum longitude
 #define MIN_ALT         -1000   // Minimum altitude
-#define MAX_ALT         31767.5 // Maximum altitude
+#define MAX_ALT         31767.5f// Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
 #define MAX_TIMESTAMP   (60 * 60 * 10)
 #define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE) + \
@@ -90,6 +90,7 @@ typedef enum ODID_status {
     ODID_STATUS_UNDECLARED = 0,
     ODID_STATUS_GROUND = 1,
     ODID_STATUS_AIRBORNE = 2,
+    ODID_STATUS_EMERGENCY = 3,
     // 3 to 15 reserved
 } ODID_status_t;
 
@@ -175,12 +176,38 @@ typedef enum ODID_operatorIdType {
     // 201 to 255 available for private use
 } ODID_operatorIdType_t;
 
-typedef enum ODID_location_source {
-    ODID_LOCATION_SRC_TAKEOFF = 0,
-    ODID_LOCATION_SRC_LIVE_GNSS = 1,
-    ODID_LOCATION_SRC_FIXED = 2,
+typedef enum ODID_operator_location_type {
+    ODID_OPERATOR_LOCATION_TYPE_TAKEOFF = 0,
+    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1,
+    ODID_OPERATOR_LOCATION_TYPE_FIXED = 2,
     // 3 to 255 reserved
-} ODID_location_source_t;
+} ODID_operator_location_type_t;
+
+typedef enum ODID_classification_type {
+    ODID_CLASSIFICATION_TYPE_UNDECLARED = 0,
+    ODID_CLASSIFICATION_TYPE_EU = 1, // European Union
+    // 2 to 7 reserved
+} ODID_classification_type_t;
+
+typedef enum ODID_category_EU {
+    ODID_CATEGORY_EU_UNDECLARED = 0,
+    ODID_CATEGORY_EU_OPEN = 1,
+    ODID_CATEGORY_EU_SPECIFIC = 2,
+    ODID_CATEGORY_EU_CERTIFIED = 3,
+    // 4 to 15 reserved
+} ODID_category_EU_t;
+
+typedef enum ODID_class_EU {
+    ODID_CLASS_EU_UNDECLARED = 0,
+    ODID_CLASS_EU_CLASS_0 = 1,
+    ODID_CLASS_EU_CLASS_1 = 2,
+    ODID_CLASS_EU_CLASS_2 = 3,
+    ODID_CLASS_EU_CLASS_3 = 4,
+    ODID_CLASS_EU_CLASS_4 = 5,
+    ODID_CLASS_EU_CLASS_5 = 6,
+    ODID_CLASS_EU_CLASS_6 = 7,
+    // 8 to 15 reserved
+} ODID_class_EU_t;
 
  /*
  * @name ODID_DataStructs
@@ -236,13 +263,16 @@ typedef struct {
 } ODID_SelfID_data;
 
 typedef struct {
-    ODID_location_source_t LocationSource;
+    ODID_operator_location_type_t OperatorLocationType;
+    ODID_classification_type_t ClassificationType;
     double OperatorLatitude;  // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
     double OperatorLongitude; // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
     uint16_t AreaCount;       // Default 1
     uint16_t AreaRadius;      // meter. Default 0
     float AreaCeiling;        // meter. Invalid, No Value, or Unknown: -1000m
     float AreaFloor;          // meter. Invalid, No Value, or Unknown: -1000m
+    ODID_category_EU_t CategoryEU; // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
+    ODID_class_EU_t ClassEU;       // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
 } ODID_System_data;
 
 typedef struct {
@@ -382,9 +412,10 @@ typedef struct __attribute__((__packed__)) {
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
 
-    // Byte 1 [Reserved][LocationSource]
-    uint8_t Reserved: 7;
-    uint8_t LocationSource: 1;
+    // Byte 1 [Reserved][ClassificationType][OperatorLocationType]  -- must define LSb first
+    uint8_t OperatorLocationType: 2;
+    uint8_t ClassificationType: 3;
+    uint8_t Reserved: 3;
 
     // Byte 2-9
     int32_t OperatorLatitude;
@@ -396,8 +427,12 @@ typedef struct __attribute__((__packed__)) {
     uint16_t AreaCeiling;
     uint16_t AreaFloor;
 
-    // Byte 17-24
-    char Reserved2[8];
+    // Byte 17 [CategoryEU][ClassEU]  -- must define LSb first
+    uint8_t ClassEU: 4;
+    uint8_t CategoryEU: 4;
+
+    // Byte 18-24
+    char Reserved2[7];
 } ODID_System_encoded;
 
 typedef struct __attribute__((__packed__)) {
