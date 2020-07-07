@@ -649,8 +649,7 @@ struct __attribute__((__packed__)) nan_service_id_list_attribute {
 };
 
 struct __attribute__((__packed__)) nan_service_descriptor_attribute {
-	uint8_t attribute_id;
-	uint16_t length;
+	struct nan_attribute_header header;
 	uint8_t service_id[6];
 	uint8_t instance_id;
 	uint8_t requestor_instance_id;

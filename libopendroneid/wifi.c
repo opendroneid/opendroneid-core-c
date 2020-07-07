@@ -308,7 +308,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 		return -ENOMEM;
 
 	nsda = (struct nan_service_descriptor_attribute *)(buf + len);
-	nsda->attribute_id = 0x3;		/* Service Descriptor Attribute type */
+	nsda->header.attribute_id = 0x3;		/* Service Descriptor Attribute type */
 	memcpy(nsda->service_id, service_id, sizeof(service_id));
 	/* always 1 */
 	nsda->instance_id = 0x01;		/* always 1 */
@@ -332,7 +332,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 
 	/* set the lengths according to the message pack lengths */
 	nsda->service_info_length = sizeof(*si) + ret;
-	nsda->length = cpu_to_le16(sizeof(*nsda) - sizeof(struct nan_attribute_header) + nsda->service_info_length);
+	nsda->header.length = cpu_to_le16(sizeof(*nsda) - sizeof(struct nan_attribute_header) + nsda->service_info_length);
 
 	/* NAN Attribute for Service Descriptor extension header */
 	if (len + sizeof(*nsdea) > buf_size)
@@ -403,7 +403,7 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
 
 	/* check NAN service descriptor attribute fields */
 	nsda = (struct nan_service_descriptor_attribute *)(buf + len);
-	if (nsda->attribute_id != 0x3)
+	if (nsda->header.attribute_id != 0x3)
 		return -EINVAL;
 	if (memcmp(nsda->service_id, service_id, sizeof(service_id)) != 0)
 		return -EINVAL;
