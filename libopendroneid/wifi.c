@@ -36,6 +36,27 @@ sw@simonwunderlich.de
 #define IEEE80211_STYPE_ACTION          0x00D0
 #define IEEE80211_STYPE_BEACON          0x0080
 
+/* Neighbor Awareness Networking Specification v3.1 in section 2.8.2
+ * The NAN Cluster ID is a MAC address that takes a value from
+ * 50-6F-9A-01-00-00 to 50-6F-9A-01-FF-FF and is carried in the A3 field of
+ * some of the NAN frames. The NAN Cluster ID is randomly chosen by the device
+ * that initiates the NAN Cluster.
+ */
+uint8_t* get_nan_cluster_id()
+{
+	static uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
+	static int generated = 0;
+
+	if (generated == 0)
+	{
+		srand(time(NULL));
+		cluster_id[4] = rand() % 256;
+		cluster_id[5] = rand() % 256;
+		generated = 1;
+	}
+
+	return cluster_id;
+}
 
 void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 {
@@ -146,10 +167,12 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
 
 int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size)
 {
+	/* Broadcast address */
 	uint8_t target_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-	uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0xAF, 0xBF };
 	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
+	/* "org.opendroneid.remoteid" hash */
 	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
+	uint8_t *cluster_id = get_nan_cluster_id();
 	struct ieee80211_mgmt *mgmt;
 	struct ieee80211_beacon *beacon;
 	struct nan_master_indication_attribute *master_indication_attr;
@@ -245,6 +268,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	/* "org.opendroneid.remoteid" hash */
 	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
 	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
+	uint8_t *cluster_id = get_nan_cluster_id();
 	struct ieee80211_mgmt *mgmt;
 	struct nan_service_discovery *nsd;
 	struct nan_service_descriptor_attribute *nsda;
@@ -262,7 +286,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	mgmt->duration = 0;
 	memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
 	memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
-	memcpy(mgmt->bssid, mac, sizeof(mgmt->bssid));
+	memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
 	mgmt->seq_ctrl = 0;
 
 	len += sizeof(*mgmt);
