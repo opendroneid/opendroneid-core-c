@@ -549,6 +549,16 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size);
  */
 int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen);
 
+/* odid_wifi_build_nan_sync_beacon_frame - creates a NAN sync beacon frame
+ * that shall be send just before the NAN action frame.
+ * @mac: mac address of the wifi adapter where the NAN frame will be sent
+ * @buf: pointer to buffer space where the NAN will be written to
+ * @buf_size: maximum size of the buffer
+ *
+ * Returns the packet length on success, or < 0 on error.
+ */
+int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size);
+
 /* odid_wifi_build_message_pack_nan_action_frame - creates a message pack
  * with each type of message from the drone information into an NAN action fram
  * @UAS_Data: general drone status information
@@ -596,6 +606,16 @@ struct __attribute__((__packed__)) ieee80211_mgmt {
 	uint16_t seq_ctrl;
 };
 
+struct __attribute__((__packed__)) ieee80211_beacon {
+	uint64_t timestamp;
+	uint16_t beacon_interval;
+	uint16_t capability;
+	uint8_t element_id;
+	uint8_t length;
+	uint8_t oui[3];
+	uint8_t oui_type;
+};
+
 struct __attribute__((__packed__)) nan_service_discovery {
 	uint8_t category;
 	uint8_t action_code;
@@ -606,6 +626,26 @@ struct __attribute__((__packed__)) nan_service_discovery {
 struct __attribute__((__packed__)) nan_attribute_header {
 	uint8_t attribute_id;
 	uint16_t length;
+};
+
+struct __attribute__((__packed__)) nan_master_indication_attribute {
+	struct nan_attribute_header header;
+	uint8_t master_preference;
+	uint8_t random_factor;
+};
+
+struct __attribute__((__packed__)) nan_cluster_attribute {
+	struct nan_attribute_header header;
+	uint8_t device_mac[6];
+	uint8_t random_factor;
+	uint8_t master_preference;
+	uint8_t hop_count_to_anchor_master;
+	uint8_t anchor_master_beacon_transmission_time[4];
+};
+
+struct __attribute__((__packed__)) nan_service_id_list_attribute {
+	struct nan_attribute_header header;
+	uint8_t service_id[6];
 };
 
 struct __attribute__((__packed__)) nan_service_descriptor_attribute {
