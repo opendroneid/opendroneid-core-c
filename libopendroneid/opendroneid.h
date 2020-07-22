@@ -15,6 +15,11 @@ gabriel.c.cox@intel.com
 
 #include <stdint.h>
 #include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ODID_MESSAGE_SIZE 25
 #define ODID_ID_SIZE 20
 #define ODID_STR_SIZE 23
@@ -627,5 +632,9 @@ void printSelfID_data(ODID_SelfID_data *SelfID);
 void printOperatorID_data(ODID_OperatorID_data *OperatorID);
 void printSystem_data(ODID_System_data *System_data);
 #endif // ODID_DISABLE_PRINTF
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _OPENDRONEID_H_
