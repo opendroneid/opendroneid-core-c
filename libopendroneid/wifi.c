@@ -153,6 +153,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	struct ieee80211_mgmt *mgmt;
 	struct nan_service_discovery *nsd;
 	struct nan_service_descriptor_attribute *nsda;
+	struct nan_service_descriptor_extension_attribute *nsdea;
 	struct ODID_service_info *si;
 	long ret, len = 0;
 
@@ -213,6 +214,18 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	/* set the lengths according to the message pack lengths */
 	nsda->service_info_length = sizeof(*si) + ret;
 	nsda->length = cpu_to_le16(sizeof(*nsda) - sizeof(struct nan_attribute_header) + nsda->service_info_length);
+
+	/* NAN Attribute for Service Descriptor extension header */
+	if (len + sizeof(*nsdea) > buf_size)
+		return -ENOMEM;
+
+	nsdea = (struct nan_service_descriptor_extension_attribute *)(buf + len);
+	nsdea->header.attribute_id = 0xE;
+	nsdea->header.length = cpu_to_le16(0x0004);
+	nsdea->instance_id = 0x01;
+	nsdea->control = cpu_to_le16(0x0200);
+	nsdea->service_update_indicator = send_counter;
+	len += sizeof(*nsdea);
 
 	return len;
 }

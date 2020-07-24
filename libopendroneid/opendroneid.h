@@ -618,6 +618,13 @@ struct __attribute__((__packed__)) nan_service_descriptor_attribute {
 	uint8_t service_info_length;
 };
 
+struct __attribute__((__packed__)) nan_service_descriptor_extension_attribute {
+	struct nan_attribute_header header;
+	uint8_t instance_id;
+	uint16_t control;
+	uint8_t service_update_indicator;
+};
+
 struct __attribute__((__packed__)) ODID_service_info {
 	uint8_t message_counter;
 	ODID_MessagePack_encoded odid_message_pack[];
