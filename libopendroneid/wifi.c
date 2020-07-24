@@ -17,13 +17,16 @@ sw@simonwunderlich.de
 #include <stdarg.h>
 #include <errno.h>
 #include <byteswap.h>
+#include <time.h>
 
 #include "opendroneid.h"
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define cpu_to_le16(x)  (x)
+#define cpu_to_le64(x)  (x)
 #else
 #define cpu_to_le16(x)      (bswap_16(x))
+#define cpu_to_le64(x)      (bswap_64(x))
 #endif
 
 #define IEEE80211_FCTL_FTYPE          0x000c
@@ -31,7 +34,29 @@ sw@simonwunderlich.de
 
 #define IEEE80211_FTYPE_MGMT            0x0000
 #define IEEE80211_STYPE_ACTION          0x00D0
+#define IEEE80211_STYPE_BEACON          0x0080
 
+/* Neighbor Awareness Networking Specification v3.1 in section 2.8.2
+ * The NAN Cluster ID is a MAC address that takes a value from
+ * 50-6F-9A-01-00-00 to 50-6F-9A-01-FF-FF and is carried in the A3 field of
+ * some of the NAN frames. The NAN Cluster ID is randomly chosen by the device
+ * that initiates the NAN Cluster.
+ */
+uint8_t* get_nan_cluster_id()
+{
+	static uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
+	static int generated = 0;
+
+	if (generated == 0)
+	{
+		srand(time(NULL));
+		cluster_id[4] = rand() % 256;
+		cluster_id[5] = rand() % 256;
+		generated = 1;
+	}
+
+	return cluster_id;
+}
 
 void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 {
@@ -140,6 +165,99 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
 	return len;
 }
 
+int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size)
+{
+	/* Broadcast address */
+	uint8_t target_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
+	/* "org.opendroneid.remoteid" hash */
+	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
+	uint8_t *cluster_id = get_nan_cluster_id();
+	struct ieee80211_mgmt *mgmt;
+	struct ieee80211_beacon *beacon;
+	struct nan_master_indication_attribute *master_indication_attr;
+	struct nan_cluster_attribute *cluster_attr;
+	struct nan_service_id_list_attribute *nsila;
+	struct timespec ts;
+	long len = 0;
+
+	/* IEEE 802.11 Management Header */
+	if (len + sizeof(*mgmt) > buf_size)
+		return -ENOMEM;
+
+	mgmt = (struct ieee80211_mgmt *)(buf + len);
+	memset(mgmt, 0, sizeof(*mgmt));
+	mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_BEACON);
+	mgmt->duration = 0;
+	memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
+	memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
+	memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
+	mgmt->seq_ctrl = 0;
+	len += sizeof(*mgmt);
+
+	/* Beacon */
+	if (len + sizeof(*beacon) > buf_size)
+		return -ENOMEM;
+
+	beacon = (struct ieee80211_beacon *)(buf + len);
+	memset(beacon, 0, sizeof(*beacon));
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	uint64_t mono = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
+	beacon->timestamp = cpu_to_le64(mono);
+	beacon->beacon_interval = cpu_to_le16(0x0200);
+	beacon->capability = cpu_to_le16(0x0420);
+	beacon->element_id = 0xDD;
+	beacon->length = 0x22;
+	memcpy(beacon->oui, wifi_alliance_oui, sizeof(beacon->oui));
+	beacon->oui_type = 0x13;
+	len += sizeof(*beacon);
+
+	/* NAN Master Indication attribute */
+	if (len + sizeof(*master_indication_attr) > buf_size)
+		return -ENOMEM;
+
+	master_indication_attr = (struct nan_master_indication_attribute *)(buf + len);
+	memset(master_indication_attr, 0, sizeof(*master_indication_attr));
+	master_indication_attr->header.attribute_id = 0x00;
+	master_indication_attr->header.length = cpu_to_le16(0x0002);
+	/* Information that is used to indicate a NAN Device’s preference to serve
+	 * as the role of Master, with a larger value indicating a higher
+	 * preference. Values 1 and 255 are used for testing purposes only.
+	 */
+	master_indication_attr->master_preference = 0xFE;
+	/* Random factor value 0xEA is recommended by the European Standard */
+	master_indication_attr->random_factor = 0xEA;
+	len += sizeof(*master_indication_attr);
+
+	/* NAN Cluster attribute */
+	if (len + sizeof(*cluster_attr) > buf_size)
+		return -ENOMEM;
+
+	cluster_attr = (struct nan_cluster_attribute *)(buf + len);
+	memset(cluster_attr, 0, sizeof(*cluster_attr));
+	cluster_attr->header.attribute_id = 0x1;
+	cluster_attr->header.length = cpu_to_le16(0x000D);
+	memcpy(cluster_attr->device_mac, mac, sizeof(cluster_attr->device_mac));
+	cluster_attr->random_factor = 0xEA;
+	cluster_attr->master_preference = 0xFE;
+	cluster_attr->hop_count_to_anchor_master = 0x00;
+	memset(cluster_attr->anchor_master_beacon_transmission_time, 0, sizeof(cluster_attr->anchor_master_beacon_transmission_time));
+	len += sizeof(*cluster_attr);
+
+	/* NAN attributes */
+	if (len + sizeof(*nsila) > buf_size)
+		return -ENOMEM;
+
+	nsila = (struct nan_service_id_list_attribute *)(buf + len);
+	memset(nsila, 0, sizeof(*nsila));
+	nsila->header.attribute_id = 0x02;
+	nsila->header.length = cpu_to_le16(0x0006);
+	memcpy(nsila->service_id, service_id, sizeof(service_id));
+	len += sizeof(*nsila);
+
+	return len;
+}
+
 int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
 						  uint8_t send_counter,
 						  uint8_t *buf, size_t buf_size)
@@ -150,6 +268,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	/* "org.opendroneid.remoteid" hash */
 	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
 	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
+	uint8_t *cluster_id = get_nan_cluster_id();
 	struct ieee80211_mgmt *mgmt;
 	struct nan_service_discovery *nsd;
 	struct nan_service_descriptor_attribute *nsda;
@@ -167,7 +286,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	mgmt->duration = 0;
 	memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
 	memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
-	memcpy(mgmt->bssid, mac, sizeof(mgmt->bssid));
+	memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
 	mgmt->seq_ctrl = 0;
 
 	len += sizeof(*mgmt);
