@@ -139,28 +139,64 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
 	ODID_MessagePack_encoded *msg_pack_enc;
 	size_t len = 0;
 
-	/* check if there is enough space for the message pack. */
-	if (sizeof(*msg_pack_enc) > buflen)
-		return -ENOMEM;
-
 	/* create a complete message pack */
 	msg_pack.SingleMessageSize = ODID_MESSAGE_SIZE;
-	msg_pack.MsgPackSize = 10;
-	encodeBasicIDMessage((void *)&msg_pack.Messages[0], &UAS_Data->BasicID);
-	encodeLocationMessage((void *)&msg_pack.Messages[1], &UAS_Data->Location);
-	encodeAuthMessage((void *)&msg_pack.Messages[2], &UAS_Data->Auth[0]);
-	encodeAuthMessage((void *)&msg_pack.Messages[3], &UAS_Data->Auth[1]);
-	encodeAuthMessage((void *)&msg_pack.Messages[4], &UAS_Data->Auth[2]);
-	encodeAuthMessage((void *)&msg_pack.Messages[5], &UAS_Data->Auth[3]);
-	encodeAuthMessage((void *)&msg_pack.Messages[6], &UAS_Data->Auth[4]);
-	encodeSelfIDMessage((void *)&msg_pack.Messages[7], &UAS_Data->SelfID);
-	encodeSystemMessage((void *)&msg_pack.Messages[8], &UAS_Data->System);
-	encodeOperatorIDMessage((void *)&msg_pack.Messages[9], &UAS_Data->OperatorID);
+	msg_pack.MsgPackSize = 0;
+	if (UAS_Data->BasicIDValid != 0) {
+		encodeBasicIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->BasicID);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->LocationValid != 0) {
+		encodeLocationMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Location);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->AuthValid[0] != 0) {
+		encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[0]);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->AuthValid[1] != 0) {
+		encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[1]);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->AuthValid[2] != 0) {
+		encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[2]);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->AuthValid[3] != 0) {
+		encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[3]);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->AuthValid[4] != 0) {
+		encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[4]);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->SelfIDValid != 0) {
+		encodeSelfIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->SelfID);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->SystemValid != 0) {
+		encodeSystemMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->System);
+		msg_pack.MsgPackSize++;
+	}
+	if (UAS_Data->OperatorIDValid != 0) {
+		encodeOperatorIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->OperatorID);
+		msg_pack.MsgPackSize++;
+	}
+
+	/* check that there is at least one message to send. */
+	if (msg_pack.MsgPackSize == 0)
+		return -EINVAL;
+
+	/* calculate the exact encoded message pack size. */
+	len =  sizeof(*msg_pack_enc) - (ODID_PACK_MAX_MESSAGES - msg_pack.MsgPackSize) * ODID_MESSAGE_SIZE;
+
+	/* check if there is enough space for the message pack. */
+	if (len > buflen)
+		return -ENOMEM;
 
 	msg_pack_enc = (ODID_MessagePack_encoded *) pack;
 	if (encodeMessagePack(msg_pack_enc, &msg_pack) != ODID_SUCCESS)
 		return -1;
-	len += sizeof(*msg_pack_enc);
 
 	return len;
 }
