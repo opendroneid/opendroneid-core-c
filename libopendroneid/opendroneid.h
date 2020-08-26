@@ -220,13 +220,13 @@ typedef enum ODID_class_EU {
  * This is the structure that any input adapters should form to
  * let the encoders put the data into encoded form.
  */
-typedef struct {
+typedef struct ODID_BasicID_data {
     ODID_uatype_t UAType;
     ODID_idtype_t IDType;
     char UASID[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_BasicID_data;
 
-typedef struct {
+typedef struct ODID_Location_data {
     ODID_status_t Status;
     float Direction;          // Degrees. 0 <= x < 360. Route course based on true North. Invalid, No Value, or Unknown: 361deg
     float SpeedHorizontal;    // m/s. Positive only. Invalid, No Value, or Unknown: 255m/s. If speed is >= 254.25 m/s: 254.25m/s
@@ -253,7 +253,7 @@ typedef struct {
  * For data page 1 through 4, PageCount,Length and TimeStamp are not present and
  * the size of AuthData is 23 bytes.
  */
-typedef struct {
+typedef struct ODID_Auth_data {
     uint8_t DataPage;   // 0 - 4
     ODID_authtype_t AuthType;
     uint8_t PageCount;  // Page 0 only. Maximum ODID_AUTH_MAX_PAGES
@@ -262,12 +262,12 @@ typedef struct {
     char AuthData[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_Auth_data;
 
-typedef struct {
+typedef struct ODID_SelfID_data {
     ODID_desctype_t DescType;
     char Desc[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_SelfID_data;
 
-typedef struct {
+typedef struct ODID_System_data {
     ODID_operator_location_type_t OperatorLocationType;
     ODID_classification_type_t ClassificationType;
     double OperatorLatitude;  // Invalid, No Value, or Unknown: 0 deg (both Lat/Lon)
@@ -280,12 +280,12 @@ typedef struct {
     ODID_class_EU_t ClassEU;       // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
 } ODID_System_data;
 
-typedef struct {
+typedef struct ODID_OperatorID_data {
     ODID_operatorIdType_t OperatorIdType;
     char OperatorId[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_OperatorID_data;
 
-typedef struct {
+typedef struct ODID_UAS_Data {
     ODID_BasicID_data BasicID;
     ODID_Location_data Location;
     ODID_Auth_data Auth[ODID_AUTH_MAX_PAGES];
@@ -307,7 +307,7 @@ typedef struct {
 * It's best not directly access these.  Use the encoders/decoders.
 */
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_BasicID_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -323,7 +323,7 @@ typedef struct __attribute__((__packed__)) {
     char Reserved[3];
 } ODID_BasicID_encoded;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_Location_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -364,7 +364,7 @@ typedef struct __attribute__((__packed__)) {
     char Reserved3;
 } ODID_Location_encoded;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_Auth_encoded_page_zero {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -382,7 +382,7 @@ typedef struct __attribute__((__packed__)) {
     char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE];
 } ODID_Auth_encoded_page_zero;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_Auth_encoded_page_non_zero {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -395,12 +395,12 @@ typedef struct __attribute__((__packed__)) {
     char AuthData[ODID_STR_SIZE];
 } ODID_Auth_encoded_page_non_zero;
 
-typedef union {
+typedef union ODID_Auth_encoded{
     ODID_Auth_encoded_page_zero page_zero;
     ODID_Auth_encoded_page_non_zero page_non_zero;
 } ODID_Auth_encoded;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_SelfID_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -412,7 +412,7 @@ typedef struct __attribute__((__packed__)) {
     char Desc[ODID_STR_SIZE];
 } ODID_SelfID_encoded;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_System_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -440,7 +440,7 @@ typedef struct __attribute__((__packed__)) {
     char Reserved2[7];
 } ODID_System_encoded;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -455,7 +455,7 @@ typedef struct __attribute__((__packed__)) {
     char Reserved[3];
 } ODID_OperatorID_encoded;
 
-typedef union {
+typedef union ODID_Messages_encoded {
     uint8_t rawData[ODID_MESSAGE_SIZE];
     ODID_BasicID_encoded basicId;
     ODID_Location_encoded location;
@@ -465,7 +465,7 @@ typedef union {
     ODID_OperatorID_encoded operatorId;
 } ODID_Messages_encoded;
 
-typedef struct __attribute__((__packed__)) {
+typedef struct __attribute__((__packed__)) ODID_MessagePack_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
     uint8_t ProtoVersion: 4;
     uint8_t MessageType : 4;
@@ -478,7 +478,7 @@ typedef struct __attribute__((__packed__)) {
     ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
 } ODID_MessagePack_encoded;
 
-typedef struct {
+typedef struct ODID_MessagePack_data {
     uint8_t SingleMessageSize; // Must always be ODID_MESSAGE_SIZE
     uint8_t MsgPackSize; // Number of messages in pack (NOT number of bytes)
 
