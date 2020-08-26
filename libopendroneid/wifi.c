@@ -20,6 +20,7 @@ sw@simonwunderlich.de
 #include <time.h>
 
 #include "opendroneid.h"
+#include "wifi.h"
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define cpu_to_le16(x)  (x)
