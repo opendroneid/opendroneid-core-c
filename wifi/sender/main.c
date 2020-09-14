@@ -1,4 +1,5 @@
-/*
+/* -*- tab-width: 4; mode: c; -*-
+
 Copyright (C) 2020 Simon Wunderlich, Marek Sobe
 Copyright (C) 2020 Doodle Labs
 
@@ -196,6 +197,8 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 {
 	uint64_t time_in_tenth;
 
+	drone->LocationValid = 1;
+	
 	/*
 	*	ALL READOUTS FROM GPSD
 	*/
@@ -231,11 +234,11 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 	drone->Location.TSAccuracy = createEnumTimestampAccuracy((float)gpsdata->fix.ept);
 
 	printf("drone:\n\t"
-	       "TimeStamp: %f, time since last hour (100ms): %ld, TSAccuracy: %d\n\t"
+	       "TimeStamp: %f, time since last hour (100ms): %zu, TSAccuracy: %d\n\t"
 	       "Direction: %f, SpeedHorizontal: %f, SpeedVertical: %f\n\t"
 	       "Latitude: %f, Longitude: %f\n",
 	       (double) drone->Location.TimeStamp,
-		   (uint64_t)(drone->Location.TimeStamp*10)%36000, drone->Location.TSAccuracy,
+		   (size_t) ((uint64_t) (drone->Location.TimeStamp*10)%36000), drone->Location.TSAccuracy,
 	       (double) drone->Location.Direction, (double) drone->Location.SpeedHorizontal,
 		   (double) drone->Location.SpeedVertical,
 	       drone->Location.Latitude, drone->Location.Longitude
@@ -252,7 +255,9 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
 	drone->BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
 	drone->BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
 	char id[] = "12345678901234567890";
-	strncpy(drone->BasicID.UASID, id, sizeof(*id));
+	strncpy(drone->BasicID.UASID, id, sizeof(drone->BasicID.UASID));
+
+	drone->BasicIDValid = 1;
 
 	/* Authentication */
 	drone->Auth[0].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
@@ -261,28 +266,30 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
 	drone->Auth[0].Length = 39;
 	drone->Auth[0].Timestamp = 28000000;
 	char auth0_data[] = "12345678901234567";
-	strncpy(drone->Auth[0].AuthData, auth0_data, sizeof(auth0_data));
+	strncpy(drone->Auth[0].AuthData, auth0_data, sizeof(drone->Auth[0].AuthData));
 	drone->Auth[1].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
 	drone->Auth[1].DataPage = 1;
 	char auth1_data[] = "23456789012345678";
-	strncpy(drone->Auth[1].AuthData, auth1_data, sizeof(auth1_data));
+	strncpy(drone->Auth[1].AuthData, auth1_data, sizeof(drone->Auth[1].AuthData));
 	drone->Auth[2].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
 	drone->Auth[2].DataPage = 2;
 	char auth2_data[] = "34567890123456789";
-	strncpy(drone->Auth[2].AuthData, auth2_data, sizeof(auth2_data));
+	strncpy(drone->Auth[2].AuthData, auth2_data, sizeof(drone->Auth[2].AuthData));
 	drone->Auth[3].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
 	drone->Auth[3].DataPage = 3;
 	char auth3_data[] = "45678901234567890";
-	strncpy(drone->Auth[3].AuthData, auth3_data, sizeof(auth3_data));
+	strncpy(drone->Auth[3].AuthData, auth3_data, sizeof(drone->Auth[3].AuthData));
 	drone->Auth[4].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
 	drone->Auth[4].DataPage = 4;
 	char auth4_data[] = "56789012345678901";
-	strncpy(drone->Auth[4].AuthData, auth4_data, sizeof(auth4_data));
+	strncpy(drone->Auth[4].AuthData, auth4_data, sizeof(drone->Auth[4].AuthData));
 
 	/* Self ID */
 	drone->SelfID.DescType = ODID_DESC_TYPE_TEXT;
 	char description[] = "NAN Frame WiFi Test SID";
-	strncpy(drone->SelfID.Desc, description, sizeof(description));
+	strncpy(drone->SelfID.Desc, description, sizeof(drone->SelfID.Desc));
+
+	drone->SelfIDValid = 1;
 
 	/* System data */
 	drone->System.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
@@ -296,10 +303,14 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
 	drone->System.CategoryEU = ODID_CATEGORY_EU_UNDECLARED;
 	drone->System.ClassEU = ODID_CLASS_EU_UNDECLARED;
 
+	drone->SystemValid = 1;
+
 	/* Operator ID */
 	drone->OperatorID.OperatorIdType = ODID_OPERATOR_ID;
 	char operatorId[] = "99887766554433221100";
-	strncpy(drone->OperatorID.OperatorId, operatorId, sizeof(operatorId));
+	strncpy(drone->OperatorID.OperatorId, operatorId, sizeof(drone->OperatorID.OperatorId));
+
+	drone->OperatorIDValid = 1;
 }
 
 static void drone_set_ssid(ODID_UAS_Data *drone, struct global *global)
