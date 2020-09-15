@@ -1,4 +1,4 @@
-/* -*- tab-width: 4; mode: c; -*-
+/* -*- tab-width: 2; mode: c; -*-
 
 Copyright (C) 2020 Simon Wunderlich, Marek Sobe
 Copyright (C) 2020 Doodle Labs
@@ -234,16 +234,17 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 	drone->Location.TSAccuracy = createEnumTimestampAccuracy((float)gpsdata->fix.ept);
 
 	printf("drone:\n\t"
-		   "TimeStamp: %f, time since last hour (100ms): %llu, TSAccuracy: %d\n\t",
-		   (double) drone->Location.TimeStamp,
-		   (uint64_t) (drone->Location.TimeStamp*10)%36000, 
-		   drone->Location.TSAccuracy);
+				 "TimeStamp: %f, time since last hour (100ms): %zu, ",
+				 (double) drone->Location.TimeStamp,
+				 (size_t) ((uint64_t) (drone->Location.TimeStamp*10)%36000));
 
-	printf("Direction: %f, SpeedHorizontal: %f, SpeedVertical: %f\n\t"
+	printf("TSAccuracy: %d\n\tDirection: %f, SpeedHorizontal: %f, SpeedVertical: %f\n\t"
 	       "Latitude: %f, Longitude: %f\n",
+				 drone->Location.TSAccuracy,
 	       (double) drone->Location.Direction, (double) drone->Location.SpeedHorizontal,
 	       (double) drone->Location.SpeedVertical,
-	       drone->Location.Latitude, drone->Location.Longitude);
+	       drone->Location.Latitude, drone->Location.Longitude
+	);
 }
 
 /**
