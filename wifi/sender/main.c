@@ -1,4 +1,4 @@
-/* -*- tab-width: 2; mode: c; -*-
+/* -*- tab-width: 4; mode: c; -*-
 
 Copyright (C) 2020 Simon Wunderlich, Marek Sobe
 Copyright (C) 2020 Doodle Labs
