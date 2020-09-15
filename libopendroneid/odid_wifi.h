@@ -88,4 +88,4 @@ struct __attribute__((__packed__)) ODID_service_info {
 	ODID_MessagePack_encoded odid_message_pack[];
 };
 
-#endif // _WIFI_H_
+#endif // _ODID_WIFI_H_
