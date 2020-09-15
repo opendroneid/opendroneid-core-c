@@ -10,8 +10,8 @@ Gabriel Cox
 gabriel.c.cox@intel.com
 */
 
-#ifndef _WIFI_H_
-#define _WIFI_H_
+#ifndef _ODID_WIFI_H_
+#define _ODID_WIFI_H_
 
 /**
 * IEEE 802.11 structs to build management action frame
