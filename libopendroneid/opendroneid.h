@@ -493,6 +493,7 @@ void odid_initSelfIDData(ODID_SelfID_data *data);
 void odid_initSystemData(ODID_System_data *data);
 void odid_initOperatorIDData(ODID_OperatorID_data *data);
 void odid_initMessagePackData(ODID_MessagePack_data *data);
+void odid_initUasData(ODID_UAS_Data *data);
 
 int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
 int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);

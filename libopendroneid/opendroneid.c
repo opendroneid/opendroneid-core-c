@@ -126,6 +126,33 @@ void odid_initMessagePackData(ODID_MessagePack_data *data)
 }
 
 /**
+* Initialize UAS data fields to their default values
+*
+* @param data (non encoded/packed) structure
+*/
+
+void odid_initUasData(ODID_UAS_Data *data)
+{
+    if (!data)
+        return;
+    data->BasicIDValid = 0;
+    odid_initBasicIDData(&data->BasicID);
+    data->LocationValid = 0;
+    odid_initLocationData(&data->Location);
+    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++)
+    {
+        data->AuthValid[i] = 0;
+        odid_initAuthData(&data->Auth[i]);
+    }
+    data->SelfIDValid = 0;
+    odid_initSelfIDData(&data->SelfID);
+    data->SystemValid = 0;
+    odid_initSystemData(&data->System);
+    data->OperatorIDValid = 0;
+    odid_initOperatorIDData(&data->OperatorID);
+}
+
+/**
 * Encode direction as defined by Open Drone ID
 *
 * The encoding method uses 8 bits for the direction in degrees and
@@ -774,6 +801,10 @@ int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encod
 
 /**
 * Decode Message Pack from packed message
+*
+* The various Valid flags in uasData are set true whenever a message has been
+* decoded and the corresponding data structure has been filled. The caller must
+* clear these flags before calling decodeMessagePack().
 *
 * @param uasData Output: Structure containing buffers for all message data
 * @param pack    Pointer to an encoded packed message
