@@ -388,16 +388,17 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 
 int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen)
 {
-	ODID_MessagePack_encoded *msg_pack_enc;
-
-	if (sizeof(*msg_pack_enc) > buflen)
+	ODID_MessagePack_encoded *msg_pack_enc = (ODID_MessagePack_encoded *) pack;
+	int size = sizeof(*msg_pack_enc) - ODID_MESSAGE_SIZE * (ODID_PACK_MAX_MESSAGES - msg_pack_enc->MsgPackSize);
+	if (size > buflen)
 		return -ENOMEM;
 
-	msg_pack_enc = (ODID_MessagePack_encoded *) pack;
+	odid_initUasData(UAS_Data);
+
 	if (decodeMessagePack(UAS_Data, msg_pack_enc) != ODID_SUCCESS)
 		return -1;
 
-	return 0;
+	return size;
 }
 
 int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
@@ -406,39 +407,43 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
 	struct ieee80211_mgmt *mgmt;
 	struct nan_service_discovery *nsd;
 	struct nan_service_descriptor_attribute *nsda;
+	struct nan_service_descriptor_extension_attribute *nsdea;
 	struct ODID_service_info *si;
+	uint8_t target_addr[6] = { 0x51, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
 	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
 	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
-	int ret, len;
+	int ret, len = 0;
 
-	/* basic header size check */
-	if (sizeof(*mgmt) + sizeof(*nsd) + sizeof(*nsda) + sizeof(*si) > buf_size)
+	/* IEEE 802.11 Management Header */
+	if (len + sizeof(*mgmt) > buf_size)
 		return -EINVAL;
-	len = 0;
-
-	/* check for frame type and correct sender address */
 	mgmt = (struct ieee80211_mgmt *)(buf + len);
 	if ((mgmt->frame_control & cpu_to_le16(IEEE80211_FCTL_FTYPE | IEEE80211_FCTL_STYPE)) !=
 	    cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_ACTION))
 		return -EINVAL;
-
+	if (memcmp(mgmt->da, target_addr, sizeof(mgmt->da)) != 0)
+		return -EINVAL;
 	memcpy(mac, mgmt->sa, sizeof(mgmt->sa));
 
 	len += sizeof(*mgmt);
 
-	/* check NAN service discovery frame fields */
+	/* NAN Service Discovery header */
+	if (len + sizeof(*nsd) > buf_size)
+		return -EINVAL;
 	nsd = (struct nan_service_discovery *)(buf + len);
 	if (nsd->category != 0x04)
 		return -EINVAL;
 	if (nsd->action_code != 0x09)
 		return -EINVAL;
-	if (nsd->oui_type != 0x13)
-		return -EINVAL;
 	if (memcmp(nsd->oui, wifi_alliance_oui, sizeof(wifi_alliance_oui)) != 0)
+		return -EINVAL;
+	if (nsd->oui_type != 0x13)
 		return -EINVAL;
 	len += sizeof(*nsd);
 
-	/* check NAN service descriptor attribute fields */
+	/* NAN Attribute for Service Descriptor header */
+	if (len + sizeof(*nsda) > buf_size)
+		return -EINVAL;
 	nsda = (struct nan_service_descriptor_attribute *)(buf + len);
 	if (nsda->header.attribute_id != 0x3)
 		return -EINVAL;
@@ -448,18 +453,30 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
 		return -EINVAL;
 	if (nsda->service_control != 0x10)
 		return -EINVAL;
-	if (len + sizeof(*nsda) + nsda->service_info_length != buf_size)
-		return -EINVAL;
-
 	len += sizeof(*nsda);
 
 	si = (struct ODID_service_info *)(buf + len);
-	len += sizeof(*si);
+	ret = odid_message_process_pack(UAS_Data, buf + len + sizeof(*si), buf_size - len - sizeof(*nsdea));
+	if (ret < 0)
+		return -EINVAL;
+	if (nsda->service_info_length != (sizeof(*si) + ret))
+		return -EINVAL;
+	if (nsda->header.length != (cpu_to_le16(sizeof(*nsda) - sizeof(struct nan_attribute_header) + nsda->service_info_length)))
+		return -EINVAL;
+	len += sizeof(*si) + ret;
 
-	ret = odid_message_process_pack(UAS_Data, buf + len, buf_size - len);
-	if (ret < 0) {
-		return -1;
-	}
+	/* NAN Attribute for Service Descriptor extension header */
+	if (len + sizeof(*nsdea) > buf_size)
+		return -ENOMEM;
+	nsdea = (struct nan_service_descriptor_extension_attribute *)(buf + len);
+	if (nsdea->header.attribute_id != 0xE)
+		return -EINVAL;
+	if (nsdea->header.length != cpu_to_le16(0x0004))
+		return -EINVAL;
+	if (nsdea->instance_id != 0x01)
+		return -EINVAL;
+	if (nsdea->control != cpu_to_le16(0x0200))
+		return -EINVAL;
 
 	return 0;
 }
