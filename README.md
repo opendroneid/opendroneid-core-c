@@ -10,6 +10,10 @@ For an example Android receiver application, see https://github.com/opendroneid/
 
 Related Mavlink messages are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID.
 
+An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
+Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Long Range and Extended Advertising is not supported.
+Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
+
 To build the library and the sample app:
 
 ```
@@ -107,8 +111,12 @@ int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encod
 int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
 ```
 
-Specific messages have been added to the Mavlink message set to accomodate data for Open Drone ID implementations:
+Specific messages have been added to the MAVLink message set to accomodate data for Open Drone ID implementations:
 
 https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID
 
-The functions in `mav2odid.c` can be used to convert these Mavlink messages into suitable `opendroneid.h` data structures and back again. See the example usages in `test/test_mav2odid.c`.
+The functions in `mav2odid.c` can be used to convert these MAVLink messages into suitable `opendroneid.h` data structures and back again. See the example usages in `test/test_mav2odid.c`.
+
+Recomendations on how to utilize the MAVLink messages for internal distribution of Open Drone ID data of an Unmanned Aircraft System can be found here:
+
+https://mavlink.io/en/services/opendroneid.html
