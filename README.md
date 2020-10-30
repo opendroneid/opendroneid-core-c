@@ -4,7 +4,9 @@
 
 This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available at https://www.astm.org/Standards/F3411.htm.
 
-The opendroneid-core-c code is primarily meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi NaN. If you are looking for code related to Network Remoted ID, please take a look at https://github.com/interuss and https://github.com/uastech/standards.
+The opendroneid-core-c code is primarily meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi NaN.
+If you are looking for code related to Network Remoted ID, please take a look at https://github.com/interuss and https://github.com/uastech/standards.
+See also https://datatracker.ietf.org/wg/drip/documents/.
 
 For an example Android receiver application, see https://github.com/opendroneid/receiver-android.
 
