@@ -3,22 +3,28 @@
 ## Open Drone ID Core C Library
 
 This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available at https://www.astm.org/Standards/F3411.htm.
+The code is also compatible with the upcoming European ASD-STAN Direct Remote ID standard.
 
 The opendroneid-core-c code is primarily meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi NaN.
 If you are looking for code related to Network Remoted ID, please take a look at https://github.com/interuss and https://github.com/uastech/standards.
-See also https://datatracker.ietf.org/wg/drip/documents/.
 
-For an example Android receiver application, see https://github.com/opendroneid/receiver-android.
+Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID standard:
+https://datatracker.ietf.org/wg/drip/documents/
 
-Related Mavlink messages are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID.
+For an example Android receiver application supporting Bluetooth and WiFi NaN, see https://github.com/opendroneid/receiver-android.
+
+Mavlink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
 An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
-Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Long Range and Extended Advertising is not supported.
+The implementation supports simultaneous transmission via Bluetooth Legacy Advertising and via WiFi NaN.
+Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Long Range and Extended Advertising are not supported.
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
+A [leak](https://hackaday.com/2020/11/22/espressif-leaks-esp32-c3-a-wifi-soc-thats-risc-v-and-is-esp8266-pin-compatible/) of partial [documentation](https://mega.nz/file/4VRGgLzK#YIzeMvj_Z-LayxY8KztL4WiifcmQYcFJTomzFrEr_3c) for the upcoming ESP32-C3 chip, suggests that it will be able to support Long Range and Extended Advertising.
 
 To build the library and the sample app:
 
 ```
+sudo apt-get install libgps-dev libnl-genl-3-dev
 git submodule init
 git submodule update
 cmake .
