@@ -19,7 +19,7 @@ An example library for transmitting Open Drone ID signals from ESP32 HW can be f
 The implementation supports simultaneous transmission via Bluetooth Legacy Advertising and via WiFi NaN.
 Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Long Range and Extended Advertising are not supported.
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
-A [leak](https://hackaday.com/2020/11/22/espressif-leaks-esp32-c3-a-wifi-soc-thats-risc-v-and-is-esp8266-pin-compatible/) of partial [documentation](https://mega.nz/file/4VRGgLzK#YIzeMvj_Z-LayxY8KztL4WiifcmQYcFJTomzFrEr_3c) for the upcoming ESP32-C3 chip, suggests that it will be able to support Long Range and Extended Advertising.
+The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3?position=0&list=_TQH0oNBtbw0KMnMbCVH3ol_jy3McAHwrsqIZcX6XjM) chips will both support Long Range and Extended Advertising.
 
 To build the library and the sample app:
 
