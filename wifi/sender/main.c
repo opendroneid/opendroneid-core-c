@@ -42,6 +42,12 @@ sw@simonwunderlich.de
 
 #include <opendroneid.h>
 
+/* convert a timespec to a double.
+ * if tv_sec > 2, then inevitable loss of precision in tv_nsec
+ * so best to NEVER use TSTONS()
+ * WARNING replacing 1e9 with NS_IN_SEC causes loss of precision */
+#define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
+
 struct global {
 	char server[1024];
 	char port[16];
@@ -198,7 +204,7 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 	uint64_t time_in_tenth;
 
 	drone->LocationValid = 1;
-	
+
 	/*
 	*	ALL READOUTS FROM GPSD
 	*/
@@ -229,7 +235,11 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 	drone->Location.SpeedAccuracy = createEnumSpeedAccuracy(gpsdata->fix.eps > gpsdata->fix.epc ? gpsdata->fix.eps : gpsdata->fix.epc);
 
 	/* Time */
+#ifdef LIBGPS_OLD
 	time_in_tenth = gpsdata->fix.time * 10;
+#else
+	time_in_tenth = TSTONS(&gpsdata->fix.time) * 10;
+#endif
 	drone->Location.TimeStamp = (float)((time_in_tenth % 36000) / 10);
 	drone->Location.TSAccuracy = createEnumTimestampAccuracy((float)gpsdata->fix.ept);
 
