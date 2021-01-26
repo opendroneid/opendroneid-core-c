@@ -9,7 +9,6 @@ Maintainer:
 Gabriel Cox
 gabriel.c.cox@intel.com
 */
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <opendroneid.h>
@@ -51,15 +50,15 @@ void test_InOut()
     BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
     BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
     char id[] = "12345678901234567890";
-    strncpy(BasicID.UASID, id, sizeof(id));
+    strncpy(BasicID.UASID, id, sizeof(BasicID.UASID));
     printf("BasicID\n-------\n");
     printBasicID_data(&BasicID);
     encodeBasicIDMessage(&BasicID_enc, &BasicID);
 
     Location.Status = ODID_STATUS_AIRBORNE;
-    Location.Direction = 215.7;
-    Location.SpeedHorizontal = 5.4;
-    Location.SpeedVertical = 5.25;
+    Location.Direction = 215.7f;
+    Location.SpeedHorizontal = 5.4f;
+    Location.SpeedVertical = 5.25f;
     Location.Latitude = 45.539309;
     Location.Longitude = -122.966389;
     Location.AltitudeBaro = 100;
@@ -71,7 +70,7 @@ void test_InOut()
     Location.BaroAccuracy = createEnumVerticalAccuracy(1.5f);
     Location.SpeedAccuracy = createEnumSpeedAccuracy(0.5f);
     Location.TSAccuracy = createEnumTimestampAccuracy(0.2f);
-    Location.TimeStamp = 3600.52;
+    Location.TimeStamp = 3600.52f;
     printf("\nLocation\n--------\n");
     printLocation_data(&Location);
     encodeLocationMessage(&Location_enc, &Location);
@@ -82,7 +81,7 @@ void test_InOut()
     Auth0.Length = 39;
     Auth0.Timestamp = 28000000;
     char auth0_data[] = "12345678901234567";
-    strncpy(Auth0.AuthData, auth0_data, sizeof(auth0_data));
+    strncpy(Auth0.AuthData, auth0_data, sizeof(Auth0.AuthData));
     printf("\nAuth0\n--------------\n");
     printAuth_data(&Auth0);
     encodeAuthMessage(&Auth0_enc, &Auth0);
@@ -90,14 +89,14 @@ void test_InOut()
     Auth1.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     Auth1.DataPage = 1;
     char auth1_data[] = "12345678901234567890123";
-    strncpy(Auth1.AuthData, auth1_data, sizeof(auth1_data));
+    strncpy(Auth1.AuthData, auth1_data, sizeof(Auth1.AuthData));
     printf("\nAuth1\n--------------\n");
     printAuth_data(&Auth1);
     encodeAuthMessage(&Auth1_enc, &Auth1);
 
     SelfID.DescType = ODID_DESC_TYPE_TEXT;
     char description[] = "DronesRUS: Real Estate";
-    strncpy(SelfID.Desc, description, sizeof(description));
+    strncpy(SelfID.Desc, description, sizeof(SelfID.Desc));
     printf("\nSelfID\n------\n");
     printSelfID_data(&SelfID);
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
@@ -108,8 +107,8 @@ void test_InOut()
     System_data.OperatorLongitude = Location.Longitude + 0.00001;
     System_data.AreaCount = 35;
     System_data.AreaRadius = 75;
-    System_data.AreaCeiling = 176.9;
-    System_data.AreaFloor = 41.7;
+    System_data.AreaCeiling = 176.9f;
+    System_data.AreaFloor = 41.7f;
     System_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
     System_data.ClassEU = ODID_CLASS_EU_CLASS_3;
     printf("\nSystem\n------\n");
@@ -118,7 +117,7 @@ void test_InOut()
 
     operatorID.OperatorIdType = ODID_OPERATOR_ID;
     char operatorId[] = "98765432100123456789";
-    strncpy(operatorID.OperatorId, operatorId, sizeof(operatorId));
+    strncpy(operatorID.OperatorId, operatorId, sizeof(operatorID.OperatorId));
     printf("\nOperatorID\n------\n");
     printOperatorID_data(&operatorID);
     encodeOperatorIDMessage(&operatorID_enc, &operatorID);

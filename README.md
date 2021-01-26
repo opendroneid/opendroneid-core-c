@@ -25,9 +25,9 @@ To build the library and the sample app:
 
 ```
 sudo apt-get install libgps-dev libnl-genl-3-dev
-git submodule init
-git submodule update
-cmake .
+git submodule update --init
+mkdir build && cd build
+cmake ../.
 make
 ```
 
