@@ -14,9 +14,7 @@ sw@simonwunderlich.de
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <errno.h>
-#include <byteswap.h>
 #include <time.h>
 
 #include "opendroneid.h"
@@ -130,15 +128,13 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 	mprintf("\t\t},\n");
 
 	mprintf("\t}\n}");
-
-	return;
 }
 
 int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
 {
 	ODID_MessagePack_data msg_pack;
 	ODID_MessagePack_encoded *msg_pack_enc;
-	size_t len = 0;
+	size_t len;
 
 	/* create a complete message pack */
 	msg_pack.SingleMessageSize = ODID_MESSAGE_SIZE;
@@ -189,7 +185,7 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
 		return -EINVAL;
 
 	/* calculate the exact encoded message pack size. */
-	len =  sizeof(*msg_pack_enc) - (ODID_PACK_MAX_MESSAGES - msg_pack.MsgPackSize) * ODID_MESSAGE_SIZE;
+	len = sizeof(*msg_pack_enc) - (ODID_PACK_MAX_MESSAGES - msg_pack.MsgPackSize) * ODID_MESSAGE_SIZE;
 
 	/* check if there is enough space for the message pack. */
 	if (len > buflen)
@@ -216,7 +212,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
 	struct nan_cluster_attribute *cluster_attr;
 	struct nan_service_id_list_attribute *nsila;
 	struct timespec ts;
-	long len = 0;
+	size_t len = 0;
 
 	/* IEEE 802.11 Management Header */
 	if (len + sizeof(*mgmt) > buf_size)
@@ -311,7 +307,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 	struct nan_service_descriptor_attribute *nsda;
 	struct nan_service_descriptor_extension_attribute *nsdea;
 	struct ODID_service_info *si;
-	long ret, len = 0;
+	size_t ret, len = 0;
 
 	/* IEEE 802.11 Management Header */
 	if (len + sizeof(*mgmt) > buf_size)
@@ -389,7 +385,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen)
 {
 	ODID_MessagePack_encoded *msg_pack_enc = (ODID_MessagePack_encoded *) pack;
-	int size = sizeof(*msg_pack_enc) - ODID_MESSAGE_SIZE * (ODID_PACK_MAX_MESSAGES - msg_pack_enc->MsgPackSize);
+	size_t size = sizeof(*msg_pack_enc) - ODID_MESSAGE_SIZE * (ODID_PACK_MAX_MESSAGES - msg_pack_enc->MsgPackSize);
 	if (size > buflen)
 		return -ENOMEM;
 
@@ -412,7 +408,7 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
 	uint8_t target_addr[6] = { 0x51, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
 	uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
 	uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
-	int ret, len = 0;
+	size_t ret, len = 0;
 
 	/* IEEE 802.11 Management Header */
 	if (len + sizeof(*mgmt) > buf_size)

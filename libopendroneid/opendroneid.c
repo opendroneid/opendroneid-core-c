@@ -11,7 +11,6 @@ gabriel.c.cox@intel.com
 */
 
 #include "opendroneid.h"
-#include <stdlib.h>
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
@@ -22,7 +21,6 @@ const float VSPEED_DIV = 0.5f;
 const int32_t LATLON_MULT = 10000000;
 const float ALT_DIV = 0.5f;
 const int ALT_ADDER = 1000;
-const int DATA_AGE_DIV = 10;
 
 static char *safe_dec_copyfill(char *dstStr, const char *srcStr, int dstSize);
 static int intRangeMax(int64_t inValue, int startRange, int endRange);
@@ -236,7 +234,7 @@ static int32_t encodeLatLon(double LatLon_data)
 */
 static int16_t encodeAltitude(float Alt_data)
 {
-    return (uint16_t) intRangeMax( (int) ((Alt_data + ALT_ADDER) / ALT_DIV), 0, UINT16_MAX);
+    return (uint16_t) intRangeMax( (int) ((Alt_data + (float) ALT_ADDER) / ALT_DIV), 0, UINT16_MAX);
 }
 
 /**
@@ -251,7 +249,7 @@ static int16_t encodeAltitude(float Alt_data)
 static uint16_t encodeTimeStamp(float Seconds_data)
 {
     // max should be 60s * 60m * 10 = number of tenths within an hour
-    return (uint16_t) intRangeMax(round(Seconds_data*10), 0, 60 * 60 * 10);
+    return (uint16_t) intRangeMax(roundf(Seconds_data*10), 0, 60 * 60 * 10);
 }
 
 /**
@@ -555,9 +553,9 @@ int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_dat
 static float decodeDirection(uint8_t Direction_enc, uint8_t EWDirection)
 {
     if (EWDirection)
-        return Direction_enc + 180;
+        return (float) Direction_enc + 180;
     else
-        return Direction_enc;
+        return (float) Direction_enc;
 }
 
 /**
@@ -605,7 +603,7 @@ static double decodeLatLon(int32_t LatLon_enc)
 */
 static float decodeAltitude(uint16_t Alt_enc)
 {
-    return (float) ((float) Alt_enc * ALT_DIV - ALT_ADDER) ;
+    return (float) ((float) Alt_enc * ALT_DIV - (float) ALT_ADDER) ;
 }
 
 /**

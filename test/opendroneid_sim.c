@@ -10,8 +10,6 @@ Gabriel Cox
 gabriel.c.cox@intel.com
 */
 
-#include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include <unistd.h>
 #include <opendroneid.h>
@@ -49,7 +47,7 @@ int stepCount = 0;
 
 void updateLocation(void)
 {
-    simSpeedHorizontal = DISTANCE_PER_LAT * SIM_STEP_SIZE;
+    simSpeedHorizontal = (float) DISTANCE_PER_LAT * (float) SIM_STEP_SIZE;
     stepCount++;
     switch(direction) {
         case E:
@@ -84,24 +82,27 @@ void updateLocation(void)
                 stepCount = 0;
             }
             break;
+
+        default:
+            break;
     }
 }
 
 void ODID_getSimData(uint8_t *message, uint8_t msgType)
 {
     switch (msgType) {
-        case 0:
+        case ODID_MESSAGETYPE_BASIC_ID:
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
             basicID_data.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
             // 4 chr mfg code, 1chr Len, 15chr serial
             char id[] = "INTCE123456789012345";
-            strncpy(basicID_data.UASID, id, sizeof(id));
+            strncpy(basicID_data.UASID, id, sizeof(basicID_data.UASID));
 
             encodeBasicIDMessage(&basicID_enc, &basicID_data);
             memcpy(message, &basicID_enc, ODID_MESSAGE_SIZE);
             break;
 
-        case 1:
+        case ODID_MESSAGETYPE_LOCATION:
             updateLocation();
             location_data.Status = ODID_STATUS_AIRBORNE;
             location_data.Direction = simDirection;
@@ -124,53 +125,56 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             memcpy(message, &location_enc, ODID_MESSAGE_SIZE);
             break;
 
-        case 2:
+        case ODID_MESSAGETYPE_AUTH:
             auth_data.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
             auth_data.DataPage = 0;
             auth_data.PageCount = 1;
             auth_data.Length = 12;
             auth_data.Timestamp = 23000000;
             char data[] = "030a0cd033a3";
-            strncpy(auth_data.AuthData, data, sizeof(data));
+            strncpy(auth_data.AuthData, data, sizeof(auth_data.AuthData));
 
             encodeAuthMessage(&auth_enc, &auth_data);
             memcpy(message, &auth_enc, ODID_MESSAGE_SIZE);
             break;
 
-        case 3:
+        case ODID_MESSAGETYPE_SELF_ID:
             selfID_data.DescType = ODID_DESC_TYPE_TEXT;
             char description[] = "Real Estate Photos";
-            strncpy(selfID_data.Desc, description, sizeof(description));
+            strncpy(selfID_data.Desc, description, sizeof(selfID_data.Desc));
             encodeSelfIDMessage(&selfID_enc, &selfID_data);
             memcpy(message, &selfID_enc, ODID_MESSAGE_SIZE);
             break;
 
-        case 4:
+        case ODID_MESSAGETYPE_SYSTEM:
             system_data.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
             system_data.ClassificationType = ODID_CLASSIFICATION_TYPE_EU;
             system_data.OperatorLatitude = simGndLat;
             system_data.OperatorLongitude = simGndLon;
             system_data.AreaCount = 35;
             system_data.AreaRadius = 75;
-            system_data.AreaCeiling = 176.9;
-            system_data.AreaFloor = 41.7;
+            system_data.AreaCeiling = 176.9f;
+            system_data.AreaFloor = 41.7f;
             system_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
             system_data.ClassEU = ODID_CLASS_EU_CLASS_3;
             encodeSystemMessage(&system_enc, &system_data);
             memcpy(message, &system_enc, ODID_MESSAGE_SIZE);
             break;
 
-        case 5:
+        case ODID_MESSAGETYPE_OPERATOR_ID:
             operatorID_data.OperatorIdType = ODID_OPERATOR_ID;
             char operatorId[] = "98765432100123456789";
-            strncpy(operatorID_data.OperatorId, operatorId, sizeof(operatorId));
+            strncpy(operatorID_data.OperatorId, operatorId, sizeof(operatorID_data.OperatorId));
             encodeOperatorIDMessage(&operatorID_enc, &operatorID_data);
             memcpy(message, &operatorID_enc, ODID_MESSAGE_SIZE);
+            break;
+
+        default:
             break;
     }
 }
 
-void test_sim()
+_Noreturn void test_sim()
 {
     uint8_t testBytes[ODID_MESSAGE_SIZE];
     int x;

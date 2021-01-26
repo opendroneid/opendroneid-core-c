@@ -16,7 +16,7 @@ gabriel.c.cox@intel.com
 
 void test_InOut(void);
 void ODID_getSimData(uint8_t *message, uint8_t msgType);
-void test_sim(void);
+_Noreturn void test_sim(void);
 void test_mav2odid();
 
 int main(int argc, char const *argv[]) {
