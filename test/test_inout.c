@@ -36,7 +36,7 @@ ODID_System_encoded System_enc;
 ODID_System_data System_data;
 ODID_System_data System_out;
 
-ODID_OperatorID_encoded operatorID_enc;
+ODID_OperatorID_encoded OperatorID_enc;
 ODID_OperatorID_data operatorID;
 ODID_OperatorID_data operatorID_out;
 
@@ -120,7 +120,7 @@ void test_InOut()
     strncpy(operatorID.OperatorId, operatorId, sizeof(operatorID.OperatorId));
     printf("\nOperatorID\n------\n");
     printOperatorID_data(&operatorID);
-    encodeOperatorIDMessage(&operatorID_enc, &operatorID);
+    encodeOperatorIDMessage(&OperatorID_enc, &operatorID);
 
     pack.SingleMessageSize = ODID_MESSAGE_SIZE;
     pack.MsgPackSize = 7;
@@ -130,7 +130,7 @@ void test_InOut()
     memcpy(&pack.Messages[3], &Auth1_enc, ODID_MESSAGE_SIZE);
     memcpy(&pack.Messages[4], &SelfID_enc, ODID_MESSAGE_SIZE);
     memcpy(&pack.Messages[5], &System_enc, ODID_MESSAGE_SIZE);
-    memcpy(&pack.Messages[6], &operatorID_enc, ODID_MESSAGE_SIZE);
+    memcpy(&pack.Messages[6], &OperatorID_enc, ODID_MESSAGE_SIZE);
     encodeMessagePack(&pack_enc, &pack);
 
     printf("\n-------------------------------------Encoded Data-----------------------------------\n");
@@ -154,7 +154,7 @@ void test_InOut()
     printByteArray((uint8_t*) &System_enc, ODID_MESSAGE_SIZE, 1);
 
     printf("OperatorID: ");
-    printByteArray((uint8_t*) &operatorID_enc, ODID_MESSAGE_SIZE, 1);
+    printByteArray((uint8_t*) &OperatorID_enc, ODID_MESSAGE_SIZE, 1);
 
     printf("\n-------------------------------------Decoded Data-----------------------------------\n");
     // Now for the reverse -- decode test
@@ -182,7 +182,7 @@ void test_InOut()
     printf("\nSystem\n------\n");
     printSystem_data(&System_out);
 
-    decodeOperatorIDMessage(&operatorID_out, &operatorID_enc);
+    decodeOperatorIDMessage(&operatorID_out, &OperatorID_enc);
     printf("\nOperatorID\n------\n");
     printOperatorID_data(&operatorID_out);
 
