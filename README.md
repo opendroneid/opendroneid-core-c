@@ -6,21 +6,36 @@ This provides a function library for encoding and decoding (packing/unpacking) O
 The code is also compatible with the upcoming European ASD-STAN Direct Remote ID standard.
 This latter standard has not yet been published, but some preliminary information can be found in this [white paper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and in the recording of this [webinar](https://www.cencenelec.eu/news/events/Pages/EV-2021-15.aspx).
 
-The opendroneid-core-c code is primarily meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi NaN.
+The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
 
 Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID standard:
 https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-drip.
 
-For an example Android receiver application supporting Bluetooth and WiFi NaN, see https://github.com/opendroneid/receiver-android.
+MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
-Mavlink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
+## Receiver example
+
+For an example Android receiver application supporting Bluetooth and WiFi, see https://github.com/opendroneid/receiver-android.
+
+## Transmitter examples
 
 An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
-The implementation supports simultaneous transmission via Bluetooth Legacy Advertising and via WiFi NaN.
-Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Long Range and Extended Advertising are not supported.
+The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, WiFi NaN and WiFi Beacon.
+Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported.
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
-The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3?position=0&list=_TQH0oNBtbw0KMnMbCVH3ol_jy3McAHwrsqIZcX6XjM) chips will both support Long Range and Extended Advertising.
+The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3?position=0&list=_TQH0oNBtbw0KMnMbCVH3ol_jy3McAHwrsqIZcX6XjM) chips will both support Long Range and Extended Advertising but this has not yet been tested.
+
+A WiFi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
+Better documentation is needed on what exact HW + SW environment this is functional.
+
+A description of some very preliminary experiments using bluez and hostapd to transmit BT4 and WiFi Beacon drone ID signals from a Linux PC or Raspberry Pi can be found [here](https://github.com/opendroneid/opendroneid-core-c/issues/42).
+Contributions to create fully functional transmitter implementations are very welcome.
+
+Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exists but so far none have been open sourced.
+Please open an issue if you have an implementation you are willing to share. A new repository under opendroneid can be made.
+
+## How to Build
 
 To build the library and the sample app:
 
@@ -40,9 +55,9 @@ The intended architecture is to take whatever input you wish, and to put it into
 
 ## Build Options
 
-### MavLink
+### MAVLink
 
-MavLink OpenDroneID support is included by default.
+MAVLink OpenDroneID support is included by default.
 
 To disable, use the ```BUILD_MAVLINK``` parameter, i.e.:
 
@@ -50,11 +65,11 @@ To disable, use the ```BUILD_MAVLINK``` parameter, i.e.:
 cmake -DBUILD_MAVLINK=off .
 ```
 
-MavLinks requires the mavlink_c_library_v2 to be installed in the respective folder
+MAVLink support requires the mavlink_c_library_v2 to be installed in the respective folder
 
-### WiFi reference implementation
+### WiFi NaN example implementation
 
-WiFi reference implementation is built by default.
+The WiFi NaN example implementation is built by default.
 
 To disable, use the ```BUILD_WIFI``` parameter, i.e.:
 
@@ -120,12 +135,11 @@ int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encod
 int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
 ```
 
-Specific messages have been added to the MAVLink message set to accomodate data for Open Drone ID implementations:
+Specific messages have been added to the MAVLink message set to accommodate data for Open Drone ID implementations:
 
 https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID
 
 The functions in `mav2odid.c` can be used to convert these MAVLink messages into suitable `opendroneid.h` data structures and back again. See the example usages in `test/test_mav2odid.c`.
 
-Recomendations on how to utilize the MAVLink messages for internal distribution of Open Drone ID data of an Unmanned Aircraft System can be found here:
-
+Recommendations on how to utilize the MAVLink messages for internal distribution of Open Drone ID data of an Unmanned Aircraft System can be found here:
 https://mavlink.io/en/services/opendroneid.html
