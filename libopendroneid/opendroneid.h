@@ -47,7 +47,7 @@ extern "C" {
 #define MIN_ALT         -1000   // Minimum altitude
 #define MAX_ALT         31767.5f// Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
-#define MAX_TIMESTAMP   (60 * 60 * 10)
+#define MAX_TIMESTAMP   (60 * 60)
 #define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE) + \
                          ODID_STR_SIZE * (ODID_AUTH_MAX_PAGES - 1))
 #define MAX_AREA_RADIUS 2550
@@ -244,7 +244,7 @@ typedef struct ODID_Location_data {
     ODID_Vertical_accuracy_t BaroAccuracy;
     ODID_Speed_accuracy_t SpeedAccuracy;
     ODID_Timestamp_accuracy_t TSAccuracy;
-    float TimeStamp;          // seconds after the full hour
+    float TimeStamp;          // seconds after the full hour relative to UTC. Invalid, No Value, or Unknown: 0xFFFF
 } ODID_Location_data;
 
 /*

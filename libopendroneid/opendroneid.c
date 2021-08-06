@@ -248,8 +248,10 @@ static uint16_t encodeAltitude(float Alt_data)
 */
 static uint16_t encodeTimeStamp(float Seconds_data)
 {
-    // max should be 60s * 60m * 10 = number of tenths within an hour
-    return (uint16_t) intRangeMax(roundf(Seconds_data*10), 0, 60 * 60 * 10);
+    if (Seconds_data == 0xFFFF)
+        return 0xFFFF;
+    else
+        return (uint16_t) intRangeMax(roundf(Seconds_data*10), 0, MAX_TIMESTAMP * 10);
 }
 
 /**
@@ -328,7 +330,8 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
         inData->Height < MIN_ALT || inData->Height > MAX_ALT)
         return ODID_FAIL;
 
-    if (inData->TimeStamp < 0 || inData->TimeStamp > MAX_TIMESTAMP)
+    if (inData->TimeStamp < 0 ||
+        (inData->TimeStamp > MAX_TIMESTAMP && inData->TimeStamp != 0xFFFF))
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_LOCATION;
@@ -614,7 +617,10 @@ static float decodeAltitude(uint16_t Alt_enc)
 */
 static float decodeTimeStamp(uint16_t Seconds_enc)
 {
-    return (float) Seconds_enc / 10;
+    if (Seconds_enc == 0xFFFF)
+        return 0xFFFF;
+    else
+        return (float) Seconds_enc / 10;
 }
 
 /**

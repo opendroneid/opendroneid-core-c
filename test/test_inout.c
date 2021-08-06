@@ -70,7 +70,7 @@ void test_InOut()
     Location.BaroAccuracy = createEnumVerticalAccuracy(1.5f);
     Location.SpeedAccuracy = createEnumSpeedAccuracy(0.5f);
     Location.TSAccuracy = createEnumTimestampAccuracy(0.2f);
-    Location.TimeStamp = 3600.52f;
+    Location.TimeStamp = 360.52f;
     printf("\nLocation\n--------\n");
     printLocation_data(&Location);
     encodeLocationMessage(&Location_enc, &Location);
