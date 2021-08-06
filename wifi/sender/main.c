@@ -48,6 +48,8 @@ sw@simonwunderlich.de
  * WARNING replacing 1e9 with NS_IN_SEC causes loss of precision */
 #define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
 
+#define MINIMUM(a,b) (((a)<(b))?(a):(b))
+
 struct global {
     char server[1024];
     char port[16];
@@ -270,27 +272,27 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     /* Authentication */
     drone->Auth[0].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[0].DataPage = 0;
-    drone->Auth[0].PageCount = 5;
+    drone->Auth[0].LastPageIndex = 4;
     drone->Auth[0].Length = 39;
     drone->Auth[0].Timestamp = 28000000;
     char auth0_data[] = "12345678901234567";
-    strncpy(drone->Auth[0].AuthData, auth0_data, sizeof(drone->Auth[0].AuthData));
+    memcpy(drone->Auth[0].AuthData, auth0_data, MINIMUM(sizeof(auth0_data), sizeof(drone->Auth[0].AuthData)));
     drone->Auth[1].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[1].DataPage = 1;
     char auth1_data[] = "23456789012345678";
-    strncpy(drone->Auth[1].AuthData, auth1_data, sizeof(drone->Auth[1].AuthData));
+    memcpy(drone->Auth[1].AuthData, auth1_data, MINIMUM(sizeof(auth1_data), sizeof(drone->Auth[1].AuthData)));
     drone->Auth[2].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[2].DataPage = 2;
     char auth2_data[] = "34567890123456789";
-    strncpy(drone->Auth[2].AuthData, auth2_data, sizeof(drone->Auth[2].AuthData));
+    memcpy(drone->Auth[2].AuthData, auth2_data, MINIMUM(sizeof(auth2_data), sizeof(drone->Auth[2].AuthData)));
     drone->Auth[3].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[3].DataPage = 3;
     char auth3_data[] = "45678901234567890";
-    strncpy(drone->Auth[3].AuthData, auth3_data, sizeof(drone->Auth[3].AuthData));
+    memcpy(drone->Auth[3].AuthData, auth3_data, MINIMUM(sizeof(auth3_data), sizeof(drone->Auth[3].AuthData)));
     drone->Auth[4].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[4].DataPage = 4;
     char auth4_data[] = "56789012345678901";
-    strncpy(drone->Auth[4].AuthData, auth4_data, sizeof(drone->Auth[4].AuthData));
+    memcpy(drone->Auth[4].AuthData, auth4_data, MINIMUM(sizeof(auth4_data), sizeof(drone->Auth[4].AuthData)));
 
     /* Self ID */
     drone->SelfID.DescType = ODID_DESC_TYPE_TEXT;
@@ -456,6 +458,11 @@ int main(int argc, char *argv[])
 
     memset(&drone, 0, sizeof(drone));
     memset(&global, 0, sizeof(global));
+
+    if (ODID_AUTH_MAX_PAGES < 5) {
+        fprintf(stderr, "Program compiled with ODID_AUTH_MAX_PAGES < 5\n");
+        return -1;
+    }
 
     if (read_arguments(argc, argv, &drone, &global) < 0) {
         usage(argv[0]);

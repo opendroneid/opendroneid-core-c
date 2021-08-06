@@ -10,6 +10,11 @@ cmake_minimum_required(VERSION 2.6.3)
 option(BUILD_MAVLINK "Build with mavlink support" ON)
 option(BUILD_WIFI "Build with WiFi support" ON)
 
+if(DEFINED ODID_AUTH_MAX_PAGES)
+	message(STATUS "Using externally defined ODID_AUTH_MAX_PAGES value")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DODID_AUTH_MAX_PAGES=${ODID_AUTH_MAX_PAGES}")
+endif()
+
 add_subdirectory(libopendroneid)
 if(BUILD_MAVLINK)
 	add_subdirectory(libmav2odid)

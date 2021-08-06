@@ -55,6 +55,18 @@ The intended architecture is to take whatever input you wish, and to put it into
 
 ## Build Options
 
+### Memory reductions
+
+Some embedded systems might require a smaller memory footprint than what by default is used by opendroneid-core-c.
+The following compile time options exists for reducing the memory consumption:
+- ODID_AUTH_MAX_PAGES is by default configured to support 16 pages/messages of authentication data.
+  See the beginning of [opedroneid.h](libopendroneid/opendroneid.h).
+  If authentication messages are not used, this value can be configured between 1 and 16, e.g. by adding `-DODID_AUTH_MAX_PAGES=1` when calling cmake.
+
+
+- When including MAVLink in the build (see below), if MAVLink's virtual channel functionality is not used, some memory can be saved by defining MAVLINK_COMM_NUM_BUFFERS to be equal to 1, before including mavlink_types.h
+  See further details in the beginning of [mav2odid.c](libmav2odid/mav2odid.c).
+
 ### MAVLink
 
 MAVLink OpenDroneID support is included by default.

@@ -138,8 +138,7 @@ void odid_initUasData(ODID_UAS_Data *data)
     odid_initBasicIDData(&data->BasicID);
     data->LocationValid = 0;
     odid_initLocationData(&data->Location);
-    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++)
-    {
+    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++) {
         data->AuthValid[i] = 0;
         odid_initAuthData(&data->Auth[i]);
     }
@@ -376,25 +375,31 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
     if (inData->DataPage >= ODID_AUTH_MAX_PAGES)
         return ODID_FAIL;
 
+    if (inData->DataPage == 0) {
+        if (inData->LastPageIndex >= ODID_AUTH_MAX_PAGES ||
+            inData->Length > MAX_AUTH_LENGTH)
+            return ODID_FAIL;
+
+        int len = ODID_AUTH_PAGE_ZERO_DATA_SIZE +
+                  inData->LastPageIndex * ODID_AUTH_PAGE_NONZERO_DATA_SIZE;
+        if (len < inData->Length)
+            return ODID_FAIL;
+    }
+
     outEncoded->page_zero.MessageType = ODID_MESSAGETYPE_AUTH;
     outEncoded->page_zero.ProtoVersion = ODID_PROTOCOL_VERSION;
     outEncoded->page_zero.AuthType = inData->AuthType;
     outEncoded->page_zero.DataPage = inData->DataPage;
+
     if (inData->DataPage == 0) {
-        if (inData->PageCount > ODID_AUTH_MAX_PAGES)
-            return ODID_FAIL;
-
-        if (inData->Length > MAX_AUTH_LENGTH)
-            return ODID_FAIL;
-
-        outEncoded->page_zero.PageCount = inData->PageCount;
+        outEncoded->page_zero.LastPageIndex = inData->LastPageIndex;
         outEncoded->page_zero.Length = inData->Length;
         outEncoded->page_zero.Timestamp = inData->Timestamp;
-        strncpy(outEncoded->page_zero.AuthData, inData->AuthData,
-                sizeof(outEncoded->page_zero.AuthData));
+        memcpy(outEncoded->page_zero.AuthData, inData->AuthData,
+               sizeof(outEncoded->page_zero.AuthData));
     } else {
-        strncpy(outEncoded->page_non_zero.AuthData, inData->AuthData,
-                sizeof(outEncoded->page_non_zero.AuthData));
+        memcpy(outEncoded->page_non_zero.AuthData, inData->AuthData,
+               sizeof(outEncoded->page_non_zero.AuthData));
     }
     return ODID_SUCCESS;
 }
@@ -509,8 +514,9 @@ static int checkPackContent(ODID_Message_encoded *msgs, int amount)
     }
 
     // Allow max one of each message except Authorization, of which there can
-    // be ODID_AUTH_MAX_PAGES. The OpenDroneID specification is slightly less
-    // restrictive but this implementation does not support anything else
+    // be ODID_AUTH_MAX_PAGES. The ASTM specification is less restrictive (e.g.
+    // multiple BasicID messages are allowed) but this implementation does not
+    // support anything else.
     if (numMessages[ODID_MESSAGETYPE_BASIC_ID] > 1 ||
         numMessages[ODID_MESSAGETYPE_LOCATION] > 1 ||
         numMessages[ODID_MESSAGETYPE_AUTH] > ODID_AUTH_MAX_PAGES ||
@@ -702,10 +708,10 @@ int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *in
 */
 int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 {
-    if (!inEncoded ||
+    if (!inEncoded || !pageNum ||
         inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
         !intInRange(inEncoded->page_zero.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_zero.DataPage, 0, 4))
+        !intInRange(inEncoded->page_zero.DataPage, 0, ODID_AUTH_MAX_PAGES - 1))
         return ODID_FAIL;
 
     *pageNum = inEncoded->page_zero.DataPage;
@@ -724,21 +730,35 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
     if (!outData || !inEncoded ||
         inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
         !intInRange(inEncoded->page_zero.AuthType, 0, 15) ||
-        !intInRange(inEncoded->page_zero.DataPage, 0, 4))
+        !intInRange(inEncoded->page_zero.DataPage, 0, ODID_AUTH_MAX_PAGES - 1))
         return ODID_FAIL;
+
+    if (inEncoded->page_zero.DataPage == 0) {
+        if (inEncoded->page_zero.LastPageIndex >= ODID_AUTH_MAX_PAGES ||
+            inEncoded->page_zero.Length > MAX_AUTH_LENGTH)
+            return ODID_FAIL;
+
+        int len = ODID_AUTH_PAGE_ZERO_DATA_SIZE +
+                  inEncoded->page_zero.LastPageIndex * ODID_AUTH_PAGE_NONZERO_DATA_SIZE;
+        if (len < inEncoded->page_zero.Length)
+            return ODID_FAIL;
+    }
 
     outData->AuthType = (ODID_authtype_t) inEncoded->page_zero.AuthType;
     outData->DataPage = inEncoded->page_zero.DataPage;
     if (inEncoded->page_zero.DataPage == 0) {
-        outData->PageCount = inEncoded->page_zero.PageCount;
+        outData->LastPageIndex = inEncoded->page_zero.LastPageIndex;
         outData->Length = inEncoded->page_zero.Length;
         outData->Timestamp = inEncoded->page_zero.Timestamp;
-        safe_dec_copyfill(outData->AuthData, inEncoded->page_zero.AuthData,
-                          sizeof(outData->AuthData) - ODID_AUTH_PAGE_ZERO_DATA_SIZE);
+        memset(outData->AuthData, 0, sizeof(outData->AuthData));
+        memcpy(outData->AuthData, inEncoded->page_zero.AuthData,
+               ODID_AUTH_PAGE_ZERO_DATA_SIZE);
     } else {
-        safe_dec_copyfill(outData->AuthData, inEncoded->page_non_zero.AuthData,
-                          sizeof(outData->AuthData));
+        memset(outData->AuthData, 0, sizeof(outData->AuthData));
+        memcpy(outData->AuthData, inEncoded->page_non_zero.AuthData,
+               ODID_AUTH_PAGE_NONZERO_DATA_SIZE);
     }
+
     return ODID_SUCCESS;
 }
 
@@ -904,11 +924,11 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
         break;
     }
     case ODID_MESSAGETYPE_AUTH: {
-        ODID_Auth_encoded *inEncoded = (ODID_Auth_encoded *) msgData;
+        ODID_Auth_encoded *auth = (ODID_Auth_encoded *) msgData;
         int pageNum;
-        if (getAuthPageNum(inEncoded, &pageNum) == ODID_SUCCESS) {
+        if (getAuthPageNum(auth, &pageNum) == ODID_SUCCESS) {
             ODID_Auth_data *authData = &uasData->Auth[pageNum];
-            if (decodeAuthMessage(authData, inEncoded) == ODID_SUCCESS) {
+            if (decodeAuthMessage(authData, auth) == ODID_SUCCESS) {
                 uasData->AuthValid[pageNum] = 1;
                 return ODID_MESSAGETYPE_AUTH;
             }
@@ -1352,17 +1372,17 @@ void printAuth_data(ODID_Auth_data *Auth)
 {
     if (Auth->DataPage == 0) {
         const char ODID_Auth_data_format[] =
-            "AuthType: %d\nDataPage: %d\nPageCount: %d\nLength: %d\nTimestamp:"\
-            " %d\nAuthData: ";
+            "AuthType: %d\nDataPage: %d\nLastPageIndex: %d\nLength: %d\n"\
+            "Timestamp: %d\nAuthData: ";
         printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
-            Auth->PageCount, Auth->Length, Auth->Timestamp);
-        for (int i = 0; i < ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE; i++)
+               Auth->LastPageIndex, Auth->Length, Auth->Timestamp);
+        for (int i = 0; i < ODID_AUTH_PAGE_ZERO_DATA_SIZE; i++)
             printf("0x%02X ", Auth->AuthData[i]);
     } else {
         const char ODID_Auth_data_format[] =
             "AuthType: %d\nDataPage: %d\nAuthData: ";
         printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage);
-        for (int i = 0; i < ODID_STR_SIZE; i++)
+        for (int i = 0; i < ODID_AUTH_PAGE_NONZERO_DATA_SIZE; i++)
             printf("0x%02X ", Auth->AuthData[i]);
     }
     printf("\n");

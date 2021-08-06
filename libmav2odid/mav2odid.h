@@ -36,7 +36,7 @@ mavlink_status_t m_mavlink_status[MAVLINK_COMM_NUM_BUFFERS];
 
 #include <common/mavlink.h>
 
-#define DRONEID_SCHEDULER_SIZE 18
+#define DRONEID_SCHEDULER_SIZE (2 * (4 + ODID_AUTH_MAX_PAGES))
 
 typedef struct {
     uint8_t droneidSchedule[DRONEID_SCHEDULER_SIZE];

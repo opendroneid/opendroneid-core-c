@@ -49,9 +49,8 @@ static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
     printf("Data page: %d, auth type: %d, ",
            auth->data_page, auth->authentication_type);
     int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
-    if (auth->data_page == 0)
-    {
-        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
+    if (auth->data_page == 0) {
+        size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
         printf("page_count: %d, length: %d, timestamp: %d, ",
                auth->page_count, auth->length, auth->timestamp);
     }
@@ -113,7 +112,7 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
     if (msg_type == ODID_MESSAGETYPE_INVALID)
         printf("ERROR: Parsing Mavlink message failed\n");
 
-    // m2o_parseMavlink transfered the data into the src buffer
+    // m2o_parseMavlink transferred the data into the src buffer
     // Copy the received OpenDroneID bytestring to tx_buf
     uint8_t tx_buf[ODID_MESSAGE_SIZE] = { 0 };
     memcpy(tx_buf, src, ODID_MESSAGE_SIZE);
@@ -224,7 +223,7 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .data_page = 0,
         .authentication_type = MAV_ODID_AUTH_TYPE_UAS_ID_SIGNATURE,
         .authentication_data = "98765432101234567",
-        .page_count = 1,
+        .page_count = 0,
         .length = 17,
         .timestamp = 23000000 };
     printf("\n\n---------------------Authentication---------------------\n\n");

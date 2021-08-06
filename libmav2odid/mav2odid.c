@@ -23,6 +23,12 @@ soren.friis@intel.com
 * OperatorID) are not used in a particular implementation, they should be
 * excluded from the schedule list.
 *
+* If ODID_AUTH_MAX_PAGES is equal to the default value of 16, the size/default
+* layout of the schedule list will be very large and take a long time to go
+* through. If authentication messages are not being used, it is recommended
+* to define a smaller value of ODID_AUTH_MAX_PAGES and/or initialize the
+* schedule list with other than the below default values.
+*
 * Note: The MessagePack message type is not included, since the pack already
 * contains all the message data and there is no need to cycle through individual
 * messages then.
@@ -39,14 +45,14 @@ int m2o_init(mav2odid_t *m2o)
 
     memset(m2o->droneidSchedule, ODID_MESSAGETYPE_LOCATION, DRONEID_SCHEDULER_SIZE);
     m2o->droneidSchedule[0] = ODID_MESSAGETYPE_BASIC_ID;
-    m2o->droneidSchedule[2] = ODID_MESSAGETYPE_AUTH; // Add an amount of
-    m2o->droneidSchedule[4] = ODID_MESSAGETYPE_AUTH; // auth messages equal to
-    m2o->droneidSchedule[6] = ODID_MESSAGETYPE_AUTH; // ODID_AUTH_MAX_PAGES
-    m2o->droneidSchedule[8] = ODID_MESSAGETYPE_AUTH;
-    m2o->droneidSchedule[10] = ODID_MESSAGETYPE_AUTH;
-    m2o->droneidSchedule[12] = ODID_MESSAGETYPE_SELF_ID;
-    m2o->droneidSchedule[14] = ODID_MESSAGETYPE_SYSTEM;
-    m2o->droneidSchedule[16] = ODID_MESSAGETYPE_OPERATOR_ID;
+    int index = 2;
+    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++, index += 2)
+        m2o->droneidSchedule[index] = ODID_MESSAGETYPE_AUTH;
+    m2o->droneidSchedule[index] = ODID_MESSAGETYPE_SELF_ID;
+    index += 2;
+    m2o->droneidSchedule[index] = ODID_MESSAGETYPE_SYSTEM;
+    index += 2;
+    m2o->droneidSchedule[index] = ODID_MESSAGETYPE_OPERATOR_ID;
 
     union {
         ODID_BasicID_data basicId;
@@ -95,8 +101,8 @@ int m2o_init(mav2odid_t *m2o)
 * only one message at a time can be transmitted.
 *
 * It is expected that this function is called with an interval faster than
-* (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) = 3 / 18 = 166 ms
-* in order to comply with the timing restraints in the specification.
+* (BcMinStaticRefreshRate seconds / DRONEID_SCHEDULER_SIZE) in order to comply
+* with the timing restraints in the specification.
 *
 * This function will copy the relevant DroneID data to the provided data buffer.
 *
@@ -253,10 +259,9 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
     authentication.AuthType = (ODID_authtype_t) mavAuthentication->authentication_type;
 
     int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
-    if (authentication.DataPage == 0)
-    {
-        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
-        authentication.PageCount = mavAuthentication->page_count;
+    if (authentication.DataPage == 0) {
+        size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
+        authentication.LastPageIndex = mavAuthentication->page_count;
         authentication.Length = mavAuthentication->length;
         authentication.Timestamp = mavAuthentication->timestamp;
     }
@@ -501,11 +506,10 @@ void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
     mavAuth->authentication_type = (MAV_ODID_AUTH_TYPE) Auth->AuthType;
     mavAuth->data_page = Auth->DataPage;
 
-    int size = ODID_STR_SIZE;
-    if (Auth->DataPage == 0)
-    {
-        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
-        mavAuth->page_count = Auth->PageCount;
+    int size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
+    if (Auth->DataPage == 0) {
+        size = ODID_AUTH_PAGE_NONZERO_DATA_SIZE;
+        mavAuth->page_count = Auth->LastPageIndex;
         mavAuth->length = Auth->Length;
         mavAuth->timestamp = Auth->Timestamp;
     }

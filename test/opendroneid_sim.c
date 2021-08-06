@@ -15,6 +15,8 @@ gabriel.c.cox@intel.com
 #include <opendroneid.h>
 #define SLEEPMS 1000000 //ns
 
+#define MINIMUM(a,b) (((a)<(b))?(a):(b))
+
 ODID_BasicID_encoded basicID_enc;
 ODID_Location_encoded location_enc;
 ODID_Auth_encoded auth_enc;
@@ -128,11 +130,11 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
         case ODID_MESSAGETYPE_AUTH:
             auth_data.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
             auth_data.DataPage = 0;
-            auth_data.PageCount = 1;
+            auth_data.LastPageIndex = 0;
             auth_data.Length = 12;
             auth_data.Timestamp = 23000000;
             char data[] = "030a0cd033a3";
-            strncpy(auth_data.AuthData, data, sizeof(auth_data.AuthData));
+            memcpy(auth_data.AuthData, data, MINIMUM(sizeof(data), sizeof(auth_data.AuthData)));
 
             encodeAuthMessage(&auth_enc, &auth_data);
             memcpy(message, &auth_enc, ODID_MESSAGE_SIZE);

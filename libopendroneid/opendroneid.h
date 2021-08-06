@@ -23,9 +23,26 @@ extern "C" {
 #define ODID_MESSAGE_SIZE 25
 #define ODID_ID_SIZE 20
 #define ODID_STR_SIZE 23
+
 #define ODID_PROTOCOL_VERSION 0
-#define ODID_AUTH_MAX_PAGES 5
-#define ODID_AUTH_PAGE_ZERO_DATA_SIZE 6
+
+/*
+ * To save memory on implementations that do not need support for 16 pages of
+ * authentication data, define ODID_AUTH_MAX_PAGES to the desired value before
+ * including opendroneid.h. E.g. "-DODID_AUTH_MAX_PAGES=5" when calling cmake.
+ */
+#ifndef ODID_AUTH_MAX_PAGES
+#define ODID_AUTH_MAX_PAGES 16
+#endif
+#if (ODID_AUTH_MAX_PAGES < 1) || (ODID_AUTH_MAX_PAGES > 16)
+#error "ODID_AUTH_MAX_PAGES must be between 1 and 16."
+#endif
+
+#define ODID_AUTH_PAGE_ZERO_DATA_SIZE    17
+#define ODID_AUTH_PAGE_NONZERO_DATA_SIZE 23
+#define MAX_AUTH_LENGTH (ODID_AUTH_PAGE_ZERO_DATA_SIZE + \
+                         ODID_AUTH_PAGE_NONZERO_DATA_SIZE * (ODID_AUTH_MAX_PAGES - 1))
+
 #define ODID_PACK_MAX_MESSAGES 10
 
 #define ODID_SUCCESS    0
@@ -48,8 +65,6 @@ extern "C" {
 #define MAX_ALT         31767.5f// Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
 #define MAX_TIMESTAMP   (60 * 60)
-#define MAX_AUTH_LENGTH ((ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE) + \
-                         ODID_STR_SIZE * (ODID_AUTH_MAX_PAGES - 1))
 #define MAX_AREA_RADIUS 2550
 
 typedef enum ODID_messagetype {
@@ -168,7 +183,11 @@ typedef enum ODID_authtype {
     ODID_AUTH_OPERATOR_ID_SIGNATURE = 2,
     ODID_AUTH_MESSAGE_SET_SIGNATURE = 3,
     ODID_AUTH_NETWORK_REMOTE_ID = 4, // Authentication provided by Network Remote ID
-    // 5 to 9 reserved for the specification. 0xA to 0xF reserved for private use
+    ODID_AUTH_SPECIFIC_AUTHENTICATION = 5, // Specific auth method. The exact authentication type is indicated by the
+                                           // first byte of AuthData and these type values are managed by ICAO.
+                                           // 0 is reserved. 1 - 224 are managed by ICAO. 225 - 255 are available for
+                                           // private experimental usage only
+    // 6 to 9 reserved for the specification. 0xA to 0xF reserved for private use
 } ODID_authtype_t;
 
 typedef enum ODID_desctype {
@@ -225,7 +244,7 @@ typedef enum ODID_class_EU {
 typedef struct ODID_BasicID_data {
     ODID_uatype_t UAType;
     ODID_idtype_t IDType;
-    char UASID[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form
+    char UASID[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form. Fill unused space with NULL
 } ODID_BasicID_data;
 
 typedef struct ODID_Location_data {
@@ -248,25 +267,70 @@ typedef struct ODID_Location_data {
 } ODID_Location_data;
 
 /*
- * The Authentication message can have two different formats.
- * Five data pages are supported.
- * For data page 0, the fields PageCount, Length and TimeStamp are present and
- * AuthData is only 17 bytes.
- * For data page 1 through 4, PageCount,Length and TimeStamp are not present and
- * the size of AuthData is 23 bytes.
+ * The Authentication message can have two different formats:
+ *  - For data page 0, the fields LastPageIndex, Length and TimeStamp are present.
+ *    The size of AuthData is maximum 17 bytes (ODID_AUTH_PAGE_ZERO_DATA_SIZE).
+ *  - For data page 1 through (ODID_AUTH_MAX_PAGES - 1), LastPageIndex, Length and
+ *    TimeStamp are not present.
+ *    For pages 1 to LastPageIndex, the size of AuthData is maximum
+ *    23 bytes (ODID_AUTH_PAGE_NONZERO_DATA_SIZE).
+ *
+ * Unused bytes in the AuthData field must be filled with NULLs (i.e. 0x00).
+ *
+ * Since the Length field is uint8_t, the precise amount of data bytes
+ * transmitted over multiple pages of AuthData can only be specified up to 255.
+ * I.e. the maximum is one page 0, then 10 full pages and finally a page with
+ * 255 - (10*23 + 17) = 8 bytes of data.
+ *
+ * The payload data consisting of actual authentication data can never be
+ * larger than 255 bytes. However, it is possible to transmit additional
+ * support data, such as Forward Error Correction (FEC) data beyond that.
+ * This is e.g. useful when transmitting on Bluetooth 4, which does not have
+ * built-in FEC in the transmission protocol. The presence of this additional
+ * data is indicated by a combination of LastPageIndex and the value of the
+ * AuthData byte right after the last data byte indicated by Length. If this
+ * additional byte is non-zero/non-NULL, the value of the byte indicates the
+ * amount of additional (e.g. FEC) data bytes. The value of LastPageIndex must
+ * always be large enough to include all pages containing normal authentication
+ * and additional data. Some examples are given below. The value in the
+ * "FEC data" column must be stored in the "(Length - 1) + 1" position in the
+ * transmitted AuthData[] array. The total size of valid data in the AuthData
+ * array will be = Length + 1 + "FEC data".
+ *                                                                 Unused bytes
+ *    Authentication data        FEC data   LastPageIndex  Length  on last page
+ * 17 +  1*23 + 23 =  63 bytes    0 bytes         2           63         0
+ * 17 +  1*23 + 23 =  63 bytes   22 bytes         3           63         0
+ * 17 +  2*23 +  1 =  64 bytes    0 bytes         3           64        22
+ * 17 +  2*23 +  1 =  64 bytes   21 bytes         3           64         0
+ * 17 +  2*23 +  1 =  64 bytes   22 bytes         4           64        22
+ * ...
+ * 17 +  4*23 + 19 = 128 bytes    0 bytes         5          128         4
+ * 17 +  4*23 + 19 = 128 bytes    3 bytes         5          128         0
+ * 17 +  4*23 + 20 = 128 bytes   16 bytes         6          128        10
+ * 17 +  4*23 + 20 = 128 bytes   26 bytes         6          128         0
+ * ...
+ * 17 +  9*23 + 23 = 247 bytes    0 bytes        10          247         0
+ * 17 +  9*23 + 23 = 247 bytes   22 bytes        11          247         0
+ * 17 + 10*23 +  1 = 248 bytes    0 bytes        11          248        22
+ * 17 + 10*23 +  1 = 248 bytes   44 bytes        12          248         0
+ * ...
+ * 17 + 10*23 +  8 = 255 bytes    0 bytes        11          255        15
+ * 17 + 10*23 +  8 = 255 bytes   14 bytes        11          255         0
+ * 17 + 10*23 +  8 = 255 bytes   37 bytes        12          255         0
+ * 17 + 10*23 +  8 = 255 bytes   60 bytes        13          255         0
  */
 typedef struct ODID_Auth_data {
-    uint8_t DataPage;   // 0 - 4
+    uint8_t DataPage;       // 0 - (ODID_AUTH_MAX_PAGES - 1)
     ODID_authtype_t AuthType;
-    uint8_t PageCount;  // Page 0 only. Maximum ODID_AUTH_MAX_PAGES
-    uint8_t Length;     // Page 0 only. Bytes. Total of AuthData from all data pages
-    uint32_t Timestamp; // Page 0 only. Relative to 00:00:00 01/01/2019
-    char AuthData[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
+    uint8_t LastPageIndex;  // Page 0 only. Maximum (ODID_AUTH_MAX_PAGES - 1)
+    uint8_t Length;         // Page 0 only. Bytes. See description above.
+    uint32_t Timestamp;     // Page 0 only. Relative to 00:00:00 01/01/2019 UTC/Unix Time
+    uint8_t AuthData[ODID_AUTH_PAGE_NONZERO_DATA_SIZE+1]; // Additional byte to allow for null term in normative form
 } ODID_Auth_data;
 
 typedef struct ODID_SelfID_data {
     ODID_desctype_t DescType;
-    char Desc[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form
+    char Desc[ODID_STR_SIZE+1]; // Additional byte to allow for null term in normative form. Fill unused space with NULL
 } ODID_SelfID_data;
 
 typedef struct ODID_System_data {
@@ -285,7 +349,7 @@ typedef struct ODID_System_data {
 
 typedef struct ODID_OperatorID_data {
     ODID_operatorIdType_t OperatorIdType;
-    char OperatorId[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form
+    char OperatorId[ODID_ID_SIZE+1]; // Additional byte to allow for null term in normative form. Fill unused space with NULL
 } ODID_OperatorID_data;
 
 typedef struct ODID_UAS_Data {
@@ -377,12 +441,12 @@ typedef struct __attribute__((__packed__)) ODID_Auth_encoded_page_zero {
     uint8_t AuthType: 4;
 
     // Bytes 2-7
-    uint8_t PageCount;
+    uint8_t LastPageIndex;
     uint8_t Length;
     uint32_t Timestamp;
 
     // Byte 8-24
-    char AuthData[ODID_STR_SIZE - ODID_AUTH_PAGE_ZERO_DATA_SIZE];
+    uint8_t AuthData[ODID_AUTH_PAGE_ZERO_DATA_SIZE];
 } ODID_Auth_encoded_page_zero;
 
 typedef struct __attribute__((__packed__)) ODID_Auth_encoded_page_non_zero {
@@ -395,9 +459,16 @@ typedef struct __attribute__((__packed__)) ODID_Auth_encoded_page_non_zero {
     uint8_t AuthType: 4;
 
     // Byte 2-24
-    char AuthData[ODID_STR_SIZE];
+    uint8_t AuthData[ODID_AUTH_PAGE_NONZERO_DATA_SIZE];
 } ODID_Auth_encoded_page_non_zero;
 
+/*
+ * It is safe to access the first four fields (i.e. ProtoVersion, MessageType,
+ * DataPage and AuthType) from either of the union members, since the declarations
+ * for these fields are identical and the first parts of the structures.
+ * The ISO/IEC 9899:1999 Chapter 6.5.2.3 part 5 and related Example 3 documents this.
+ * https://www.iso.org/standard/29237.html
+ */
 typedef union ODID_Auth_encoded{
     ODID_Auth_encoded_page_zero page_zero;
     ODID_Auth_encoded_page_non_zero page_non_zero;
@@ -461,6 +532,13 @@ typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {
     char Reserved[3];
 } ODID_OperatorID_encoded;
 
+/*
+ * It is safe to access the first two fields (i.e. ProtoVersion and MessageType)
+ * from any of the structure parts of the union members, since the declarations
+ * for these fields are identical and the first parts of the structures.
+ * The ISO/IEC 9899:1999 Chapter 6.5.2.3 part 5 and related Example 3 documents this.
+ * https://www.iso.org/standard/29237.html
+ */
 typedef union ODID_Message_encoded {
     uint8_t rawData[ODID_MESSAGE_SIZE];
     ODID_BasicID_encoded basicId;
