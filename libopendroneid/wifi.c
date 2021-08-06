@@ -59,7 +59,7 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
         return; \
     }
 
-    mprintf("{\n\t\"Version\": \"0.8\",\n\t\"Response\": {\n");
+    mprintf("{\n\t\"Version\": \"1.1\",\n\t\"Response\": {\n");
 
     mprintf("\t\t\"BasicID\": {\n");
     for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {

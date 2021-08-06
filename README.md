@@ -2,9 +2,13 @@
 
 ## Open Drone ID Core C Library
 
-This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available at https://www.astm.org/Standards/F3411.htm.
+This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available [here](https://www.astm.org/Standards/F3411.htm).
 The code is also compatible with the upcoming European ASD-STAN Direct Remote ID standard.
 This latter standard has not yet been published, but some preliminary information can be found in this [white paper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and in the recording of this [webinar](https://www.cencenelec.eu/news/events/Pages/EV-2021-15.aspx).
+An early draft of the standard is available [here](https://asd-stan.org/downloads/din-en-4709-0022021-02/).
+
+Please note that both standards have been updated during the first half of 2021 and the updated documents are not yet published (August 2021).
+However, this implementation is already compliant with these updates. 
 
 The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
@@ -14,9 +18,11 @@ https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-d
 
 MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
-## Receiver example
+## Receiver examples
 
 For an example Android receiver application supporting Bluetooth and WiFi, see https://github.com/opendroneid/receiver-android.
+
+Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages are available here: https://github.com/opendroneid/wireshark-dissector.  
 
 ## Transmitter examples
 

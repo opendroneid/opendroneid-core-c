@@ -24,7 +24,17 @@ extern "C" {
 #define ODID_ID_SIZE 20
 #define ODID_STR_SIZE 23
 
-#define ODID_PROTOCOL_VERSION 0
+/*
+ * This implementation is compliant with the:
+ *   - ASTM F3411 Specification for Remote ID and Tracking
+ *   - ASD-STAN prEN 4709-002:2020 Direct Remote Identification
+ * Since the strategy of the standardization for drone ID has been to not break
+ * backwards compatibility when adding new functionality, no attempt in this
+ * implementation is made to verify the version number when decoding messages.
+ * It is assumed that newer versions can be decoded but some data elements
+ * might be missing in the output.
+ */
+#define ODID_PROTOCOL_VERSION 1 // ASTM F3411 v1.1, ASD-STAN DRI
 
 /*
  * To save memory on implementations that do not need support for 16 pages of
