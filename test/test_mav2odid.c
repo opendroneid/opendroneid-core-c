@@ -180,7 +180,7 @@ static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .status = MAV_ODID_STATUS_AIRBORNE,
         .direction = (uint16_t) (27.4f * 100),
         .speed_horizontal = (uint16_t) (4.25f * 100),
-        .speed_vertical = (uint16_t) (4.5f * 100),
+        .speed_vertical = (int16_t) (4.5f * 100),
         .latitude = (int32_t) (51.477 * 1E7),
         .longitude = (int32_t) (0.0005 * 1E7),
         .altitude_barometric = 37.5f,

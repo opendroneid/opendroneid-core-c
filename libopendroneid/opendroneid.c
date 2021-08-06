@@ -232,7 +232,7 @@ static int32_t encodeLatLon(double LatLon_data)
 * @param Alt_data Altitude to encode (in meters)
 * @return Encoded Altitude
 */
-static int16_t encodeAltitude(float Alt_data)
+static uint16_t encodeAltitude(float Alt_data)
 {
     return (uint16_t) intRangeMax( (int) ((Alt_data + (float) ALT_ADDER) / ALT_DIV), 0, UINT16_MAX);
 }
@@ -260,7 +260,7 @@ static uint16_t encodeTimeStamp(float Seconds_data)
 * @param Radius The radius of the drone area/swarm
 * @return Encoded area radius
 */
-static uint16_t encodeAreaRadius(uint16_t Radius)
+static uint8_t encodeAreaRadius(uint16_t Radius)
 {
     return (uint8_t) intRangeMax(Radius / 10, 0, 255);
 }
@@ -858,7 +858,7 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
 * Parse encoded Open Drone ID data to identify the message type. Then decode
 * from Open Drone ID packed format into the appropriate Open Drone ID structure
 *
-* This function assumes that msgData points to a buffer conaining all
+* This function assumes that msgData points to a buffer containing all
 * ODID_MESSAGE_SIZE bytes of an Open Drone ID message.
 *
 * The various Valid flags in uasData are set true whenever a message has been

@@ -449,7 +449,7 @@ void m2o_location2Mavlink(mavlink_open_drone_id_location_t *mavLocation,
     mavLocation->status = (MAV_ODID_STATUS) location->Status;
     mavLocation->direction = (uint16_t) (location->Direction * 100);
     mavLocation->speed_horizontal = (uint16_t) (location->SpeedHorizontal * 100);
-    mavLocation->speed_vertical = (uint16_t) (location->SpeedVertical * 100);
+    mavLocation->speed_vertical = (int16_t) (location->SpeedVertical * 100);
     mavLocation->latitude = (int32_t) (location->Latitude * 1E7);
     mavLocation->longitude = (int32_t) (location->Longitude * 1E7);
     mavLocation->altitude_barometric = location->AltitudeBaro;

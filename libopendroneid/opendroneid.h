@@ -213,7 +213,7 @@ typedef enum ODID_class_EU {
     // 8 to 15 reserved
 } ODID_class_EU_t;
 
- /*
+/*
  * @name ODID_DataStructs
  * ODID Data Structures in their normative (non-packed) form.
  * This is the structure that any input adapters should form to

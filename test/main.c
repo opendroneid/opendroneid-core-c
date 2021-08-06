@@ -12,7 +12,6 @@ gabriel.c.cox@intel.com
 
 #include <stdio.h>
 #include <opendroneid.h>
-#include <mav2odid.h>
 
 void test_InOut(void);
 void ODID_getSimData(uint8_t *message, uint8_t msgType);
