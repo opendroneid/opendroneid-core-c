@@ -111,6 +111,7 @@ void test_InOut()
     System_data.AreaFloor = 41.7f;
     System_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
     System_data.ClassEU = ODID_CLASS_EU_CLASS_3;
+    System_data.OperatorAltitudeGeo = 20.5f;
     printf("\nSystem\n------\n");
     printSystem_data(&System_data);
     encodeSystemMessage(&System_enc, &System_data);

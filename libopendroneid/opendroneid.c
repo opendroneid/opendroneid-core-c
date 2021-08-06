@@ -94,6 +94,7 @@ void odid_initSystemData(ODID_System_data *data)
     data->AreaCount = 1;
     data->AreaCeiling = MIN_ALT;
     data->AreaFloor = MIN_ALT;
+    data->OperatorAltitudeGeo = INV_ALT;
 }
 
 /**
@@ -441,7 +442,8 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
         return ODID_FAIL;
 
     if (inData->AreaCeiling < MIN_ALT || inData->AreaCeiling > MAX_ALT ||
-        inData->AreaFloor < MIN_ALT || inData->AreaFloor > MAX_ALT)
+        inData->AreaFloor < MIN_ALT || inData->AreaFloor > MAX_ALT ||
+        inData->OperatorAltitudeGeo < MIN_ALT || inData->OperatorAltitudeGeo > MAX_ALT)
         return ODID_FAIL;
 
     outEncoded->MessageType = ODID_MESSAGETYPE_SYSTEM;
@@ -457,6 +459,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
     outEncoded->AreaFloor = encodeAltitude(inData->AreaFloor);
     outEncoded->CategoryEU = inData->CategoryEU;
     outEncoded->ClassEU = inData->ClassEU;
+    outEncoded->OperatorAltitudeGeo = encodeAltitude(inData->OperatorAltitudeGeo);
     memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
     return ODID_SUCCESS;
 }
@@ -782,6 +785,7 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
     outData->AreaFloor = decodeAltitude(inEncoded->AreaFloor);
     outData->CategoryEU = (ODID_category_EU_t) inEncoded->CategoryEU;
     outData->ClassEU = (ODID_class_EU_t) inEncoded->ClassEU;
+    outData->OperatorAltitudeGeo = decodeAltitude(inEncoded->OperatorAltitudeGeo);
     return ODID_SUCCESS;
 }
 
@@ -1389,13 +1393,14 @@ void printSystem_data(ODID_System_data *System_data)
     const char ODID_System_data_format[] = "Operator Location Type: %d\n"
         "Classification Type: %d\nLat/Lon: %.7f, %.7f\n"
         "Area Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n"
-        "Category EU: %d, Class EU: %d\n";
+        "Category EU: %d, Class EU: %d, Altitude: %.2f\n";
     printf(ODID_System_data_format, System_data->OperatorLocationType,
         System_data->ClassificationType,
         System_data->OperatorLatitude, System_data->OperatorLongitude,
         System_data->AreaCount, System_data->AreaRadius,
         (double) System_data->AreaCeiling, (double) System_data->AreaFloor,
-        System_data->CategoryEU, System_data->ClassEU);
+        System_data->CategoryEU, System_data->ClassEU,
+        (double) System_data->OperatorAltitudeGeo);
 }
 
 /**

@@ -184,9 +184,9 @@ typedef enum ODID_operatorIdType {
 } ODID_operatorIdType_t;
 
 typedef enum ODID_operator_location_type {
-    ODID_OPERATOR_LOCATION_TYPE_TAKEOFF = 0,
-    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1,
-    ODID_OPERATOR_LOCATION_TYPE_FIXED = 2,
+    ODID_OPERATOR_LOCATION_TYPE_TAKEOFF = 0,   // Takeoff location and altitude
+    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1, // Live location and altitude
+    ODID_OPERATOR_LOCATION_TYPE_FIXED = 2,     // Fixed location and altitude
     // 3 to 255 reserved
 } ODID_operator_location_type_t;
 
@@ -280,6 +280,7 @@ typedef struct ODID_System_data {
     float AreaFloor;          // meter. Invalid, No Value, or Unknown: -1000m
     ODID_category_EU_t CategoryEU; // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
     ODID_class_EU_t ClassEU;       // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
+    float OperatorAltitudeGeo;// meter (WGS84-HAE). Invalid, No Value, or Unknown: -1000m
 } ODID_System_data;
 
 typedef struct ODID_OperatorID_data {
@@ -438,8 +439,11 @@ typedef struct __attribute__((__packed__)) ODID_System_encoded {
     uint8_t ClassEU: 4;
     uint8_t CategoryEU: 4;
 
-    // Byte 18-24
-    char Reserved2[7];
+    // Byte 18-19
+    uint16_t OperatorAltitudeGeo;
+
+    // Byte 20-24
+    char Reserved2[5];
 } ODID_System_encoded;
 
 typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {

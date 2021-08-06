@@ -306,10 +306,11 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     drone->System.OperatorLongitude = drone->Location.Longitude + 0.00001;
     drone->System.AreaCount = 20;
     drone->System.AreaRadius = 50;
-    drone->System.AreaCeiling = 150.0;
-    drone->System.AreaFloor = 25.0;
+    drone->System.AreaCeiling = 150.0f;
+    drone->System.AreaFloor = 25.0f;
     drone->System.CategoryEU = ODID_CATEGORY_EU_UNDECLARED;
     drone->System.ClassEU = ODID_CLASS_EU_UNDECLARED;
+    drone->System.OperatorAltitudeGeo = 15.5f;
 
     drone->SystemValid = 1;
 
