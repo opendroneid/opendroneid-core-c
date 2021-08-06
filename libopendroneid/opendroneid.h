@@ -67,8 +67,11 @@ typedef enum ODID_idtype {
     ODID_IDTYPE_NONE = 0,
     ODID_IDTYPE_SERIAL_NUMBER = 1,
     ODID_IDTYPE_CAA_REGISTRATION_ID = 2, // Civil Aviation Authority
-    ODID_IDTYPE_UTM_ASSIGNED_UUID = 3, // UAS (Unmanned Aircraft System) Traffic Management
-    // 4 to 15 reserved
+    ODID_IDTYPE_UTM_ASSIGNED_UUID = 3,   // UAS (Unmanned Aircraft System) Traffic Management
+    ODID_IDTYPE_SPECIFIC_SESSION_ID = 4, // The exact id type is specified by the first byte of UASID and these type
+                                         // values are managed by ICAO. 0 is reserved. 1 - 224 are managed by ICAO.
+                                         // 225 - 255 are available for private experimental usage only
+    // 5 to 15 reserved
 } ODID_idtype_t;
 
 typedef enum ODID_uatype {
