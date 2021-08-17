@@ -497,10 +497,10 @@ int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID
 */
 static int checkPackContent(ODID_Message_encoded *msgs, int amount)
 {
-    if (amount == 0 || amount > ODID_PACK_MAX_MESSAGES)
+    if (amount <= 0 || amount > ODID_PACK_MAX_MESSAGES)
         return ODID_FAIL;
 
-    int numMessages[6] = { 0 };
+    int numMessages[6] = { 0 }; // Counters for relevant parts of ODID_messagetype_t
     for (int i = 0; i < amount; i++) {
         uint8_t MessageType = decodeMessageType(msgs[i].rawData[0]);
 

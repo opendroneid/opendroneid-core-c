@@ -148,35 +148,30 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
         encodeLocationMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Location);
         msg_pack.MsgPackSize++;
     }
-    if (UAS_Data->AuthValid[0] != 0) {
-        encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[0]);
-        msg_pack.MsgPackSize++;
-    }
-    if (UAS_Data->AuthValid[1] != 0) {
-        encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[1]);
-        msg_pack.MsgPackSize++;
-    }
-    if (UAS_Data->AuthValid[2] != 0) {
-        encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[2]);
-        msg_pack.MsgPackSize++;
-    }
-    if (UAS_Data->AuthValid[3] != 0) {
-        encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[3]);
-        msg_pack.MsgPackSize++;
-    }
-    if (UAS_Data->AuthValid[4] != 0) {
-        encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[4]);
-        msg_pack.MsgPackSize++;
+    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++)
+    {
+        if (UAS_Data->AuthValid[i] != 0) {
+            if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
+                return -EINVAL;
+            encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[i]);
+            msg_pack.MsgPackSize++;
+        }
     }
     if (UAS_Data->SelfIDValid != 0) {
+        if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
+            return -EINVAL;
         encodeSelfIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->SelfID);
         msg_pack.MsgPackSize++;
     }
     if (UAS_Data->SystemValid != 0) {
+        if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
+            return -EINVAL;
         encodeSystemMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->System);
         msg_pack.MsgPackSize++;
     }
     if (UAS_Data->OperatorIDValid != 0) {
+        if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
+            return -EINVAL;
         encodeOperatorIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->OperatorID);
         msg_pack.MsgPackSize++;
     }

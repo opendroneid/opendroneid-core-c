@@ -43,7 +43,7 @@ extern "C" {
 #define MAX_AUTH_LENGTH (ODID_AUTH_PAGE_ZERO_DATA_SIZE + \
                          ODID_AUTH_PAGE_NONZERO_DATA_SIZE * (ODID_AUTH_MAX_PAGES - 1))
 
-#define ODID_PACK_MAX_MESSAGES 10
+#define ODID_PACK_MAX_MESSAGES 9
 
 #define ODID_SUCCESS    0
 #define ODID_FAIL       1
@@ -558,7 +558,7 @@ typedef struct __attribute__((__packed__)) ODID_MessagePack_encoded {
     uint8_t SingleMessageSize;
     uint8_t MsgPackSize;
 
-    // Byte 3 - 252
+    // Byte 3 - 227
     ODID_Message_encoded Messages[ODID_PACK_MAX_MESSAGES];
 } ODID_MessagePack_encoded;
 

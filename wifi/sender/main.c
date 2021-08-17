@@ -272,8 +272,8 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     /* Authentication */
     drone->Auth[0].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[0].DataPage = 0;
-    drone->Auth[0].LastPageIndex = 4;
-    drone->Auth[0].Length = 39;
+    drone->Auth[0].LastPageIndex = 3;
+    drone->Auth[0].Length = 68;
     drone->Auth[0].Timestamp = 28000000;
     char auth0_data[] = "12345678901234567";
     memcpy(drone->Auth[0].AuthData, auth0_data, MINIMUM(sizeof(auth0_data), sizeof(drone->Auth[0].AuthData)));
@@ -289,10 +289,6 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     drone->Auth[3].DataPage = 3;
     char auth3_data[] = "45678901234567890";
     memcpy(drone->Auth[3].AuthData, auth3_data, MINIMUM(sizeof(auth3_data), sizeof(drone->Auth[3].AuthData)));
-    drone->Auth[4].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
-    drone->Auth[4].DataPage = 4;
-    char auth4_data[] = "56789012345678901";
-    memcpy(drone->Auth[4].AuthData, auth4_data, MINIMUM(sizeof(auth4_data), sizeof(drone->Auth[4].AuthData)));
 
     /* Self ID */
     drone->SelfID.DescType = ODID_DESC_TYPE_TEXT;
@@ -459,8 +455,8 @@ int main(int argc, char *argv[])
     memset(&drone, 0, sizeof(drone));
     memset(&global, 0, sizeof(global));
 
-    if (ODID_AUTH_MAX_PAGES < 5) {
-        fprintf(stderr, "Program compiled with ODID_AUTH_MAX_PAGES < 5\n");
+    if (ODID_AUTH_MAX_PAGES < 4) {
+        fprintf(stderr, "Program compiled with ODID_AUTH_MAX_PAGES < 4\n");
         return -1;
     }
 

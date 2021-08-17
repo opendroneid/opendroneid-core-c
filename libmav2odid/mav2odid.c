@@ -181,18 +181,31 @@ int m2o_collectMessagePack(mav2odid_t *m2o)
     if (m2o->locationEncValid)
         memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->locationEnc, ODID_MESSAGE_SIZE);
 
-    for (int j = 0; j < ODID_AUTH_MAX_PAGES; j++)
-        if (m2o->authEncValid[j])
+    for (int j = 0; j < ODID_AUTH_MAX_PAGES; j++) {
+        if (m2o->authEncValid[j]) {
+            if (i >= ODID_PACK_MAX_MESSAGES)
+                return ODID_FAIL;
             memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->authEnc[j], ODID_MESSAGE_SIZE);
+        }
+    }
 
-    if (m2o->selfIDEncValid)
+    if (m2o->selfIDEncValid) {
+        if (i >= ODID_PACK_MAX_MESSAGES)
+            return ODID_FAIL;
         memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->selfIdEnc, ODID_MESSAGE_SIZE);
+    }
 
-    if (m2o->systemEncValid)
+    if (m2o->systemEncValid) {
+        if (i >= ODID_PACK_MAX_MESSAGES)
+            return ODID_FAIL;
         memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->systemEnc, ODID_MESSAGE_SIZE);
+    }
 
-    if (m2o->operatorIDEncValid)
+    if (m2o->operatorIDEncValid) {
+        if (i >= ODID_PACK_MAX_MESSAGES)
+            return ODID_FAIL;
         memcpy(m2o->messagePackEnc.Messages[i++].rawData, &m2o->operatorIdEnc, ODID_MESSAGE_SIZE);
+    }
 
     m2o->messagePackEnc.SingleMessageSize = ODID_MESSAGE_SIZE;
     m2o->messagePackEnc.MsgPackSize = i;
