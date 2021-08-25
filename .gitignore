@@ -23,4 +23,5 @@ test/odidtest
 wifi/sender/sender
 
 .idea/
-cmake-build-debug/
+cmake-build*
+build
