@@ -484,7 +484,7 @@ int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID
 * @param amount The amount of messages in the pack
 * @return       ODID_SUCCESS or ODID_FAIL;
 */
-static int checkPackContent(ODID_Messages_encoded *msgs, int amount)
+static int checkPackContent(ODID_Message_encoded *msgs, int amount)
 {
     if (amount == 0 || amount > ODID_PACK_MAX_MESSAGES)
         return ODID_FAIL;

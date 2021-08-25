@@ -454,7 +454,7 @@ typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {
     char Reserved[3];
 } ODID_OperatorID_encoded;
 
-typedef union ODID_Messages_encoded {
+typedef union ODID_Message_encoded {
     uint8_t rawData[ODID_MESSAGE_SIZE];
     ODID_BasicID_encoded basicId;
     ODID_Location_encoded location;
@@ -462,7 +462,7 @@ typedef union ODID_Messages_encoded {
     ODID_SelfID_encoded selfId;
     ODID_System_encoded system;
     ODID_OperatorID_encoded operatorId;
-} ODID_Messages_encoded;
+} ODID_Message_encoded;
 
 typedef struct __attribute__((__packed__)) ODID_MessagePack_encoded {
     // Byte 0 [MessageType][ProtoVersion]  -- must define LSb first
@@ -474,14 +474,14 @@ typedef struct __attribute__((__packed__)) ODID_MessagePack_encoded {
     uint8_t MsgPackSize;
 
     // Byte 3 - 252
-    ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
+    ODID_Message_encoded Messages[ODID_PACK_MAX_MESSAGES];
 } ODID_MessagePack_encoded;
 
 typedef struct ODID_MessagePack_data {
     uint8_t SingleMessageSize; // Must always be ODID_MESSAGE_SIZE
     uint8_t MsgPackSize; // Number of messages in pack (NOT number of bytes)
 
-    ODID_Messages_encoded Messages[ODID_PACK_MAX_MESSAGES];
+    ODID_Message_encoded Messages[ODID_PACK_MAX_MESSAGES];
 } ODID_MessagePack_data;
 
 // API Calls
