@@ -78,6 +78,20 @@ typedef enum ODID_messagetype {
     ODID_MESSAGETYPE_INVALID = 0xFF,
 } ODID_messagetype_t;
 
+// Each message type must maintain it's own message uint8_t counter, which must
+// be incremented if the message content changes. For repeated transmission of
+// the same message content, incrementing the counter is optional.
+typedef enum ODID_msg_counter {
+    ODID_MSG_COUNTER_BASIC_ID = 0,
+    ODID_MSG_COUNTER_LOCATION = 1,
+    ODID_MSG_COUNTER_AUTH = 2,
+    ODID_MSG_COUNTER_SELF_ID = 3,
+    ODID_MSG_COUNTER_SYSTEM = 4,
+    ODID_MSG_COUNTER_OPERATOR_ID = 5,
+    ODID_MSG_COUNTER_PACKED = 6,
+    ODID_MSG_COUNTER_AMOUNT = 7,
+} ODID_msg_counter_t;
+
 typedef enum ODID_idtype {
     ODID_IDTYPE_NONE = 0,
     ODID_IDTYPE_SERIAL_NUMBER = 1,
