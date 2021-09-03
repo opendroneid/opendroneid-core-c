@@ -506,11 +506,10 @@ static int checkPackContent(ODID_Message_encoded *msgs, int amount)
 
         // Check for illegal content. This also avoids recursive calls between
         // decodeOpenDroneID() and decodeMessagePack()/checkPackContent()
-        if (MessageType == ODID_MESSAGETYPE_PACKED ||
-            MessageType == ODID_MESSAGETYPE_INVALID)
+        if (MessageType >= ODID_MESSAGETYPE_BASIC_ID && MessageType <= ODID_MESSAGETYPE_OPERATOR_ID)
+            numMessages[MessageType]++;
+        else
             return ODID_FAIL;
-
-        numMessages[MessageType]++;
     }
 
     // Allow max one of each message except Authorization, of which there can
