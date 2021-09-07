@@ -134,8 +134,10 @@ void odid_initUasData(ODID_UAS_Data *data)
 {
     if (!data)
         return;
-    data->BasicIDValid = 0;
-    odid_initBasicIDData(&data->BasicID);
+    for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {
+        data->BasicIDValid[i] = 0;
+        odid_initBasicIDData(&data->BasicID[i]);
+    }
     data->LocationValid = 0;
     odid_initLocationData(&data->Location);
     for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++) {
@@ -512,11 +514,8 @@ static int checkPackContent(ODID_Message_encoded *msgs, int amount)
             return ODID_FAIL;
     }
 
-    // Allow max one of each message except Authorization, of which there can
-    // be ODID_AUTH_MAX_PAGES. The ASTM specification is less restrictive (e.g.
-    // multiple BasicID messages are allowed) but this implementation does not
-    // support anything else.
-    if (numMessages[ODID_MESSAGETYPE_BASIC_ID] > 1 ||
+    // Allow max one of each message except Basic ID and Authorization.
+    if (numMessages[ODID_MESSAGETYPE_BASIC_ID] > ODID_BASIC_ID_MAX_MESSAGES ||
         numMessages[ODID_MESSAGETYPE_LOCATION] > 1 ||
         numMessages[ODID_MESSAGETYPE_AUTH] > ODID_AUTH_MAX_PAGES ||
         numMessages[ODID_MESSAGETYPE_SELF_ID] > 1 ||
@@ -642,6 +641,22 @@ static float decodeTimeStamp(uint16_t Seconds_enc)
 static uint16_t decodeAreaRadius(uint8_t Radius_enc)
 {
     return (uint16_t) Radius_enc * 10;
+}
+
+/**
+* Get the ID type of the basic ID message
+*
+* @param inEncoded  Input message (encoded/packed) structure
+* @param idType     Output: The ID type of this basic ID message
+* @return           ODID_SUCCESS or ODID_FAIL;
+*/
+int getBasicIDType(ODID_BasicID_encoded *inEncoded, enum ODID_idtype *idType)
+{
+    if (!inEncoded || !idType || inEncoded->MessageType != ODID_MESSAGETYPE_BASIC_ID)
+        return ODID_FAIL;
+
+    *idType = inEncoded->IDType;
+    return ODID_SUCCESS;
 }
 
 /**
@@ -908,9 +923,18 @@ ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
     {
     case ODID_MESSAGETYPE_BASIC_ID: {
         ODID_BasicID_encoded *basicId = (ODID_BasicID_encoded *) msgData;
-        if (decodeBasicIDMessage(&uasData->BasicID, basicId) == ODID_SUCCESS) {
-            uasData->BasicIDValid = 1;
-            return ODID_MESSAGETYPE_BASIC_ID;
+        enum ODID_idtype idType;
+        if (getBasicIDType(basicId, &idType) == ODID_SUCCESS) {
+            // Find a free slot to store the current message in or overwrite old data of the same type.
+            for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {
+                enum ODID_idtype storedType = uasData->BasicID[i].IDType;
+                if (storedType == ODID_IDTYPE_NONE || storedType == idType) {
+                    if (decodeBasicIDMessage(&uasData->BasicID[i], basicId) == ODID_SUCCESS) {
+                        uasData->BasicIDValid[i] = 1;
+                        return ODID_MESSAGETYPE_BASIC_ID;
+                    }
+                }
+            }
         }
         break;
     }

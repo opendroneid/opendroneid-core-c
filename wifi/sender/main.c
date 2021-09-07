@@ -50,6 +50,8 @@ sw@simonwunderlich.de
 
 #define MINIMUM(a,b) (((a)<(b))?(a):(b))
 
+#define ID_MSG_POS 0
+
 struct global {
     char server[1024];
     char port[16];
@@ -148,9 +150,9 @@ int read_arguments(int argc, char *argv[], ODID_UAS_Data *drone, struct global *
     strncpy(global->server, "127.0.0.1", sizeof(global->server));
     strncpy(global->port, (char *)DEFAULT_GPSD_PORT, sizeof(global->port));
     strncpy(global->wlan_iface, "wlan0", sizeof(global->wlan_iface));
-    strncpy(drone->BasicID.UASID, "1", sizeof(drone->BasicID.UASID));
-    drone->BasicID.IDType = ODID_IDTYPE_SERIAL_NUMBER;
-    drone->BasicID.UAType = ODID_UATYPE_FREE_BALLOON; /* balloon */
+    strncpy(drone->BasicID[ID_MSG_POS].UASID, "1", sizeof(drone->BasicID[ID_MSG_POS].UASID));
+    drone->BasicID[ID_MSG_POS].IDType = ODID_IDTYPE_SERIAL_NUMBER;
+    drone->BasicID[ID_MSG_POS].UAType = ODID_UATYPE_FREE_BALLOON;
     global->refresh_rate = 1;
 
     while((opt = getopt(argc, argv, "hp:H:i:t:r:TSw:")) != -1) {
@@ -169,11 +171,11 @@ int read_arguments(int argc, char *argv[], ODID_UAS_Data *drone, struct global *
                 strncpy(global->wlan_iface, optarg, sizeof(global->wlan_iface));
                 break;
             case 'i':
-                strncpy(drone->BasicID.UASID, optarg, sizeof(drone->BasicID.UASID));
+                strncpy(drone->BasicID[ID_MSG_POS].UASID, optarg, sizeof(drone->BasicID[ID_MSG_POS].UASID));
                 break;
             case 't':
                 /* TODO: verify */
-                drone->BasicID.UAType = atoi(optarg);
+                drone->BasicID[ID_MSG_POS].UAType = atoi(optarg);
                 break;
             case 'r':
                 global->refresh_rate = atoi(optarg);
@@ -262,12 +264,11 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
 static void drone_set_mock_data(ODID_UAS_Data *drone)
 {
     /* Basic ID */
-    drone->BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
-    drone->BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
+    drone->BasicID[ID_MSG_POS].UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
+    drone->BasicID[ID_MSG_POS].IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
     char id[] = "12345678901234567890";
-    strncpy(drone->BasicID.UASID, id, sizeof(drone->BasicID.UASID));
-
-    drone->BasicIDValid = 1;
+    strncpy(drone->BasicID[ID_MSG_POS].UASID, id, sizeof(drone->BasicID[ID_MSG_POS].UASID));
+    drone->BasicIDValid[ID_MSG_POS] = 1;
 
     /* Authentication */
     drone->Auth[0].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
@@ -277,24 +278,27 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     drone->Auth[0].Timestamp = 28000000;
     char auth0_data[] = "12345678901234567";
     memcpy(drone->Auth[0].AuthData, auth0_data, MINIMUM(sizeof(auth0_data), sizeof(drone->Auth[0].AuthData)));
+    drone->AuthValid[0] = 1;
     drone->Auth[1].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[1].DataPage = 1;
     char auth1_data[] = "23456789012345678";
     memcpy(drone->Auth[1].AuthData, auth1_data, MINIMUM(sizeof(auth1_data), sizeof(drone->Auth[1].AuthData)));
+    drone->AuthValid[1] = 1;
     drone->Auth[2].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[2].DataPage = 2;
     char auth2_data[] = "34567890123456789";
     memcpy(drone->Auth[2].AuthData, auth2_data, MINIMUM(sizeof(auth2_data), sizeof(drone->Auth[2].AuthData)));
+    drone->AuthValid[2] = 1;
     drone->Auth[3].AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     drone->Auth[3].DataPage = 3;
     char auth3_data[] = "45678901234567890";
     memcpy(drone->Auth[3].AuthData, auth3_data, MINIMUM(sizeof(auth3_data), sizeof(drone->Auth[3].AuthData)));
+    drone->AuthValid[3] = 1;
 
     /* Self ID */
     drone->SelfID.DescType = ODID_DESC_TYPE_TEXT;
     char description[] = "NAN Frame WiFi Test SID";
     strncpy(drone->SelfID.Desc, description, sizeof(drone->SelfID.Desc));
-
     drone->SelfIDValid = 1;
 
     /* System data */
@@ -309,14 +313,12 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     drone->System.CategoryEU = ODID_CATEGORY_EU_UNDECLARED;
     drone->System.ClassEU = ODID_CLASS_EU_UNDECLARED;
     drone->System.OperatorAltitudeGeo = 15.5f;
-
     drone->SystemValid = 1;
 
     /* Operator ID */
     drone->OperatorID.OperatorIdType = ODID_OPERATOR_ID;
     char operatorId[] = "99887766554433221100";
     strncpy(drone->OperatorID.OperatorId, operatorId, sizeof(drone->OperatorID.OperatorId));
-
     drone->OperatorIDValid = 1;
 }
 
@@ -327,7 +329,7 @@ static void drone_set_ssid(ODID_UAS_Data *drone, struct global *global)
     int ret;
 
     ret = snprintf(ssid, sizeof(ssid), "%7s:%2.5f:%3.5f:%3d",
-                   drone->BasicID.UASID,
+                   drone->BasicID[ID_MSG_POS].UASID,
                    drone->Location.Latitude,
                    drone->Location.Longitude,
                    (int) drone->Location.AltitudeGeo);

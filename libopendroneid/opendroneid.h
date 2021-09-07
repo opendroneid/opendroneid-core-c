@@ -43,6 +43,13 @@ extern "C" {
 #define MAX_AUTH_LENGTH (ODID_AUTH_PAGE_ZERO_DATA_SIZE + \
                          ODID_AUTH_PAGE_NONZERO_DATA_SIZE * (ODID_AUTH_MAX_PAGES - 1))
 
+#ifndef ODID_BASIC_ID_MAX_MESSAGES
+#define ODID_BASIC_ID_MAX_MESSAGES 2
+#endif
+#if (ODID_BASIC_ID_MAX_MESSAGES < 1) || (ODID_BASIC_ID_MAX_MESSAGES > 5)
+#error "ODID_BASIC_ID_MAX_MESSAGES must be between 1 and 5."
+#endif
+
 #define ODID_PACK_MAX_MESSAGES 9
 
 #define ODID_SUCCESS    0
@@ -367,14 +374,14 @@ typedef struct ODID_OperatorID_data {
 } ODID_OperatorID_data;
 
 typedef struct ODID_UAS_Data {
-    ODID_BasicID_data BasicID;
+    ODID_BasicID_data BasicID[ODID_BASIC_ID_MAX_MESSAGES];
     ODID_Location_data Location;
     ODID_Auth_data Auth[ODID_AUTH_MAX_PAGES];
     ODID_SelfID_data SelfID;
     ODID_System_data System;
     ODID_OperatorID_data OperatorID;
 
-    uint8_t BasicIDValid;
+    uint8_t BasicIDValid[ODID_BASIC_ID_MAX_MESSAGES];
     uint8_t LocationValid;
     uint8_t AuthValid[ODID_AUTH_MAX_PAGES];
     uint8_t SelfIDValid;
@@ -609,6 +616,7 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
 int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded);
 int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
 
+int getBasicIDType(ODID_BasicID_encoded *inEncoded, enum ODID_idtype *idType);
 int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum);
 ODID_messagetype_t decodeMessageType(uint8_t byte);
 ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);

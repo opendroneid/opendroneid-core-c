@@ -157,17 +157,17 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                               &msg, &basic_id);
 
     ODID_messagetype_t msgType;
-    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->basicIdEnc,
+    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->basicIdEnc[0],
                      uas_data, &msgType);
 
     if (msgType != ODID_MESSAGETYPE_BASIC_ID)
         printf("ERROR: Open Drone ID message type was not Basic ID\n");
 
-    printBasicID_data(&uas_data->BasicID);
+    printBasicID_data(&uas_data->BasicID[0]);
 
     // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_basic_id_t basic_id2 = { 0 };
-    m2o_basicId2Mavlink(&basic_id2, &uas_data->BasicID);
+    m2o_basicId2Mavlink(&basic_id2, &uas_data->BasicID[0]);
     printf("\n");
     print_mavlink_basicID(&basic_id2);
 }

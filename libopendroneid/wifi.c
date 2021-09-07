@@ -70,9 +70,13 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
     mprintf("{\n\t\"Version\": \"0.8\",\n\t\"Response\": {\n");
 
     mprintf("\t\t\"BasicID\": {\n");
-    mprintf("\t\t\t\"UAType\": %d,\n", UAS_Data->BasicID.UAType);
-    mprintf("\t\t\t\"IDType\": %d,\n", UAS_Data->BasicID.IDType);
-    mprintf("\t\t\t\"UASID\": %s,\n", UAS_Data->BasicID.UASID);
+    for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {
+        if (!UAS_Data->BasicIDValid[i])
+            continue;
+        mprintf("\t\t\t\"UAType%d\": %d,\n", i, UAS_Data->BasicID[i].UAType);
+        mprintf("\t\t\t\"IDType%d\": %d,\n", i, UAS_Data->BasicID[i].IDType);
+        mprintf("\t\t\t\"UASID%d\": %s,\n", i, UAS_Data->BasicID[i].UASID);
+    }
     mprintf("\t\t},\n");
 
     mprintf("\t\t\"Location\": {\n");
@@ -140,36 +144,42 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
     /* create a complete message pack */
     msg_pack.SingleMessageSize = ODID_MESSAGE_SIZE;
     msg_pack.MsgPackSize = 0;
-    if (UAS_Data->BasicIDValid != 0) {
-        encodeBasicIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->BasicID);
-        msg_pack.MsgPackSize++;
+    for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {
+        if (UAS_Data->BasicIDValid[i]) {
+            if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
+                return -EINVAL;
+            encodeBasicIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->BasicID[i]);
+            msg_pack.MsgPackSize++;
+        }
     }
-    if (UAS_Data->LocationValid != 0) {
+    if (UAS_Data->LocationValid) {
+        if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
+            return -EINVAL;
         encodeLocationMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Location);
         msg_pack.MsgPackSize++;
     }
     for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++)
     {
-        if (UAS_Data->AuthValid[i] != 0) {
+        if (UAS_Data->AuthValid[i]) {
             if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
                 return -EINVAL;
             encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[i]);
             msg_pack.MsgPackSize++;
         }
     }
-    if (UAS_Data->SelfIDValid != 0) {
+    if (UAS_Data->SelfIDValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
         encodeSelfIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->SelfID);
         msg_pack.MsgPackSize++;
     }
-    if (UAS_Data->SystemValid != 0) {
+    if (UAS_Data->SystemValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
         encodeSystemMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->System);
         msg_pack.MsgPackSize++;
     }
-    if (UAS_Data->OperatorIDValid != 0) {
+    if (UAS_Data->OperatorIDValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
         encodeOperatorIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->OperatorID);

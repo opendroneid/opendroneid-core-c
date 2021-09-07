@@ -196,8 +196,8 @@ void test_InOut()
 
     decodeMessagePack(&uasData, &pack_enc);
     printf("\nPack\n------\n");
-    if (uasData.BasicIDValid)
-        printBasicID_data(&uasData.BasicID);
+    if (uasData.BasicIDValid[0])
+        printBasicID_data(&uasData.BasicID[0]);
     if (uasData.LocationValid)
         printLocation_data(&uasData.Location);
     if (uasData.AuthValid[0])
