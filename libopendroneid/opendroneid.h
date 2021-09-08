@@ -570,8 +570,8 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
  * Returns the packet length on success, or < 0 on error.
  */
 int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
-						  uint8_t send_counter,
-						  uint8_t *buf, size_t buf_size);
+                                                  uint8_t send_counter,
+                                                  uint8_t *buf, size_t buf_size);
 
 /* odid_message_process_pack - decodes the messages from the odid message pack
  * @UAS_Data: general drone status information
@@ -592,8 +592,7 @@ int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buf
  * Returns 0 on success, or < 0 on error. Will fill 6 bytes into @mac.
  */
 int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
-						    char *mac, uint8_t *buf, size_t buf_size);
-
+                                                    char *mac, uint8_t *buf, size_t buf_size);
 
 #ifndef ODID_DISABLE_PRINTF
 void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
