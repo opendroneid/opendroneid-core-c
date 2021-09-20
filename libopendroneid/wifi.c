@@ -40,20 +40,12 @@ sw@simonwunderlich.de
  * 50-6F-9A-01-00-00 to 50-6F-9A-01-FF-FF and is carried in the A3 field of
  * some of the NAN frames. The NAN Cluster ID is randomly chosen by the device
  * that initiates the NAN Cluster.
+ * However, the ASTM Remote ID specification v1.1 specifies that the NAN
+ * cluster ID must be fixed to the value 50-6F-9A-01-00-FF.
  */
-uint8_t* get_nan_cluster_id()
+const uint8_t* get_nan_cluster_id()
 {
-    static uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
-    static int generated = 0;
-
-    if (generated == 0)
-    {
-        srand(time(NULL));
-        cluster_id[4] = rand() % 256;
-        cluster_id[5] = rand() % 256;
-        generated = 1;
-    }
-
+    static const uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0x00, 0xFF };
     return cluster_id;
 }
 
@@ -211,7 +203,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
     /* "org.opendroneid.remoteid" hash */
     uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
-    uint8_t *cluster_id = get_nan_cluster_id();
+    const uint8_t *cluster_id = get_nan_cluster_id();
     struct ieee80211_mgmt *mgmt;
     struct ieee80211_beacon *beacon;
     struct nan_master_indication_attribute *master_indication_attr;
@@ -307,7 +299,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     /* "org.opendroneid.remoteid" hash */
     uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
     uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
-    uint8_t *cluster_id = get_nan_cluster_id();
+    const uint8_t *cluster_id = get_nan_cluster_id();
     struct ieee80211_mgmt *mgmt;
     struct nan_service_discovery *nsd;
     struct nan_service_descriptor_attribute *nsda;
