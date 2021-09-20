@@ -51,8 +51,8 @@ static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
     int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
     if (auth->data_page == 0) {
         size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
-        printf("page_count: %d, length: %d, timestamp: %d, ",
-               auth->page_count, auth->length, auth->timestamp);
+        printf("last_page_index: %d, length: %d, timestamp: %d, ",
+               auth->last_page_index, auth->length, auth->timestamp);
     }
     printf("\n");
     for (int i = 0; i < size; i++)
@@ -75,12 +75,13 @@ static void print_mavlink_system(mavlink_open_drone_id_system_t *system)
     printf("Operator Location Type: %d, Classification Type: %d\n"
            "Lat/Lon: %d, %d degE7, \n"
            "Area Count, Radius: %d, %d, Ceiling, Floor: %.2f, %.2f m\n"
-           "Category EU: %d, Class EU: %d\n",
+           "Category EU: %d, Class EU: %d\n"
+           "Operator Altitude Geodetic: %.2f\n",
            system->operator_location_type, system->classification_type,
            system->operator_latitude, system->operator_longitude,
            system->area_count, system->area_radius,
            (double) system->area_ceiling, (double) system->area_floor,
-           system->category_eu, system->class_eu);
+           system->category_eu, system->class_eu, (double) system->operator_altitude_geo);
 }
 
 static void print_mavlink_operatorID(mavlink_open_drone_id_operator_id_t *operator_id)
@@ -223,7 +224,7 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .data_page = 0,
         .authentication_type = MAV_ODID_AUTH_TYPE_UAS_ID_SIGNATURE,
         .authentication_data = "98765432101234567",
-        .page_count = 0,
+        .last_page_index = 0,
         .length = 17,
         .timestamp = 23000000 };
     printf("\n\n---------------------Authentication---------------------\n\n");
@@ -294,7 +295,8 @@ static void test_system(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .area_ceiling = 75.5f,
         .area_floor = 26.5f,
         .category_eu = MAV_ODID_CATEGORY_EU_CERTIFIED,
-        .class_eu = MAV_ODID_CLASS_EU_CLASS_5 };
+        .class_eu = MAV_ODID_CLASS_EU_CLASS_5,
+        .operator_altitude_geo = 2.3f };
 
     printf("\n\n------------------------System------------------------\n\n");
     print_mavlink_system(&system);
