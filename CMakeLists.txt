@@ -5,7 +5,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector \
     -fno-delete-null-pointer-checks -fwrapv -O0 -Wall -Wdouble-promotion \
     -Wno-address-of-packed-member")
 
-cmake_minimum_required(VERSION 2.6.3)
+cmake_minimum_required(VERSION 2.8.12)
 
 option(BUILD_MAVLINK "Build with mavlink support" ON)
 option(BUILD_WIFI "Build with WiFi support" ON)
