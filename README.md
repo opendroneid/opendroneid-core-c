@@ -2,48 +2,57 @@
 
 ## Open Drone ID Core C Library
 
-This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available [here](https://www.astm.org/Standards/F3411.htm).
-The code is also compatible with the upcoming European ASD-STAN Direct Remote ID standard.
-This latter standard has not yet been published, but some preliminary information can be found in this [white paper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and in the recording of this [webinar](https://www.cencenelec.eu/news/events/Pages/EV-2021-15.aspx).
-An early draft of the standard is available [here](https://asd-stan.org/downloads/din-en-4709-0022021-02/).
+This repository provides a C-code function library for encoding and decoding (packing/unpacking) Open Drone ID messages, as the format is defined in the ASTM F3411 Remote ID and the ASD-STAN prEN 4709-002 Direct Remote ID specifications.
+See further details in the [specifications](#relevant-specifications) section below.
 
-Please note that both standards have been updated during the first half of 2021 and the updated documents are not yet published (August 2021).
-However, this implementation is already compliant with these updates. 
+Please note that both specifications have been updated during the first half of 2021 and the updated documents are not yet published (September 2021).
+However, this implementation is already compliant with these updates.
 
 The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
 
-Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID standard:
+Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID specification:
 https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-drip.
 
 MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
 ## Receiver examples
 
+### Android
 For an example Android receiver application supporting Bluetooth and WiFi, see https://github.com/opendroneid/receiver-android.
 
+### iOS
+Currently there is no open source iOS receiver application for Apple devices.
+However, reception of Bluetooth 4 Legacy Advertising drone ID signals have been demonstrated to work on iOS.
+Apple currently does not expose suitable APIs to receive any other transmission method for drone ID signals than BT4 legacy advertising. I.e. current versions of iOS (up to and including 15) do not support receiving BT5 Long Range + Extended Advertising, Wi-Fi NaN nor Wi-Fi Beacon.
+
+### WireShark
 Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages are available here: https://github.com/opendroneid/wireshark-dissector.  
 
 ## Transmitter examples
 
+### ESP32
 An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
 The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, WiFi NaN and WiFi Beacon.
+
 Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported.
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
-The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3?position=0&list=_TQH0oNBtbw0KMnMbCVH3ol_jy3McAHwrsqIZcX6XjM) chips will both support Long Range and Extended Advertising but this has not yet been tested.
+The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips will both support Long Range and Extended Advertising but this has not yet been tested.
 
+### Linux
 A WiFi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
 Better documentation is needed on what exact HW + SW environment this is functional.
 
 A description of some very preliminary experiments using bluez and hostapd to transmit BT4 and WiFi Beacon drone ID signals from a Linux PC or Raspberry Pi can be found [here](https://github.com/opendroneid/opendroneid-core-c/issues/42).
 Contributions to create fully functional transmitter implementations are very welcome.
 
+### nRF and TI Bluetooth chipsets
 Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exists but so far none have been open sourced.
 Please open an issue if you have an implementation you are willing to share. A new repository under opendroneid can be made.
 
 ## How to Build
 
-To build the library and the sample app:
+To build the library and the sample app on Linux:
 
 ```
 sudo apt-get install libgps-dev libnl-genl-3-dev
@@ -159,5 +168,77 @@ https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID
 
 The functions in `mav2odid.c` can be used to convert these MAVLink messages into suitable `opendroneid.h` data structures and back again. See the example usages in `test/test_mav2odid.c`.
 
-Recommendations on how to utilize the MAVLink messages for internal distribution of Open Drone ID data of an Unmanned Aircraft System can be found here:
+Recommendations on how to utilize the MAVLink messages for UAS internal distribution of Open Drone ID data of an Unmanned Aircraft System (UAS) can be found here:
 https://mavlink.io/en/services/opendroneid.html
+
+
+## Relevant specifications
+
+### United States
+
+The ASTM F3411 Specification for Remote ID and Tracking has been defined to specify how Unmanned Aircraft (UA) or Unmanned Aircraft Systems (UAS) can publish their ID, location, altitude etc., either via direct broadcast (Bluetooth or Wi-Fi), or via an internet connection to a Remote ID server.
+
+Version 1.0 (F3411-19) of the specification is currently [available](https://www.astm.org/Standards/F3411.htm).
+An updated version 1.1 (F3411-21?) is in the final stages of being finalized (September 2021).
+It contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
+Additionally, a Means of Compliance document (MoC) is being drafted by the ASTM, containing further implementation requirements and test specifications.
+Together, the two documents will allow manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
+
+### European Union
+
+To meet the European Commission Delegated Regulation [2019/945](https://eur-lex.europa.eu/eli/reg_del/2019/945/2020-08-09) and the Commission Implementing Regulation [2019/947](https://eur-lex.europa.eu/eli/reg_impl/2019/947/2021-08-05), ASD-STAN has developed the prEN 4709-002 Direct Remote Identification specification.
+It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 specification.
+See the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and the recording of this [webinar](https://www.cencenelec.eu/news-and-events/events/2021-02-09-european-workshop-on-uas-direct-remote-identification/).
+The final version is not yet published (September 2021).
+An earlier draft is available [here](https://asd-stan.org/downloads/din-en-4709-0022021-02/).
+Be aware, that multiple changes were done after this draft version was made available and it should not be used as a reference for any implementations.
+
+
+
+### Comparison
+
+A comparison of some of the more detailed parts of each specification and rule is given in the table below.
+If a field is left blank, nothing specific is mentioned in the particular document related to that part.
+
+The rules are what is defined by law and must be followed (the FAA rule in the United States and the EU rule in the European Union).
+The ASTM Means of Compliance (MoC) document overrides certain parts of the ASTM specification to meet the FAA rule requirements.
+
+| | FAA rule | ASTM v1.1 | ASTM MoC | EU rule | ASD-STAN DRI |
+| --- | --- | --- | --- | --- | --- |
+| Serial ANSI/CTA-2063-A | M<sup>1</sup> |  M<sup>1</sup> | M<sup>1</sup> | M | M |
+| Session ID | M<sup>1</sup> | M<sup>1</sup> | M<sup>1</sup> |  | O |
+| UA dynamic position | M | M |  | M | M |
+| UA altitude WGS-84 | M | M |  |  | O |
+| UA altitude AGL/Take-off |  | O |  | M | M |
+| Timestamp | M | M |  | M | M |
+| Operational/Emergency status | M<sup>2</sup> | O | M<sup>2</sup> | M<sup>2</sup> | M<sup>2</sup> |
+| Track direction | M | M |  | M | M |
+| Horizontal speed | M | M |  | M | M |
+| Vertical speed | M | M |  |  | O |
+| Operator registration ID |  | O |  | M | M |
+| EU Category & Class |  | O |  |  | R |
+| Operator dynamic position | M<sup>3</sup> | O | M<sup>3</sup> | M<sup>3</sup> | M<sup>3</sup> |
+| Operator altitude WGS-84 | M | O | M |  | O |
+| Transmission interval<sup>4</sup> (seconds) | 1 | 1 or 3 | 1 |  | 1 or 3 |
+| Transmission time | Take-off to shutdown |  | Take-off to shutdown |  | When airborne |
+| BT4 Legacy Advertising |  | M<sup>5</sup> | M<sup>6, 7</sup> |  | O |
+| BT5 Long Range |  | O | M<sup>6, 7</sup> |  | M<sup>5</sup> |
+| Wi-Fi NaN 2.4 GHz |  | M<sup>5</sup> |  |  | M<sup>5</sup> |
+| Wi-Fi NaN 5 GHz |  | O |  |  | M<sup>5</sup> |
+| Wi-Fi Beacon 2.4 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> |
+| Wi-Fi Beacon 5 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> |
+
+M: Mandatory. O: Optional. R: Recommended
+
+1. Either the Serial Number or the Session ID must be transmitted.
+    Add-ons are not allowed to use Session ID.
+2. Not required for Add-ons.
+3. For Add-ons under EU rule: the Take-off location can be used instead.
+    For Add-ons under FAA rule: The Take-off location is required instead.
+4. Concerns only the Basic ID, Location and System messages.
+    Location is always with 1 second intervals.
+    Basic ID and System intervals can be 3 seconds in the specifications.
+5. Only one of the Mandatory broadcast methods is required.
+6. Both BT4 and BT5 must be transmitted simultaneously.
+7. Only Bluetooth (BT4 + BT5 simultaneously) or Wi-Fi Beacon (2.4 GHz or 5 GHz) are allowed.
+8. If any other channel than Channel 6 on 2.4 GHz or Channel 149 on 5 GHz is used, a faster transmission rate of 5 Hz is required.

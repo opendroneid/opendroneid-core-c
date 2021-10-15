@@ -307,7 +307,7 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
     int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
     if (authentication.DataPage == 0) {
         size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
-        authentication.LastPageIndex = mavAuthentication->page_count;
+        authentication.LastPageIndex = mavAuthentication->last_page_index;
         authentication.Length = mavAuthentication->length;
         authentication.Timestamp = mavAuthentication->timestamp;
     }
@@ -364,6 +364,7 @@ static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem
     system.AreaFloor = mavSystem->area_floor;
     system.CategoryEU = (ODID_category_EU_t) mavSystem->category_eu;
     system.ClassEU = (ODID_class_EU_t) mavSystem->class_eu;
+    system.OperatorAltitudeGeo = mavSystem->operator_altitude_geo;
 
     if (encodeSystemMessage(&m2o->systemEnc, &system) != ODID_SUCCESS)
         return ODID_FAIL;
@@ -556,7 +557,7 @@ void m2o_authentication2Mavlink(mavlink_open_drone_id_authentication_t *mavAuth,
     int size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
     if (Auth->DataPage == 0) {
         size = ODID_AUTH_PAGE_NONZERO_DATA_SIZE;
-        mavAuth->page_count = Auth->LastPageIndex;
+        mavAuth->last_page_index = Auth->LastPageIndex;
         mavAuth->length = Auth->Length;
         mavAuth->timestamp = Auth->Timestamp;
     }
@@ -600,6 +601,7 @@ void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
     mavSystem->area_floor = system->AreaFloor;
     mavSystem->category_eu = (ODID_category_EU_t) system->CategoryEU;
     mavSystem->class_eu = (ODID_class_EU_t) system->ClassEU;
+    mavSystem->operator_altitude_geo = system->OperatorAltitudeGeo;
 }
 
 /**
