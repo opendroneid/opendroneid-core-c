@@ -8,7 +8,7 @@ See further details in the [specifications](#relevant-specifications) section be
 Please note that both specifications have been updated during the first half of 2021 and the updated documents are not yet published (September 2021).
 However, this implementation is already compliant with these updates.
 
-The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi.
+The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or Wi-Fi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
 
 Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID specification:
@@ -19,7 +19,7 @@ MAVLink messages for drone ID are available at https://mavlink.io/en/messages/co
 ## Receiver examples
 
 ### Android
-For an example Android receiver application supporting Bluetooth and WiFi, see https://github.com/opendroneid/receiver-android.
+For an example Android receiver application supporting Bluetooth and Wi-Fi, see https://github.com/opendroneid/receiver-android.
 
 ### iOS
 Currently there is no open source iOS receiver application for Apple devices.
@@ -33,22 +33,23 @@ Examples on how to use the WireShark PC application to pick up and dissect open 
 
 ### ESP32
 An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
-The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, WiFi NaN and WiFi Beacon.
+The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, Wi-Fi NaN and Wi-Fi Beacon.
 
 Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported.
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
 The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips will both support Long Range and Extended Advertising but this has not yet been tested.
 
 ### Linux
-A WiFi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
+A Wi-Fi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
 Better documentation is needed on what exact HW + SW environment this is functional.
 
-A description of some very preliminary experiments using bluez and hostapd to transmit BT4 and WiFi Beacon drone ID signals from a Linux PC or Raspberry Pi can be found [here](https://github.com/opendroneid/opendroneid-core-c/issues/42).
-Contributions to create fully functional transmitter implementations are very welcome.
+A simple application for sending static drone ID data via Bluetooth 4 and 5 and via Wi-Fi Beacon is available [here](https://github.com/opendroneid/transmitter-linux).
+This has tested to work reasonably okay on one CometLake motherboard and partly okay on RaspberryPi 3B and 4 HW.
 
 ### nRF and TI Bluetooth chipsets
-Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exists but so far none have been open sourced.
-Please open an issue if you have an implementation you are willing to share. A new repository under opendroneid can be made.
+Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exist, but so far none have been open sourced.
+Please open an issue if you have an implementation you are willing to share.
+A new repository under opendroneid can be made.
 
 ## How to Build
 
@@ -94,9 +95,9 @@ cmake -DBUILD_MAVLINK=off .
 
 MAVLink support requires the mavlink_c_library_v2 to be installed in the respective folder
 
-### WiFi NaN example implementation
+### Wi-Fi NaN example implementation
 
-The WiFi NaN example implementation is built by default.
+The Wi-Fi NaN example implementation is built by default.
 
 To disable, use the ```BUILD_WIFI``` parameter, i.e.:
 
@@ -110,7 +111,7 @@ It requires the libgps, libnl-3 and libnl-genl-3 support. Install the dependenci
 sudo apt-get install libgps-dev libnl-genl-3-dev
 ```
 
-If available, the WiFi reference implementation will link against libnl-tiny instead of libnl*-3 if available.
+If available, the Wi-Fi reference implementation will link against libnl-tiny instead of libnl*-3 if available.
 
 ## Architecture
 
