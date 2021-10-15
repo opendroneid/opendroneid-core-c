@@ -2,9 +2,13 @@
 
 ## Open Drone ID Core C Library
 
-This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available at https://www.astm.org/Standards/F3411.htm.
+This provides a function library for encoding and decoding (packing/unpacking) Open Drone ID messages as the format is defined in the ASTM Remote ID standard available [here](https://www.astm.org/Standards/F3411.htm).
 The code is also compatible with the upcoming European ASD-STAN Direct Remote ID standard.
 This latter standard has not yet been published, but some preliminary information can be found in this [white paper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and in the recording of this [webinar](https://www.cencenelec.eu/news/events/Pages/EV-2021-15.aspx).
+An early draft of the standard is available [here](https://asd-stan.org/downloads/din-en-4709-0022021-02/).
+
+Please note that both standards have been updated during the first half of 2021 and the updated documents are not yet published (August 2021).
+However, this implementation is already compliant with these updates. 
 
 The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or WiFi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
@@ -14,9 +18,11 @@ https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-d
 
 MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
-## Receiver example
+## Receiver examples
 
 For an example Android receiver application supporting Bluetooth and WiFi, see https://github.com/opendroneid/receiver-android.
+
+Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages are available here: https://github.com/opendroneid/wireshark-dissector.  
 
 ## Transmitter examples
 
@@ -54,6 +60,18 @@ The sample application will do a test encode/decode, then continuously generate 
 The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in `libopendroneid/opendroneid.h`.
 
 ## Build Options
+
+### Memory reductions
+
+Some embedded systems might require a smaller memory footprint than what by default is used by opendroneid-core-c.
+The following compile time options exists for reducing the memory consumption:
+- ODID_AUTH_MAX_PAGES is by default configured to support 16 pages/messages of authentication data.
+  See the beginning of [opedroneid.h](libopendroneid/opendroneid.h).
+  If authentication messages are not used, this value can be configured between 1 and 16, e.g. by adding `-DODID_AUTH_MAX_PAGES=1` when calling cmake.
+
+
+- When including MAVLink in the build (see below), if MAVLink's virtual channel functionality is not used, some memory can be saved by defining MAVLINK_COMM_NUM_BUFFERS to be equal to 1, before including mavlink_types.h
+  See further details in the beginning of [mav2odid.c](libmav2odid/mav2odid.c).
 
 ### MAVLink
 

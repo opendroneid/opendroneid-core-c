@@ -49,9 +49,8 @@ static void print_mavlink_auth(mavlink_open_drone_id_authentication_t *auth)
     printf("Data page: %d, auth type: %d, ",
            auth->data_page, auth->authentication_type);
     int size = MAVLINK_MSG_OPEN_DRONE_ID_AUTHENTICATION_FIELD_AUTHENTICATION_DATA_LEN;
-    if (auth->data_page == 0)
-    {
-        size -= ODID_AUTH_PAGE_ZERO_DATA_SIZE;
+    if (auth->data_page == 0) {
+        size = ODID_AUTH_PAGE_ZERO_DATA_SIZE;
         printf("page_count: %d, length: %d, timestamp: %d, ",
                auth->page_count, auth->length, auth->timestamp);
     }
@@ -113,7 +112,7 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
     if (msg_type == ODID_MESSAGETYPE_INVALID)
         printf("ERROR: Parsing Mavlink message failed\n");
 
-    // m2o_parseMavlink transfered the data into the src buffer
+    // m2o_parseMavlink transferred the data into the src buffer
     // Copy the received OpenDroneID bytestring to tx_buf
     uint8_t tx_buf[ODID_MESSAGE_SIZE] = { 0 };
     memcpy(tx_buf, src, ODID_MESSAGE_SIZE);
@@ -158,17 +157,17 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
                                               &msg, &basic_id);
 
     ODID_messagetype_t msgType;
-    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->basicIdEnc,
+    send_parse_tx_rx(m2o, &msg, (uint8_t *) &m2o->basicIdEnc[0],
                      uas_data, &msgType);
 
     if (msgType != ODID_MESSAGETYPE_BASIC_ID)
         printf("ERROR: Open Drone ID message type was not Basic ID\n");
 
-    printBasicID_data(&uas_data->BasicID);
+    printBasicID_data(&uas_data->BasicID[0]);
 
     // The received data is transferred into a Mavlink structure
     mavlink_open_drone_id_basic_id_t basic_id2 = { 0 };
-    m2o_basicId2Mavlink(&basic_id2, &uas_data->BasicID);
+    m2o_basicId2Mavlink(&basic_id2, &uas_data->BasicID[0]);
     printf("\n");
     print_mavlink_basicID(&basic_id2);
 }
@@ -180,7 +179,7 @@ static void test_location(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .status = MAV_ODID_STATUS_AIRBORNE,
         .direction = (uint16_t) (27.4f * 100),
         .speed_horizontal = (uint16_t) (4.25f * 100),
-        .speed_vertical = (uint16_t) (4.5f * 100),
+        .speed_vertical = (int16_t) (4.5f * 100),
         .latitude = (int32_t) (51.477 * 1E7),
         .longitude = (int32_t) (0.0005 * 1E7),
         .altitude_barometric = 37.5f,
@@ -224,7 +223,7 @@ static void test_authentication(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
         .data_page = 0,
         .authentication_type = MAV_ODID_AUTH_TYPE_UAS_ID_SIGNATURE,
         .authentication_data = "98765432101234567",
-        .page_count = 1,
+        .page_count = 0,
         .length = 17,
         .timestamp = 23000000 };
     printf("\n\n---------------------Authentication---------------------\n\n");

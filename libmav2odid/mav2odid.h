@@ -36,13 +36,27 @@ mavlink_status_t m_mavlink_status[MAVLINK_COMM_NUM_BUFFERS];
 
 #include <common/mavlink.h>
 
-#define DRONEID_SCHEDULER_SIZE 18
+/*
+ * Different transmitter implementations will be defining different sets of
+ * messages to transmit. Therefore, it is possible to override the size of the
+ * schedule list here. Define DRONEID_SCHEDULER_SIZE to the desired value
+ * before including mav2odid.h. E.g. "-DDRONEID_SCHEDULER_SIZE=12" when calling
+ * cmake. NOTE: Do not call the m2o_init() in this case, but create your own
+ * suitable version of that function.
+ */
+#ifndef DRONEID_SCHEDULER_SIZE
+#define DRONEID_SCHEDULER_SIZE (2 * (4 + ODID_AUTH_MAX_PAGES))
+#endif
+#if (DRONEID_SCHEDULER_SIZE < 1) || (DRONEID_SCHEDULER_SIZE > 255)
+#error "DRONEID_SCHEDULER_SIZE must be between 1 and 255."
+#endif
+
 
 typedef struct {
     uint8_t droneidSchedule[DRONEID_SCHEDULER_SIZE];
     uint8_t scheduleIdx;
 
-    ODID_BasicID_encoded basicIdEnc;
+    ODID_BasicID_encoded basicIdEnc[ODID_BASIC_ID_MAX_MESSAGES];
     ODID_Location_encoded locationEnc;
     ODID_Auth_encoded authEnc[ODID_AUTH_MAX_PAGES];
     ODID_SelfID_encoded selfIdEnc;
@@ -50,7 +64,7 @@ typedef struct {
     ODID_OperatorID_encoded operatorIdEnc;
     ODID_MessagePack_encoded messagePackEnc;
 
-    uint8_t basicIDEncValid;
+    uint8_t basicIDEncValid[ODID_BASIC_ID_MAX_MESSAGES];
     uint8_t locationEncValid;
     uint8_t authEncValid[ODID_AUTH_MAX_PAGES];
     uint8_t selfIDEncValid;

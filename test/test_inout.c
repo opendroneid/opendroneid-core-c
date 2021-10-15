@@ -44,8 +44,15 @@ ODID_MessagePack_encoded pack_enc;
 ODID_MessagePack_data pack;
 ODID_UAS_Data uasData;
 
+#define MINIMUM(a,b) (((a)<(b))?(a):(b))
+
 void test_InOut()
 {
+    if (ODID_AUTH_MAX_PAGES < 2) {
+        fprintf(stderr, "Program compiled with ODID_AUTH_MAX_PAGES < 2\n");
+        return;
+    }
+
     printf("\n-------------------------------------Source Data-----------------------------------\n");
     BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
     BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
@@ -70,18 +77,18 @@ void test_InOut()
     Location.BaroAccuracy = createEnumVerticalAccuracy(1.5f);
     Location.SpeedAccuracy = createEnumSpeedAccuracy(0.5f);
     Location.TSAccuracy = createEnumTimestampAccuracy(0.2f);
-    Location.TimeStamp = 3600.52f;
+    Location.TimeStamp = 360.52f;
     printf("\nLocation\n--------\n");
     printLocation_data(&Location);
     encodeLocationMessage(&Location_enc, &Location);
 
     Auth0.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     Auth0.DataPage = 0;
-    Auth0.PageCount = 2;
-    Auth0.Length = 39;
+    Auth0.LastPageIndex = 1;
+    Auth0.Length = 40;
     Auth0.Timestamp = 28000000;
     char auth0_data[] = "12345678901234567";
-    strncpy(Auth0.AuthData, auth0_data, sizeof(Auth0.AuthData));
+    memcpy(Auth0.AuthData, auth0_data, MINIMUM(sizeof(auth0_data), sizeof(Auth0.AuthData)));
     printf("\nAuth0\n--------------\n");
     printAuth_data(&Auth0);
     encodeAuthMessage(&Auth0_enc, &Auth0);
@@ -89,7 +96,7 @@ void test_InOut()
     Auth1.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     Auth1.DataPage = 1;
     char auth1_data[] = "12345678901234567890123";
-    strncpy(Auth1.AuthData, auth1_data, sizeof(Auth1.AuthData));
+    memcpy(Auth1.AuthData, auth1_data, MINIMUM(sizeof(auth1_data), sizeof(Auth1.AuthData)));
     printf("\nAuth1\n--------------\n");
     printAuth_data(&Auth1);
     encodeAuthMessage(&Auth1_enc, &Auth1);
@@ -111,6 +118,7 @@ void test_InOut()
     System_data.AreaFloor = 41.7f;
     System_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
     System_data.ClassEU = ODID_CLASS_EU_CLASS_3;
+    System_data.OperatorAltitudeGeo = 20.5f;
     printf("\nSystem\n------\n");
     printSystem_data(&System_data);
     encodeSystemMessage(&System_enc, &System_data);
@@ -188,8 +196,8 @@ void test_InOut()
 
     decodeMessagePack(&uasData, &pack_enc);
     printf("\nPack\n------\n");
-    if (uasData.BasicIDValid)
-        printBasicID_data(&uasData.BasicID);
+    if (uasData.BasicIDValid[0])
+        printBasicID_data(&uasData.BasicID[0]);
     if (uasData.LocationValid)
         printLocation_data(&uasData.Location);
     if (uasData.AuthValid[0])
