@@ -677,10 +677,10 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen);
 int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size);
 
 /* odid_wifi_build_message_pack_nan_action_frame - creates a message pack
- * with each type of message from the drone information into an NAN action fram
+ * with each type of message from the drone information into an NAN action frame.
  * @UAS_Data: general drone status information
  * @mac: mac address of the wifi adapter where the NAN frame will be sent
- * @send_counter: sequence number, to be increase for each call of this function
+ * @send_counter: sequence number, to be increased for each call of this function
  * @buf: pointer to buffer space where the NAN will be written to
  * @buf_size: maximum size of the buffer
  *
@@ -689,6 +689,23 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
 int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
                                                   uint8_t send_counter,
                                                   uint8_t *buf, size_t buf_size);
+
+/* odid_wifi_build_message_pack_beacon_frame - creates a message pack
+ * with each type of message from the drone information into an Beacon frame.
+ * @UAS_Data: general drone status information
+ * @mac: mac address of the wifi adapter where the Beacon frame will be sent
+ * @SSID: SSID of the wifi network to be sent
+ * @SSID_len: length in bytes of the SSID string
+ * @send_counter: sequence number, to be increased for each call of this function
+ * @buf: pointer to buffer space where the Beacon will be written to
+ * @buf_size: maximum size of the buffer
+ *
+ * Returns the packet length on success, or < 0 on error.
+ */
+int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
+                                              char *SSID, size_t SSID_len,
+                                              uint8_t send_counter,
+                                              uint8_t *buf, size_t buf_size);
 
 /* odid_message_process_pack - decodes the messages from the odid message pack
  * @UAS_Data: general drone status information

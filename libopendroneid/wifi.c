@@ -380,6 +380,87 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     return len;
 }
 
+int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
+                                              char *SSID, size_t SSID_len,
+                                              uint8_t send_counter,
+                                              uint8_t *buf, size_t buf_size)
+{
+    /* Broadcast address */
+    uint8_t target_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+    uint8_t asd_stan_oui[3] = { 0xFA, 0x0B, 0xBC };
+    /* Mgmt Beacon frame mandatory fields + IE 221 */
+    struct ieee80211_mgmt *mgmt;
+    struct ieee80211_beacon_ssid_minimal *beacon;
+    /* Message Pack */
+    struct ODID_service_info *si;
+
+    struct timespec ts;
+    size_t ret, len = 0;
+
+    /* IEEE 802.11 Management Header */
+    if (len + sizeof(*mgmt) > buf_size)
+        return -ENOMEM;
+
+    mgmt = (struct ieee80211_mgmt *)(buf + len);
+    memset(mgmt, 0, sizeof(*mgmt));
+    mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_BEACON);
+    mgmt->duration = 0;
+    memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
+    memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
+    memcpy(mgmt->bssid, mac, sizeof(mgmt->bssid));
+    mgmt->seq_ctrl = 0;
+    len += sizeof(*mgmt);
+
+    /* Mandatory Beacon as of 802.11-2016 Part 11 */
+    if (len + sizeof(*beacon) > buf_size)
+        return -ENOMEM;
+
+    beacon = (struct ieee80211_beacon_ssid_minimal *)(buf + len);
+    memset(beacon, 0, sizeof(*beacon));
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t mono_us = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
+    beacon->timestamp = cpu_to_le64(mono_us);
+    beacon->beacon_interval = cpu_to_le16(0x0200); // 512 TU ~≃ 0.524288s
+    beacon->capability = cpu_to_le16(0x0420);   // ???
+
+    /* SSID : 0-32 bytes */
+    if(!SSID || (SSID_len <=0) || (SSID_len > 32))
+    	return -EINVAL;
+    beacon->ssid_tag = 0;   // Element ID 0 - mandatory
+    beacon->ssid_length = (SSID_len < ODID_ID_SIZE) ? SSID_len : ODID_ID_SIZE;
+    memcpy(beacon->ssid, SSID, beacon->ssid_length);
+
+    beacon->supported_rates_tag = 1;    // Element ID 1 - mandatory
+    beacon->supported_rates_length = 1; // One rate only
+    beacon->supported_rates = 0x8C;     // 6 Mbps
+
+    /* Vendor Specific Information Element (IE 221) */
+    beacon->element_id = 0xDD;
+    beacon->length = 0x00;  // Length updated at end of function
+    memcpy(beacon->oui, asd_stan_oui, sizeof(beacon->oui));
+    beacon->oui_type = 0x0D;
+    len += sizeof(*beacon);
+
+    /* ODID Service Info Attribute header */
+    if (len + sizeof(*si) > buf_size)
+        return -ENOMEM;
+
+    si = (struct ODID_service_info *)(buf + len);
+    memset(si, 0, sizeof(*si));
+    si->message_counter = send_counter;
+    len += sizeof(*si);
+
+    ret = odid_message_build_pack(UAS_Data, buf + len, buf_size - len);
+    if (ret < 0)
+        return ret;
+    len += ret;
+
+    /* set the lengths according to the message pack lengths */
+    beacon->length = sizeof(beacon->oui) + sizeof(beacon->oui_type) + sizeof(*si) + ret;
+
+    return len;
+}
+
 int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen)
 {
     ODID_MessagePack_encoded *msg_pack_enc = (ODID_MessagePack_encoded *) pack;
