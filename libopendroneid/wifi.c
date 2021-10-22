@@ -35,6 +35,28 @@ sw@simonwunderlich.de
 #define IEEE80211_STYPE_ACTION          0x00D0
 #define IEEE80211_STYPE_BEACON          0x0080
 
+/* IEEE 802.11-2016 capability info */
+#define IEEE80211_CAPINFO_ESS               0x0001
+#define IEEE80211_CAPINFO_IBSS              0x0002
+#define IEEE80211_CAPINFO_CF_POLLABLE       0x0004
+#define IEEE80211_CAPINFO_CF_POLLREQ        0x0008
+#define IEEE80211_CAPINFO_PRIVACY           0x0010
+#define IEEE80211_CAPINFO_SHORT_PREAMBLE    0x0020
+/* bits 6-7 reserved */
+#define IEEE80211_CAPINFO_SPECTRUM_MGMT     0x0100
+#define IEEE80211_CAPINFO_QOS               0x0200
+#define IEEE80211_CAPINFO_SHORT_SLOTTIME    0x0400
+#define IEEE80211_CAPINFO_APSD              0x0800
+#define IEEE80211_CAPINFO_RADIOMEAS         0x1000
+/* bit 13 reserved */
+#define IEEE80211_CAPINFO_DEL_BLOCK_ACK     0x4000
+#define IEEE80211_CAPINFO_IMM_BLOCK_ACK     0x8000
+
+/* IEEE 802.11 Element IDs */
+#define IEEE80211_ELEMID_SSID		0x00
+#define IEEE80211_ELEMID_RATES		0x01
+#define IEEE80211_ELEMID_VENDOR		0xDD
+
 /* Neighbor Awareness Networking Specification v3.1 in section 2.8.2
  * The NAN Cluster ID is a MAC address that takes a value from
  * 50-6F-9A-01-00-00 to 50-6F-9A-01-FF-FF and is carried in the A3 field of
@@ -236,8 +258,8 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     uint64_t mono = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
     beacon->timestamp = cpu_to_le64(mono);
     beacon->beacon_interval = cpu_to_le16(0x0200);
-    beacon->capability = cpu_to_le16(0x0420);
-    beacon->element_id = 0xDD;
+    beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
+    beacon->element_id = IEEE80211_ELEMID_VENDOR;
     beacon->length = 0x22;
     memcpy(beacon->oui, wifi_alliance_oui, sizeof(beacon->oui));
     beacon->oui_type = 0x13;
