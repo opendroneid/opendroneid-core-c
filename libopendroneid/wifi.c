@@ -12,6 +12,7 @@ sw@simonwunderlich.de
 */
 
 #include <string.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -65,7 +66,7 @@ sw@simonwunderlich.de
  * However, the ASTM Remote ID specification v1.1 specifies that the NAN
  * cluster ID must be fixed to the value 50-6F-9A-01-00-FF.
  */
-const uint8_t* get_nan_cluster_id()
+static const uint8_t* get_nan_cluster_id(void)
 {
     static const uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0x00, 0xFF };
     return cluster_id;
@@ -73,11 +74,11 @@ const uint8_t* get_nan_cluster_id()
 
 void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 {
-    int len = 0;
+    ptrdiff_t len = 0;
 
 #define mprintf(...) {\
-    len += snprintf(buf + len, buf_size - len, __VA_ARGS__); \
-    if (len >= buf_size) \
+    len += snprintf(buf + len, buf_size - (size_t)len, __VA_ARGS__); \
+    if ((len < 0) || ((size_t)len >= buf_size)) \
         return; \
     }
 
@@ -242,11 +243,11 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     mgmt = (struct ieee80211_mgmt *)(buf + len);
     memset(mgmt, 0, sizeof(*mgmt));
     mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_BEACON);
-    mgmt->duration = 0;
+    mgmt->duration = cpu_to_le16(0x0000);
     memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
     memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
     memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
-    mgmt->seq_ctrl = 0;
+    mgmt->seq_ctrl = cpu_to_le16(0x0000);
     len += sizeof(*mgmt);
 
     /* Beacon */
@@ -336,7 +337,8 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     struct nan_service_descriptor_attribute *nsda;
     struct nan_service_descriptor_extension_attribute *nsdea;
     struct ODID_service_info *si;
-    size_t ret, len = 0;
+    int ret = 0;
+    size_t len = 0;
 
     /* IEEE 802.11 Management Header */
     if (len + sizeof(*mgmt) > buf_size)
@@ -345,11 +347,11 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     mgmt = (struct ieee80211_mgmt *)(buf + len);
     memset(mgmt, 0, sizeof(*mgmt));
     mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_ACTION);
-    mgmt->duration = 0;
+    mgmt->duration = cpu_to_le16(0x0000);
     memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
     memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
     memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
-    mgmt->seq_ctrl = 0;
+    mgmt->seq_ctrl = cpu_to_le16(0x0000);
 
     len += sizeof(*mgmt);
 
@@ -430,7 +432,8 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     struct ODID_service_info *si;
 
     struct timespec ts;
-    size_t ret, len = 0;
+    int ret = 0;
+    size_t len = 0;
 
     /* IEEE 802.11 Management Header */
     if (len + sizeof(*mgmt) > buf_size)
@@ -439,11 +442,11 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     mgmt = (struct ieee80211_mgmt *)(buf + len);
     memset(mgmt, 0, sizeof(*mgmt));
     mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_BEACON);
-    mgmt->duration = 0;
+    mgmt->duration = cpu_to_le16(0x0000);
     memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
     memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
     memcpy(mgmt->bssid, mac, sizeof(mgmt->bssid));
-    mgmt->seq_ctrl = 0;
+    mgmt->seq_ctrl = cpu_to_le16(0x0000);
     len += sizeof(*mgmt);
 
     /* Mandatory Beacon as of 802.11-2016 Part 11 */
@@ -538,7 +541,8 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
     uint8_t target_addr[6] = { 0x51, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
     uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
     uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
-    size_t ret, len = 0;
+    int ret = 0;
+    size_t len = 0;
 
     /* IEEE 802.11 Management Header */
     if (len + sizeof(*mgmt) > buf_size)
