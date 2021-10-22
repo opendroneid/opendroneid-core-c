@@ -82,6 +82,7 @@ extern "C" {
 #define MAX_ALT         31767.5f// Maximum altitude
 #define INV_ALT         MIN_ALT // Invalid altitude
 #define MAX_TIMESTAMP   (60 * 60)
+#define INV_TIMESTAMP   0xFFFF  // Invalid, No Value or Unknown Timestamp
 #define MAX_AREA_RADIUS 2550
 
 typedef enum ODID_messagetype {
