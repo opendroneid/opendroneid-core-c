@@ -29,26 +29,25 @@ struct __attribute__((__packed__)) ieee80211_beacon {
     uint64_t timestamp;
     uint16_t beacon_interval;
     uint16_t capability;
-    uint8_t element_id;
-    uint8_t length;
-    uint8_t oui[3];
-    uint8_t oui_type;
 };
 
-struct __attribute__((__packed__)) ieee80211_beacon_ssid_minimal {
-    uint64_t timestamp;
-    uint16_t beacon_interval;
-    uint16_t capability;
-    uint8_t ssid_tag;
-    uint8_t ssid_length;
-    uint8_t ssid[20];
-    uint8_t supported_rates_tag;
-    uint8_t supported_rates_length;
-    uint8_t supported_rates;
+struct __attribute__((__packed__)) ieee80211_ssid {
     uint8_t element_id;
     uint8_t length;
-    uint8_t oui[3];
-    uint8_t oui_type;
+    uint8_t ssid[];
+};
+
+struct __attribute__((__packed__)) ieee80211_supported_rates {
+    uint8_t element_id;
+    uint8_t length;
+    uint8_t supported_rates;
+};
+
+struct __attribute__((__packed__)) ieee80211_vendor_specific {
+	uint8_t element_id;
+	uint8_t length;
+	uint8_t oui[3];
+	uint8_t oui_type;
 };
 
 struct __attribute__((__packed__)) nan_service_discovery {

@@ -228,6 +228,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     const uint8_t *cluster_id = get_nan_cluster_id();
     struct ieee80211_mgmt *mgmt;
     struct ieee80211_beacon *beacon;
+    struct ieee80211_vendor_specific *vendor;
     struct nan_master_indication_attribute *master_indication_attr;
     struct nan_cluster_attribute *cluster_attr;
     struct nan_service_id_list_attribute *nsila;
@@ -259,11 +260,19 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     beacon->timestamp = cpu_to_le64(mono);
     beacon->beacon_interval = cpu_to_le16(0x0200);
     beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
-    beacon->element_id = IEEE80211_ELEMID_VENDOR;
-    beacon->length = 0x22;
-    memcpy(beacon->oui, wifi_alliance_oui, sizeof(beacon->oui));
-    beacon->oui_type = 0x13;
     len += sizeof(*beacon);
+
+    /* Vendor Specific */
+    if (len + sizeof(*vendor) > buf_size)
+    	return -ENOMEM;
+
+    vendor = (struct ieee80211_vendor_specific *)(buf + len);
+    memset(vendor, 0, sizeof(*vendor));
+    vendor->element_id = IEEE80211_ELEMID_VENDOR;
+    vendor->length = 0x22;
+    memcpy(vendor->oui, wifi_alliance_oui, sizeof(vendor->oui));
+    vendor->oui_type = 0x13;
+    len += sizeof(*vendor);
 
     /* NAN Master Indication attribute */
     if (len + sizeof(*master_indication_attr) > buf_size)
@@ -403,7 +412,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 }
 
 int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
-                                              char *SSID, size_t SSID_len,
+                                              const char *SSID, size_t SSID_len,
                                               uint8_t send_counter,
                                               uint8_t *buf, size_t buf_size)
 {
@@ -412,7 +421,11 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     uint8_t asd_stan_oui[3] = { 0xFA, 0x0B, 0xBC };
     /* Mgmt Beacon frame mandatory fields + IE 221 */
     struct ieee80211_mgmt *mgmt;
-    struct ieee80211_beacon_ssid_minimal *beacon;
+    struct ieee80211_beacon *beacon;
+    struct ieee80211_ssid *ssid_s;
+    struct ieee80211_supported_rates *rates;
+    struct ieee80211_vendor_specific *vendor;
+
     /* Message Pack */
     struct ODID_service_info *si;
 
@@ -437,31 +450,47 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     if (len + sizeof(*beacon) > buf_size)
         return -ENOMEM;
 
-    beacon = (struct ieee80211_beacon_ssid_minimal *)(buf + len);
+    beacon = (struct ieee80211_beacon *)(buf + len);
     memset(beacon, 0, sizeof(*beacon));
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t mono_us = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
     beacon->timestamp = cpu_to_le64(mono_us);
     beacon->beacon_interval = cpu_to_le16(0x0200); // 512 TU ~≃ 0.524288s
-    beacon->capability = cpu_to_le16(0x0420);   // ???
+    beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
+    len += sizeof(*beacon);
 
-    /* SSID : 0-32 bytes */
+    /* SSID: 0-32 bytes */
+    if (len + sizeof(*ssid_s) > buf_size)
+        return -ENOMEM;
+
+    ssid_s = (struct ieee80211_ssid *)(buf + len);
     if(!SSID || (SSID_len <=0) || (SSID_len > 32))
-    	return -EINVAL;
-    beacon->ssid_tag = 0;   // Element ID 0 - mandatory
-    beacon->ssid_length = (SSID_len < ODID_ID_SIZE) ? SSID_len : ODID_ID_SIZE;
-    memcpy(beacon->ssid, SSID, beacon->ssid_length);
+        return -EINVAL;
+    ssid_s->element_id = IEEE80211_ELEMID_SSID;
+    ssid_s->length = SSID_len;
+    memcpy(ssid_s->ssid, SSID, ssid_s->length);
+    len += sizeof(*ssid_s) + SSID_len;
 
-    beacon->supported_rates_tag = 1;    // Element ID 1 - mandatory
-    beacon->supported_rates_length = 1; // One rate only
-    beacon->supported_rates = 0x8C;     // 6 Mbps
+    /* Supported Rates: 1 record at minimum */
+    if (len + sizeof(*rates) > buf_size)
+        return -ENOMEM;
+
+    rates = (struct ieee80211_supported_rates *)(buf + len);
+    rates->element_id = IEEE80211_ELEMID_RATES;
+    rates->length = 1; // One rate only
+    rates->supported_rates = 0x8C;     // 6 Mbps
+    len += sizeof(*rates);
 
     /* Vendor Specific Information Element (IE 221) */
-    beacon->element_id = 0xDD;
-    beacon->length = 0x00;  // Length updated at end of function
-    memcpy(beacon->oui, asd_stan_oui, sizeof(beacon->oui));
-    beacon->oui_type = 0x0D;
-    len += sizeof(*beacon);
+    if (len + sizeof(*vendor) > buf_size)
+        return -ENOMEM;
+
+    vendor = (struct ieee80211_vendor_specific *)(buf + len);
+    vendor->element_id = IEEE80211_ELEMID_VENDOR;
+    vendor->length = 0x00;  // Length updated at end of function
+    memcpy(vendor->oui, asd_stan_oui, sizeof(vendor->oui));
+    vendor->oui_type = 0x0D;
+    len += sizeof(*vendor);
 
     /* ODID Service Info Attribute header */
     if (len + sizeof(*si) > buf_size)
@@ -478,7 +507,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     len += ret;
 
     /* set the lengths according to the message pack lengths */
-    beacon->length = sizeof(beacon->oui) + sizeof(beacon->oui_type) + sizeof(*si) + ret;
+    vendor->length = sizeof(vendor->oui) + sizeof(vendor->oui_type) + sizeof(*si) + ret;
 
     return len;
 }

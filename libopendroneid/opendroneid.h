@@ -703,7 +703,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
  * Returns the packet length on success, or < 0 on error.
  */
 int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
-                                              char *SSID, size_t SSID_len,
+                                              const char *SSID, size_t SSID_len,
                                               uint8_t send_counter,
                                               uint8_t *buf, size_t buf_size);
 
