@@ -66,10 +66,48 @@ sw@simonwunderlich.de
  * However, the ASTM Remote ID specification v1.1 specifies that the NAN
  * cluster ID must be fixed to the value 50-6F-9A-01-00-FF.
  */
-static const uint8_t* get_nan_cluster_id(void)
+static const uint8_t *get_nan_cluster_id(void)
 {
     static const uint8_t cluster_id[6] = { 0x50, 0x6F, 0x9A, 0x01, 0x00, 0xFF };
     return cluster_id;
+}
+
+static int buf_fill_ieee80211_mgmt(uint8_t *buf, size_t *len, size_t buf_size,
+                                   const uint16_t subtype,
+                                   const uint8_t *dst_addr,
+                                   const uint8_t *src_addr,
+                                   const uint8_t *bssid)
+{
+    if (*len + sizeof(struct ieee80211_mgmt) > buf_size)
+        return -ENOMEM;
+
+    struct ieee80211_mgmt *mgmt = (struct ieee80211_mgmt *)(buf + *len);
+    mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | subtype);
+    mgmt->duration = cpu_to_le16(0x0000);
+    memcpy(mgmt->da, dst_addr, sizeof(mgmt->da));
+    memcpy(mgmt->sa, src_addr, sizeof(mgmt->sa));
+    memcpy(mgmt->bssid, bssid, sizeof(mgmt->bssid));
+    mgmt->seq_ctrl = cpu_to_le16(0x0000);
+    *len += sizeof(*mgmt);
+
+    return 0;
+}
+
+static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size)
+{
+    if (*len + sizeof(struct ieee80211_beacon) > buf_size)
+        return -ENOMEM;
+
+    struct ieee80211_beacon *beacon = (struct ieee80211_beacon *)(buf + *len);
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    uint64_t mono_us = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
+    beacon->timestamp = cpu_to_le64(mono_us);
+    beacon->beacon_interval = cpu_to_le16(0x0200);
+    beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
+    *len += sizeof(*beacon);
+
+    return 0;
 }
 
 void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
@@ -227,45 +265,26 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     /* "org.opendroneid.remoteid" hash */
     uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
     const uint8_t *cluster_id = get_nan_cluster_id();
-    struct ieee80211_mgmt *mgmt;
-    struct ieee80211_beacon *beacon;
     struct ieee80211_vendor_specific *vendor;
     struct nan_master_indication_attribute *master_indication_attr;
     struct nan_cluster_attribute *cluster_attr;
     struct nan_service_id_list_attribute *nsila;
-    struct timespec ts;
+    int ret = 0;
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */
-    if (len + sizeof(*mgmt) > buf_size)
-        return -ENOMEM;
-
-    mgmt = (struct ieee80211_mgmt *)(buf + len);
-    memset(mgmt, 0, sizeof(*mgmt));
-    mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_BEACON);
-    mgmt->duration = cpu_to_le16(0x0000);
-    memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
-    memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
-    memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
-    mgmt->seq_ctrl = cpu_to_le16(0x0000);
-    len += sizeof(*mgmt);
+    ret = buf_fill_ieee80211_mgmt(buf, &len, buf_size, IEEE80211_STYPE_BEACON, target_addr, (uint8_t *)mac, cluster_id);
+    if (ret <0)
+        return ret;
 
     /* Beacon */
-    if (len + sizeof(*beacon) > buf_size)
-        return -ENOMEM;
-
-    beacon = (struct ieee80211_beacon *)(buf + len);
-    memset(beacon, 0, sizeof(*beacon));
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t mono = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
-    beacon->timestamp = cpu_to_le64(mono);
-    beacon->beacon_interval = cpu_to_le16(0x0200);
-    beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
-    len += sizeof(*beacon);
+    ret = buf_fill_ieee80211_beacon(buf, &len, buf_size);
+    if (ret <0)
+        return ret;
 
     /* Vendor Specific */
     if (len + sizeof(*vendor) > buf_size)
-    	return -ENOMEM;
+        return -ENOMEM;
 
     vendor = (struct ieee80211_vendor_specific *)(buf + len);
     memset(vendor, 0, sizeof(*vendor));
@@ -332,7 +351,6 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
     uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
     const uint8_t *cluster_id = get_nan_cluster_id();
-    struct ieee80211_mgmt *mgmt;
     struct nan_service_discovery *nsd;
     struct nan_service_descriptor_attribute *nsda;
     struct nan_service_descriptor_extension_attribute *nsdea;
@@ -341,19 +359,9 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */
-    if (len + sizeof(*mgmt) > buf_size)
-        return -ENOMEM;
-
-    mgmt = (struct ieee80211_mgmt *)(buf + len);
-    memset(mgmt, 0, sizeof(*mgmt));
-    mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_ACTION);
-    mgmt->duration = cpu_to_le16(0x0000);
-    memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
-    memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
-    memcpy(mgmt->bssid, cluster_id, sizeof(mgmt->bssid));
-    mgmt->seq_ctrl = cpu_to_le16(0x0000);
-
-    len += sizeof(*mgmt);
+    ret = buf_fill_ieee80211_mgmt(buf, &len, buf_size, IEEE80211_STYPE_ACTION, target_addr, (uint8_t *)mac, cluster_id);
+    if (ret <0)
+        return ret;
 
     /* NAN Service Discovery header */
     if (len + sizeof(*nsd) > buf_size)
@@ -422,8 +430,6 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     uint8_t target_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
     uint8_t asd_stan_oui[3] = { 0xFA, 0x0B, 0xBC };
     /* Mgmt Beacon frame mandatory fields + IE 221 */
-    struct ieee80211_mgmt *mgmt;
-    struct ieee80211_beacon *beacon;
     struct ieee80211_ssid *ssid_s;
     struct ieee80211_supported_rates *rates;
     struct ieee80211_vendor_specific *vendor;
@@ -431,36 +437,18 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     /* Message Pack */
     struct ODID_service_info *si;
 
-    struct timespec ts;
     int ret = 0;
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */
-    if (len + sizeof(*mgmt) > buf_size)
-        return -ENOMEM;
-
-    mgmt = (struct ieee80211_mgmt *)(buf + len);
-    memset(mgmt, 0, sizeof(*mgmt));
-    mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | IEEE80211_STYPE_BEACON);
-    mgmt->duration = cpu_to_le16(0x0000);
-    memcpy(mgmt->da, target_addr, sizeof(mgmt->da));
-    memcpy(mgmt->sa, mac, sizeof(mgmt->sa));
-    memcpy(mgmt->bssid, mac, sizeof(mgmt->bssid));
-    mgmt->seq_ctrl = cpu_to_le16(0x0000);
-    len += sizeof(*mgmt);
+    ret = buf_fill_ieee80211_mgmt(buf, &len, buf_size, IEEE80211_STYPE_BEACON, target_addr, (uint8_t *)mac, (uint8_t *)mac);
+    if (ret <0)
+        return ret;
 
     /* Mandatory Beacon as of 802.11-2016 Part 11 */
-    if (len + sizeof(*beacon) > buf_size)
-        return -ENOMEM;
-
-    beacon = (struct ieee80211_beacon *)(buf + len);
-    memset(beacon, 0, sizeof(*beacon));
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t mono_us = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
-    beacon->timestamp = cpu_to_le64(mono_us);
-    beacon->beacon_interval = cpu_to_le16(0x0200); // 512 TU ~≃ 0.524288s
-    beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
-    len += sizeof(*beacon);
+    ret = buf_fill_ieee80211_beacon(buf, &len, buf_size);
+    if (ret <0)
+        return ret;
 
     /* SSID: 0-32 bytes */
     if (len + sizeof(*ssid_s) > buf_size)
