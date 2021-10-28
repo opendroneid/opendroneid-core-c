@@ -697,6 +697,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
  * @mac: mac address of the wifi adapter where the Beacon frame will be sent
  * @SSID: SSID of the wifi network to be sent
  * @SSID_len: length in bytes of the SSID string
+ * @interval_tu: beacon interval in wifi Time Units
  * @send_counter: sequence number, to be increased for each call of this function
  * @buf: pointer to buffer space where the Beacon will be written to
  * @buf_size: maximum size of the buffer
@@ -705,7 +706,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
  */
 int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
                                               const char *SSID, size_t SSID_len,
-                                              uint8_t send_counter,
+                                              uint16_t interval_tu, uint8_t send_counter,
                                               uint8_t *buf, size_t buf_size);
 
 /* odid_message_process_pack - decodes the messages from the odid message pack

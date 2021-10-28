@@ -93,7 +93,7 @@ static int buf_fill_ieee80211_mgmt(uint8_t *buf, size_t *len, size_t buf_size,
     return 0;
 }
 
-static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size)
+static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size, uint16_t interval_tu)
 {
     if (*len + sizeof(struct ieee80211_beacon) > buf_size)
         return -ENOMEM;
@@ -103,7 +103,7 @@ static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size)
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t mono_us = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
     beacon->timestamp = cpu_to_le64(mono_us);
-    beacon->beacon_interval = cpu_to_le16(0x0200);
+    beacon->beacon_interval = cpu_to_le16(interval_tu);
     beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
     *len += sizeof(*beacon);
 
@@ -278,7 +278,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
         return ret;
 
     /* Beacon */
-    ret = buf_fill_ieee80211_beacon(buf, &len, buf_size);
+    ret = buf_fill_ieee80211_beacon(buf, &len, buf_size, 0x0200);
     if (ret <0)
         return ret;
 
@@ -423,7 +423,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
 
 int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
                                               const char *SSID, size_t SSID_len,
-                                              uint8_t send_counter,
+                                              uint16_t interval_tu, uint8_t send_counter,
                                               uint8_t *buf, size_t buf_size)
 {
     /* Broadcast address */
@@ -446,7 +446,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
         return ret;
 
     /* Mandatory Beacon as of 802.11-2016 Part 11 */
-    ret = buf_fill_ieee80211_beacon(buf, &len, buf_size);
+    ret = buf_fill_ieee80211_beacon(buf, &len, buf_size, interval_tu);
     if (ret <0)
         return ret;
 
