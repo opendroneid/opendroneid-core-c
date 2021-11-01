@@ -512,7 +512,7 @@ static int checkPackContent(ODID_Message_encoded *msgs, int amount)
 
         // Check for illegal content. This also avoids recursive calls between
         // decodeOpenDroneID() and decodeMessagePack()/checkPackContent()
-        if (MessageType >= ODID_MESSAGETYPE_BASIC_ID && MessageType <= ODID_MESSAGETYPE_OPERATOR_ID)
+        if (MessageType <= ODID_MESSAGETYPE_OPERATOR_ID)
             numMessages[MessageType]++;
         else
             return ODID_FAIL;
@@ -1404,7 +1404,7 @@ void printAuth_data(ODID_Auth_data *Auth)
     if (Auth->DataPage == 0) {
         const char ODID_Auth_data_format[] =
             "AuthType: %d\nDataPage: %d\nLastPageIndex: %d\nLength: %d\n"\
-            "Timestamp: %d\nAuthData: ";
+            "Timestamp: %u\nAuthData: ";
         printf(ODID_Auth_data_format, Auth->AuthType, Auth->DataPage,
                Auth->LastPageIndex, Auth->Length, Auth->Timestamp);
         for (int i = 0; i < ODID_AUTH_PAGE_ZERO_DATA_SIZE; i++)
