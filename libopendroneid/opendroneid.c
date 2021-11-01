@@ -378,9 +378,13 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
         return ODID_FAIL;
 
     if (inData->DataPage == 0) {
-        if (inData->LastPageIndex >= ODID_AUTH_MAX_PAGES ||
-            inData->Length > MAX_AUTH_LENGTH)
+        if (inData->LastPageIndex >= ODID_AUTH_MAX_PAGES)
             return ODID_FAIL;
+
+#if (MAX_AUTH_LENGTH < UINT8_MAX)
+        if (inData->Length > MAX_AUTH_LENGTH)
+            return ODID_FAIL;
+#endif
 
         int len = ODID_AUTH_PAGE_ZERO_DATA_SIZE +
                   inData->LastPageIndex * ODID_AUTH_PAGE_NONZERO_DATA_SIZE;
@@ -748,9 +752,13 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
         return ODID_FAIL;
 
     if (inEncoded->page_zero.DataPage == 0) {
-        if (inEncoded->page_zero.LastPageIndex >= ODID_AUTH_MAX_PAGES ||
-            inEncoded->page_zero.Length > MAX_AUTH_LENGTH)
+        if (inEncoded->page_zero.LastPageIndex >= ODID_AUTH_MAX_PAGES)
             return ODID_FAIL;
+
+#if (MAX_AUTH_LENGTH < UINT8_MAX)
+        if (inEncoded->page_zero.Length > MAX_AUTH_LENGTH)
+            return ODID_FAIL;
+#endif
 
         int len = ODID_AUTH_PAGE_ZERO_DATA_SIZE +
                   inEncoded->page_zero.LastPageIndex * ODID_AUTH_PAGE_NONZERO_DATA_SIZE;
