@@ -14,7 +14,6 @@ sw@simonwunderlich.de
 #include <string.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <time.h>
 
@@ -82,7 +81,7 @@ static int buf_fill_ieee80211_mgmt(uint8_t *buf, size_t *len, size_t buf_size,
         return -ENOMEM;
 
     struct ieee80211_mgmt *mgmt = (struct ieee80211_mgmt *)(buf + *len);
-    mgmt->frame_control = cpu_to_le16(IEEE80211_FTYPE_MGMT | subtype);
+    mgmt->frame_control = (uint16_t) cpu_to_le16(IEEE80211_FTYPE_MGMT | subtype);
     mgmt->duration = cpu_to_le16(0x0000);
     memcpy(mgmt->da, dst_addr, sizeof(mgmt->da));
     memcpy(mgmt->sa, src_addr, sizeof(mgmt->sa));
@@ -101,7 +100,7 @@ static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size,
     struct ieee80211_beacon *beacon = (struct ieee80211_beacon *)(buf + *len);
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t mono_us = (uint64_t)(ts.tv_sec * 1e6 + ts.tv_nsec * 1e-3);
+    uint64_t mono_us = (uint64_t)((double) ts.tv_sec * 1e6 + (double) ts.tv_nsec * 1e-3);
     beacon->timestamp = cpu_to_le64(mono_us);
     beacon->beacon_interval = cpu_to_le16(interval_tu);
     beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
@@ -254,7 +253,7 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
     if (encodeMessagePack(msg_pack_enc, &msg_pack) != ODID_SUCCESS)
         return -1;
 
-    return len;
+    return (int) len;
 }
 
 int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size)
@@ -269,7 +268,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     struct nan_master_indication_attribute *master_indication_attr;
     struct nan_cluster_attribute *cluster_attr;
     struct nan_service_id_list_attribute *nsila;
-    int ret = 0;
+    int ret;
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */
@@ -337,7 +336,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     memcpy(nsila->service_id, service_id, sizeof(service_id));
     len += sizeof(*nsila);
 
-    return len;
+    return (int) len;
 }
 
 int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
@@ -355,7 +354,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     struct nan_service_descriptor_attribute *nsda;
     struct nan_service_descriptor_extension_attribute *nsdea;
     struct ODID_service_info *si;
-    int ret = 0;
+    int ret;
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */
@@ -418,7 +417,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     nsdea->service_update_indicator = send_counter;
     len += sizeof(*nsdea);
 
-    return len;
+    return (int) len;
 }
 
 int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
@@ -437,7 +436,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     /* Message Pack */
     struct ODID_service_info *si;
 
-    int ret = 0;
+    int ret;
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */
@@ -458,7 +457,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     if(!SSID || (SSID_len ==0) || (SSID_len > 32))
         return -EINVAL;
     ssid_s->element_id = IEEE80211_ELEMID_SSID;
-    ssid_s->length = SSID_len;
+    ssid_s->length = (uint8_t) SSID_len;
     memcpy(ssid_s->ssid, SSID, ssid_s->length);
     len += sizeof(*ssid_s) + SSID_len;
 
@@ -500,7 +499,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     /* set the lengths according to the message pack lengths */
     vendor->length = sizeof(vendor->oui) + sizeof(vendor->oui_type) + sizeof(*si) + ret;
 
-    return len;
+    return (int) len;
 }
 
 int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen)
@@ -515,7 +514,7 @@ int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buf
     if (decodeMessagePack(UAS_Data, msg_pack_enc) != ODID_SUCCESS)
         return -1;
 
-    return size;
+    return (int) size;
 }
 
 int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
@@ -529,7 +528,7 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
     uint8_t target_addr[6] = { 0x51, 0x6F, 0x9A, 0x01, 0x00, 0x00 };
     uint8_t wifi_alliance_oui[3] = { 0x50, 0x6F, 0x9A };
     uint8_t service_id[6] = { 0x88, 0x69, 0x19, 0x9D, 0x92, 0x09 };
-    int ret = 0;
+    int ret;
     size_t len = 0;
 
     /* IEEE 802.11 Management Header */

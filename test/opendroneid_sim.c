@@ -180,7 +180,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 _Noreturn void test_sim()
 {
     uint8_t testBytes[ODID_MESSAGE_SIZE];
-    int x;
+    uint8_t x;
     while (1)
     {
         for (x = 0; x <= 5; x++) {

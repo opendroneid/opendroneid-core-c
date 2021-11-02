@@ -12,7 +12,6 @@ gabriel.c.cox@intel.com
 
 #include "opendroneid.h"
 #include <math.h>
-#include <string.h>
 #include <stdio.h>
 #define ENABLE_DEBUG 1
 
@@ -222,7 +221,7 @@ static int8_t encodeSpeedVertical(float SpeedVertical_data)
 */
 static int32_t encodeLatLon(double LatLon_data)
 {
-    return (int32_t) intRangeMax(LatLon_data * LATLON_MULT, -180 * LATLON_MULT, 180 * LATLON_MULT);
+    return (int32_t) intRangeMax((int64_t) (LatLon_data * LATLON_MULT), -180 * LATLON_MULT, 180 * LATLON_MULT);
 }
 
 /**
@@ -253,7 +252,7 @@ static uint16_t encodeTimeStamp(float Seconds_data)
     if (Seconds_data == INV_TIMESTAMP)
         return INV_TIMESTAMP;
     else
-        return (uint16_t) intRangeMax(roundf(Seconds_data*10), 0, MAX_TIMESTAMP * 10);
+        return (uint16_t) intRangeMax((int64_t) roundf(Seconds_data*10), 0, MAX_TIMESTAMP * 10);
 }
 
 /**
@@ -617,7 +616,7 @@ static double decodeLatLon(int32_t LatLon_enc)
 */
 static float decodeAltitude(uint16_t Alt_enc)
 {
-    return (float) ((float) Alt_enc * ALT_DIV - (float) ALT_ADDER) ;
+    return (float) Alt_enc * ALT_DIV - (float) ALT_ADDER;
 }
 
 /**
@@ -644,7 +643,7 @@ static float decodeTimeStamp(uint16_t Seconds_enc)
 */
 static uint16_t decodeAreaRadius(uint8_t Radius_enc)
 {
-    return (uint16_t) Radius_enc * 10;
+    return (uint16_t) ((int) Radius_enc * 10);
 }
 
 /**
@@ -659,7 +658,7 @@ int getBasicIDType(ODID_BasicID_encoded *inEncoded, enum ODID_idtype *idType)
     if (!inEncoded || !idType || inEncoded->MessageType != ODID_MESSAGETYPE_BASIC_ID)
         return ODID_FAIL;
 
-    *idType = inEncoded->IDType;
+    *idType = (enum ODID_idtype) inEncoded->IDType;
     return ODID_SUCCESS;
 }
 

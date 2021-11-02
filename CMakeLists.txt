@@ -3,7 +3,7 @@ set(VERSION 0.2)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_FORTIFY_SOURCE=2 -fstack-protector \
     -fno-delete-null-pointer-checks -fwrapv -O0 -Wall -Wdouble-promotion \
-    -Wno-address-of-packed-member")
+    -Wno-address-of-packed-member -Wextra")
 
 cmake_minimum_required(VERSION 2.8.12)
 

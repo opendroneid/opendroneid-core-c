@@ -14,7 +14,6 @@ soren.friis@intel.com
 #include <string.h>
 #include <stdio.h>
 #include <mav2odid.h>
-#include <common/mavlink.h>
 
 #define MAVLINK_SYSTEM_ID       1
 #define MAVLINK_COMPONENT_ID    1
@@ -106,7 +105,7 @@ static void send_parse_tx_rx(mav2odid_t *m2o, mavlink_message_t *msg,
     mavlink_msg_to_send_buffer(buf, msg);
 
     ODID_messagetype_t msg_type = ODID_MESSAGETYPE_INVALID;
-    int i = 0;
+    unsigned int i = 0;
     while (msg_type == ODID_MESSAGETYPE_INVALID && i < sizeof(buf))
         msg_type = m2o_parseMavlink(m2o, buf[i++]);
 
@@ -147,8 +146,9 @@ static void test_basicId(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_basic_id_t basic_id = {
         .ua_type = MAV_ODID_UA_TYPE_HELICOPTER_OR_MULTIROTOR,
-        .id_type = MAV_ODID_ID_TYPE_SERIAL_NUMBER,
-        .uas_id = "9876543210ABCDEFGHJK" };
+        .id_type = MAV_ODID_ID_TYPE_SERIAL_NUMBER };
+    uint8_t uas_id[] = "9876543210ABCDEFGHJK";
+    memcpy(basic_id.uas_id, uas_id, sizeof(basic_id.uas_id));
 
     printf("\n--------------------------Basic ID------------------------\n\n");
     print_mavlink_basicID(&basic_id);
@@ -325,8 +325,9 @@ static void test_operatorID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
 {
     mavlink_message_t msg = { 0 };
     mavlink_open_drone_id_operator_id_t operatorID = {
-        .operator_id_type = MAV_ODID_OPERATOR_ID_TYPE_CAA,
-        .operator_id = "ABCDEFGHJK0123456789" };
+        .operator_id_type = MAV_ODID_OPERATOR_ID_TYPE_CAA };
+    char operator_id[] = "ABCDEFGHJK0123456789";
+    memcpy(operatorID.operator_id, operator_id, sizeof(operatorID.operator_id));
 
     printf("\n\n----------------------Operator ID-----------------------\n\n");
     print_mavlink_operatorID(&operatorID);

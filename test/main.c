@@ -18,8 +18,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType);
 _Noreturn void test_sim(void);
 void test_mav2odid();
 
-int main(int argc, char const *argv[]) {
-
+int main(int argc __attribute__((unused)), char const *argv[] __attribute__((unused))) {
     // Perform test that takes all nominal unpacked structures displays them,
     // encodes them, decodes them, displays result
     test_InOut();

@@ -20,25 +20,13 @@ sw@simonwunderlich.de
 
 #include <net/if.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <sys/un.h>
-#include <netinet/ip.h>
-#include <linux/types.h>
-#include <linux/if_ether.h>
 
 #include <netlink/attr.h>
 #include <netlink/genl/ctrl.h>
 #include <netlink/genl/genl.h>
-#include <netlink/handlers.h>
-#include <netlink/msg.h>
-#include <netlink/netlink.h>
-#include <netlink/socket.h>
 #include <linux/nl80211.h>
 
 #include <gps.h>
-#include <math.h>
 
 #include <opendroneid.h>
 
@@ -127,7 +115,7 @@ int send_nl80211_action(struct nl_sock *nl_sock, int if_index, void *action, siz
 
     genlmsg_put(msg, 0, 0, nl80211_id, 0, 0, NL80211_CMD_FRAME, 0);
     NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, if_index);
-    NLA_PUT(msg, NL80211_ATTR_FRAME, len, action);
+    NLA_PUT(msg, NL80211_ATTR_FRAME, (int) len, action);
     NLA_PUT_FLAG(msg, NL80211_ATTR_DONT_WAIT_FOR_ACK);
     ret = nl_send_auto_complete(nl_sock, msg);
     if (ret < 0)
@@ -160,7 +148,6 @@ int read_arguments(int argc, char *argv[], ODID_UAS_Data *drone, struct global *
             case 'h':
                 usage(argv[0]);
                 exit(0);
-                break;
             case 'p':
                 strncpy(global->port, optarg, sizeof(global->port));
                 break;
@@ -175,7 +162,7 @@ int read_arguments(int argc, char *argv[], ODID_UAS_Data *drone, struct global *
                 break;
             case 't':
                 /* TODO: verify */
-                drone->BasicID[ID_MSG_POS].UAType = atoi(optarg);
+                drone->BasicID[ID_MSG_POS].UAType = (enum ODID_uatype) atoi(optarg);
                 break;
             case 'r':
                 global->refresh_rate = atoi(optarg);
@@ -216,33 +203,33 @@ static void drone_adopt_gps_data(ODID_UAS_Data *drone,
     drone->Location.Latitude = gpsdata->fix.latitude;
     drone->Location.Longitude = gpsdata->fix.longitude;
     drone->Location.HorizAccuracy = gpsdata->fix.epy > gpsdata->fix.epx ?
-            createEnumHorizontalAccuracy(gpsdata->fix.epy) : createEnumHorizontalAccuracy(gpsdata->fix.epx);
+            createEnumHorizontalAccuracy((float) gpsdata->fix.epy) : createEnumHorizontalAccuracy((float) gpsdata->fix.epx);
 
     /* Altitude */
     drone->Location.AltitudeBaro = -1000; /* unknown */
-    drone->Location.AltitudeGeo = gpsdata->fix.altitude;
+    drone->Location.AltitudeGeo = (float) gpsdata->fix.altitude;
     drone->Location.BaroAccuracy = ODID_VER_ACC_UNKNOWN; /* unknown */
-    drone->Location.VertAccuracy = createEnumVerticalAccuracy(gpsdata->fix.epv);
+    drone->Location.VertAccuracy = createEnumVerticalAccuracy((float) gpsdata->fix.epv);
     drone->Location.HeightType = ODID_HEIGHT_REF_OVER_GROUND;
     drone->Location.Height = -1000; /* unknown */
 
     /* Horizontal movement */
-    drone->Location.Direction = gpsdata->fix.track;
-    drone->Location.SpeedHorizontal = gpsdata->fix.speed;
+    drone->Location.Direction = (float) gpsdata->fix.track;
+    drone->Location.SpeedHorizontal = (float) gpsdata->fix.speed;
 
     /* Vertical movement */
-    drone->Location.SpeedVertical = gpsdata->fix.climb;
+    drone->Location.SpeedVertical = (float) gpsdata->fix.climb;
 
     drone->Location.SpeedAccuracy = createEnumSpeedAccuracy(gpsdata->fix.eps > gpsdata->fix.epc ?
-                                                            gpsdata->fix.eps : gpsdata->fix.epc);
+                                                            (float) gpsdata->fix.eps : (float) gpsdata->fix.epc);
 
     /* Time */
 #ifdef LIBGPS_OLD
     time_in_tenth = gpsdata->fix.time * 10;
 #else
-    time_in_tenth = TSTONS(&gpsdata->fix.time) * 10;
+    time_in_tenth = (uint64_t) (TSTONS(&gpsdata->fix.time) * 10);
 #endif
-    drone->Location.TimeStamp = (float)((time_in_tenth % 36000) / 10);
+    drone->Location.TimeStamp = (float) (time_in_tenth % 36000) / 10;
     drone->Location.TSAccuracy = createEnumTimestampAccuracy((float)gpsdata->fix.ept);
 
     printf("drone:\n\t"
@@ -322,7 +309,7 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     drone->OperatorIDValid = 1;
 }
 
-static void drone_set_ssid(ODID_UAS_Data *drone, struct global *global)
+static void drone_set_ssid(ODID_UAS_Data *drone)
 {
     char ssid[33];
     char cmd[256];
@@ -356,7 +343,7 @@ static void drone_test_receive_data(uint8_t *buf, size_t buf_size)
     FILE *fp;
     char filename[] = "rcvd_drone.json";
     char *drone_str;
-    int drone_str_len = 8192;
+    size_t drone_str_len = 8192;
 
     ret = odid_wifi_receive_message_pack_nan_action_frame(&rcvd, mac, buf, buf_size);
     if (ret < 0)
@@ -385,10 +372,10 @@ static void drone_send_data(ODID_UAS_Data *drone, struct global *global, struct 
     FILE *fp;
     char filename[] = "drone.json";
     char *drone_str;
-    int drone_str_len = 8192;
+    size_t drone_str_len = 8192;
 
     if (global->set_ssid_string)
-        drone_set_ssid(drone, global);
+        drone_set_ssid(drone);
 
     if (global->test_json) {
         drone_str = malloc(drone_str_len);
@@ -410,9 +397,9 @@ static void drone_send_data(ODID_UAS_Data *drone, struct global *global, struct 
     }
 
     if (global->test_json)
-        drone_test_receive_data(frame_buf, ret);
+        drone_test_receive_data(frame_buf, (size_t) ret);
 
-    ret = send_nl80211_action(nl_sock, if_index, frame_buf, ret);
+    ret = send_nl80211_action(nl_sock, if_index, frame_buf, (size_t) ret);
     if (ret < 0) {
         fprintf(stderr, "%s: send_nl80211_action failed: %d (%s)", __func__, ret, strerror(ret));
         return;
@@ -424,7 +411,7 @@ static int get_device_mac(const char *iface, char *mac, int *if_index)
     struct ifreq ifr;
     int sock;
 
-    *if_index = if_nametoindex(iface);
+    *if_index = (int) if_nametoindex(iface);
     if (*if_index == 0)
         return -1;
 
@@ -487,7 +474,7 @@ int main(int argc, char *argv[])
     gps_stream(&gpsdata, WATCH_ENABLE | WATCH_JSON, NULL);
 
     while (1) {
-        sleep(global.refresh_rate);
+        sleep((unsigned int) global.refresh_rate);
 
         /* read as much as we can using gps_read() */
 #if GPSD_API_MAJOR_VERSION >= 7
