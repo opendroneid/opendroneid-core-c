@@ -29,6 +29,9 @@ Apple currently does not expose suitable APIs to receive any other transmission 
 ### WireShark
 Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages are available here: https://github.com/opendroneid/wireshark-dissector.  
 
+### ESP32
+The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example code also contains code for receiving drone ID signals on ESP32 HW.
+
 ## Transmitter examples
 
 ### ESP32
@@ -36,15 +39,16 @@ An example library for transmitting Open Drone ID signals from ESP32 HW can be f
 The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, Wi-Fi NaN and Wi-Fi Beacon.
 
 Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported.
-Please check if this is sufficient to comply with the rules that apply in the area in which you are flying.
-The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips will both support Long Range and Extended Advertising but this has not yet been tested.
+Please check if this is sufficient to comply with the rules that apply in the area in which you are flying (most likely it is not. See [below](#relevant-specifications)).
+The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips will both support Long Range and Extended Advertising, but these have not yet been tested.
 
 ### Linux
 A Wi-Fi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
 Better documentation is needed on what exact HW + SW environment this is functional.
+Functions for creating suitable Wi-Fi Beacon frames have been added to wifi.c, but those are currently not used by the sample sender application. 
 
 A simple application for sending static drone ID data via Bluetooth 4 and 5 and via Wi-Fi Beacon is available [here](https://github.com/opendroneid/transmitter-linux).
-This has tested to work reasonably okay on one CometLake motherboard and partly okay on RaspberryPi 3B and 4 HW.
+This has tested to work reasonably okay on one CometLake motherboard and partly okay on RaspberryPi 3B and 4B HW.
 
 ### nRF and TI Bluetooth chipsets
 Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exist, but so far none have been open sourced.
