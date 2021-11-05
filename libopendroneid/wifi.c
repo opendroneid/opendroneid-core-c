@@ -11,9 +11,15 @@ Simon Wunderlich
 sw@simonwunderlich.de
 */
 
+#if defined(ARDUINO_ARCH_ESP32)
+#include <Arduino.h>
+int clock_gettime(clockid_t, struct timespec *);
+#else 
 #include <string.h>
 #include <stddef.h>
 #include <stdio.h>
+#endif
+
 #include <errno.h>
 #include <time.h>
 
@@ -99,8 +105,20 @@ static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size,
 
     struct ieee80211_beacon *beacon = (struct ieee80211_beacon *)(buf + *len);
     struct timespec ts;
+    uint64_t mono_us = 0;
+
+#if defined(CLOCK_MONOTONIC)
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t mono_us = (uint64_t)((double) ts.tv_sec * 1e6 + (double) ts.tv_nsec * 1e-3);
+    mono_us = (uint64_t)((double) ts.tv_sec * 1e6 + (double) ts.tv_nsec * 1e-3);
+#elif defined(CLOCK_REALTIME)
+    clock_gettime(CLOCK_REALTIME, &ts);
+    mono_us = (uint64_t)((double) ts.tv_sec * 1e6 + (double) ts.tv_nsec * 1e-3);
+#elif defined(ARDUINO)
+#warning "No REALTIME or MONOTONIC clock, using micros()."
+    mono_us = micros();
+#else
+#warning "Unable to set wifi timestamp."
+#endif
     beacon->timestamp = cpu_to_le64(mono_us);
     beacon->beacon_interval = cpu_to_le16(interval_tu);
     beacon->capability = cpu_to_le16(IEEE80211_CAPINFO_SHORT_SLOTTIME | IEEE80211_CAPINFO_SHORT_PREAMBLE);
