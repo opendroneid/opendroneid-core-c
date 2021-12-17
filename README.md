@@ -5,8 +5,9 @@
 This repository provides a C-code function library for encoding and decoding (packing/unpacking) Open Drone ID messages, as the format is defined in the ASTM F3411 Remote ID and the ASD-STAN prEN 4709-002 Direct Remote ID specifications.
 See further details in the [specifications](#relevant-specifications) section below.
 
-Please note that both specifications have been updated during the first half of 2021 and the updated documents are not yet published (September 2021).
-However, this implementation is already compliant with these updates.
+Please note that both specifications have been updated during the first half of 2021.
+The ASD-STAN specification has been published but the ASTM specification is still being finalized (December 2021).
+The code available in this repository is already compliant with these updates.
 
 The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or Wi-Fi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
@@ -45,7 +46,7 @@ The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https:
 ### Linux
 A Wi-Fi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
 Better documentation is needed on what exact HW + SW environment this is functional.
-Functions for creating suitable Wi-Fi Beacon frames have been added to wifi.c, but those are currently not used by the sample sender application. 
+Functions for creating suitable Wi-Fi Beacon frames have been added to wifi.c, but those are currently not used by the sample sender application.
 
 A simple application for sending static drone ID data via Bluetooth 4 and 5 and via Wi-Fi Beacon is available [here](https://github.com/opendroneid/transmitter-linux).
 This has tested to work reasonably okay on one CometLake motherboard and partly okay on RaspberryPi 3B and 4B HW.
@@ -184,7 +185,7 @@ https://mavlink.io/en/services/opendroneid.html
 The ASTM F3411 Specification for Remote ID and Tracking has been defined to specify how Unmanned Aircraft (UA) or Unmanned Aircraft Systems (UAS) can publish their ID, location, altitude etc., either via direct broadcast (Bluetooth or Wi-Fi), or via an internet connection to a Remote ID server.
 
 Version 1.0 (F3411-19) of the specification is currently [available](https://www.astm.org/Standards/F3411.htm).
-An updated version 1.1 (F3411-21?) is in the final stages of being finalized (September 2021).
+An updated version 1.1 (F3411-21?) is in the final stages of being finalized (December 2021).
 It contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
 Additionally, a Means of Compliance document (MoC) is being drafted by the ASTM, containing further implementation requirements and test specifications.
 Together, the two documents will allow manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
@@ -192,12 +193,9 @@ Together, the two documents will allow manufacturers of UAS and remote ID broadc
 ### European Union
 
 To meet the European Commission Delegated Regulation [2019/945](https://eur-lex.europa.eu/eli/reg_del/2019/945/2020-08-09) and the Commission Implementing Regulation [2019/947](https://eur-lex.europa.eu/eli/reg_impl/2019/947/2021-08-05), ASD-STAN has developed the prEN 4709-002 Direct Remote Identification specification.
-It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 specification.
-See the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and the recording of this [webinar](https://www.cencenelec.eu/news-and-events/events/2021-02-09-european-workshop-on-uas-direct-remote-identification/).
-The final version is not yet published (September 2021).
-An earlier draft is available [here](https://asd-stan.org/downloads/din-en-4709-0022021-02/).
-Be aware, that multiple changes were done after this draft version was made available and it should not be used as a reference for any implementations.
-
+It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 v1.1 specification.
+The final version of the standard has been published [here](http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/).
+See also the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and the recording of this [webinar](https://www.cencenelec.eu/news-and-events/events/2021-02-09-european-workshop-on-uas-direct-remote-identification/).
 
 
 ### Comparison
