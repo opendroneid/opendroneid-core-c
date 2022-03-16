@@ -145,6 +145,7 @@ typedef enum ODID_status {
     ODID_STATUS_GROUND = 1,
     ODID_STATUS_AIRBORNE = 2,
     ODID_STATUS_EMERGENCY = 3,
+    ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE = 4,
     // 3 to 15 reserved
 } ODID_status_t;
 
@@ -223,8 +224,10 @@ typedef enum ODID_authtype {
 } ODID_authtype_t;
 
 typedef enum ODID_desctype {
-    ODID_DESC_TYPE_TEXT = 0,
-    // 1 to 200 reserved
+    ODID_DESC_TYPE_TEXT = 0,            // General free-form information text
+    ODID_DESC_TYPE_EMERGENCY = 1,       // Additional clarification when ODID_status == EMERGENCY
+    ODID_DESC_TYPE_EXTENDED_STATUS = 2, // Additional clarification when ODID_status != EMERGENCY
+    // 3 to 200 reserved
     // 201 to 255 available for private use
 } ODID_desctype_t;
 
@@ -236,7 +239,7 @@ typedef enum ODID_operatorIdType {
 
 typedef enum ODID_operator_location_type {
     ODID_OPERATOR_LOCATION_TYPE_TAKEOFF = 0,   // Takeoff location and altitude
-    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1, // Live location and altitude
+    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1, // Dynamic/Live location and altitude
     ODID_OPERATOR_LOCATION_TYPE_FIXED = 2,     // Fixed location and altitude
     // 3 to 255 reserved
 } ODID_operator_location_type_t;
