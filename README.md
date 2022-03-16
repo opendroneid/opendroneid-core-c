@@ -6,7 +6,7 @@ This repository provides a C-code function library for encoding and decoding (pa
 See further details in the [specifications](#relevant-specifications) section below.
 
 Please note that both specifications have been updated during the first half of 2021.
-The ASD-STAN specification has been published but the ASTM specification is still being finalized (December 2021).
+The ASD-STAN specification has been published but the ASTM specification is still being finalized (March 2022).
 The code available in this repository is already compliant with these updates.
 
 The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or Wi-Fi.
@@ -184,19 +184,49 @@ https://mavlink.io/en/services/opendroneid.html
 
 The ASTM F3411 Specification for Remote ID and Tracking has been defined to specify how Unmanned Aircraft (UA) or Unmanned Aircraft Systems (UAS) can publish their ID, location, altitude etc., either via direct broadcast (Bluetooth or Wi-Fi), or via an internet connection to a Remote ID server.
 
-Version 1.0 (F3411-19) of the specification is currently [available](https://www.astm.org/Standards/F3411.htm).
-An updated version 1.1 (F3411-21?) is in the final stages of being finalized (December 2021).
+Version 1.0 (F3411-19) of the specification is available: https://www.astm.org/f3411-19.html
+
+Future updates will likely be available at this link: https://www.astm.org/Standards/F3411.htm.
+
+An updated version 1.1 (F3411-22?) is currently in the second ballot round for adoption (March 2022).
 It contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
-Additionally, a Means of Compliance document (MoC) is being drafted by the ASTM, containing further implementation requirements and test specifications.
+
+Additionally, a Means of Compliance document (MoC) has been drafted by the ASTM and is undergoing ballot (March 2022).
+It contains further implementation requirements and test specifications.
+
 Together, the two documents will allow manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
 
 ### European Union
 
 To meet the European Commission Delegated Regulation [2019/945](https://eur-lex.europa.eu/eli/reg_del/2019/945/2020-08-09) and the Commission Implementing Regulation [2019/947](https://eur-lex.europa.eu/eli/reg_impl/2019/947/2021-08-05), ASD-STAN has developed the prEN 4709-002 Direct Remote Identification specification.
-It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 v1.1 specification.
+It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 v1.1 specification (first ballot round).
+
 The final version of the standard has been published [here](http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/).
 See also the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and the recording of this [webinar](https://www.cencenelec.eu/news-and-events/events/2021-02-09-european-workshop-on-uas-direct-remote-identification/).
 
+### Protocol versions
+
+The continued development of the relevant standards is reflected in the remote ID protocol version number transmitted in the header of each drone ID message.
+The following protocol versions have been in use:
+ 0. ASTM F3411-19. Published Feb 14, 2020. https://www.astm.org/f3411-19.html
+
+ 1. ASD-STAN prEN 4709-002 P1. Published 31-Oct-2021. http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/
+
+    ASTM F3411 v1.1 draft sent for first ballot round autumn 2021.
+
+ 2. ASTM F3411-v1.1 draft sent for second ballot round Q1 2022. (ASTM F3411-22 ?)
+
+      The delta to protocol version 1 is small:
+      - New enum values ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE, ODID_DESC_TYPE_EMERGENCY and ODID_DESC_TYPE_EXTENDED_STATUS
+      - New Timestamp field in the System message
+
+### Timelines
+
+The timelines for the rules requiring manufacturers and drone operators to be compliant have been fluctuating.
+Some information can be found behind the following links but please do your own research, since this is not necessarily the most up-to-date information.
+Remember that as a manufacturer or drone operator, you are personally responsible for being compliant with all relevant laws and standards applicable to the area of operation.
+ * US: https://www.faa.gov/uas/getting_started/remote_id/
+ * EU: https://eur-lex.europa.eu/eli/reg_impl/2022/425/
 
 ### Comparison
 
@@ -213,7 +243,8 @@ The ASTM Means of Compliance (MoC) document overrides certain parts of the ASTM 
 | UA dynamic position | M | M |  | M | M |
 | UA altitude WGS-84 | M | M |  |  | O |
 | UA altitude AGL/Take-off |  | O |  | M | M |
-| Timestamp | M | M |  | M | M |
+| Timestamp (Location msg) | M | M |  | M | M |
+| Timestamp (System msg) | M | O | M |  |  |
 | Operational/Emergency status | M<sup>2</sup> | O | M<sup>2</sup> | M<sup>2</sup> | M<sup>2</sup> |
 | Track direction | M | M |  | M | M |
 | Horizontal speed | M | M |  | M | M |

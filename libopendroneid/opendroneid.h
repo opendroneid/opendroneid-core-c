@@ -27,14 +27,24 @@ extern "C" {
 /*
  * This implementation is compliant with the:
  *   - ASTM F3411 Specification for Remote ID and Tracking
- *   - ASD-STAN prEN 4709-002:2020 Direct Remote Identification
+ *   - ASD-STAN prEN 4709-002 Direct Remote Identification
+ * 
  * Since the strategy of the standardization for drone ID has been to not break
  * backwards compatibility when adding new functionality, no attempt in this
  * implementation is made to verify the version number when decoding messages.
  * It is assumed that newer versions can be decoded but some data elements
  * might be missing in the output.
+ * 
+ * The following protocol versions have been in use:
+ * 0: ASTM F3411-19. Published Feb 14, 2020. https://www.astm.org/f3411-19.html
+ * 1: ASD-STAN prEN 4709-002 P1. Published 31-Oct-2021. http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/
+ *    ASTM F3411 v1.1 draft sent for first ballot round autumn 2021
+ * 2: ASTM F3411-v1.1 draft sent for second ballot round Q1 2022. (ASTM F3411-22 ?)
+ *    The delta to protocol version 1 is small:
+ *    - New enum values ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE, ODID_DESC_TYPE_EMERGENCY and ODID_DESC_TYPE_EXTENDED_STATUS
+ *    - New Timestamp field in the System message
  */
-#define ODID_PROTOCOL_VERSION 1 // ASTM F3411 v1.1, ASD-STAN DRI
+#define ODID_PROTOCOL_VERSION 2
 
 /*
  * To save memory on implementations that do not need support for 16 pages of
