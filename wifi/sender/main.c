@@ -300,6 +300,7 @@ static void drone_set_mock_data(ODID_UAS_Data *drone)
     drone->System.CategoryEU = ODID_CATEGORY_EU_UNDECLARED;
     drone->System.ClassEU = ODID_CLASS_EU_UNDECLARED;
     drone->System.OperatorAltitudeGeo = 15.5f;
+    drone->System.Timestamp = 28000000;
     drone->SystemValid = 1;
 
     /* Operator ID */

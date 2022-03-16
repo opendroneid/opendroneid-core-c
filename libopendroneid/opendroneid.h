@@ -377,6 +377,7 @@ typedef struct ODID_System_data {
     ODID_category_EU_t CategoryEU; // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
     ODID_class_EU_t ClassEU;       // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
     float OperatorAltitudeGeo;// meter (WGS84-HAE). Invalid, No Value, or Unknown: -1000m
+    uint32_t Timestamp;       // Relative to 00:00:00 01/01/2019 UTC/Unix Time
 } ODID_System_data;
 
 typedef struct ODID_OperatorID_data {
@@ -542,11 +543,12 @@ typedef struct __attribute__((__packed__)) ODID_System_encoded {
     uint8_t ClassEU: 4;
     uint8_t CategoryEU: 4;
 
-    // Byte 18-19
+    // Byte 18-23
     uint16_t OperatorAltitudeGeo;
+    uint32_t Timestamp;
 
-    // Byte 20-24
-    char Reserved2[5];
+    // Byte 24
+    char Reserved2[1];
 } ODID_System_encoded;
 
 typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {
