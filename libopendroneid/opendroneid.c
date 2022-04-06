@@ -470,6 +470,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
     outEncoded->CategoryEU = inData->CategoryEU;
     outEncoded->ClassEU = inData->ClassEU;
     outEncoded->OperatorAltitudeGeo = encodeAltitude(inData->OperatorAltitudeGeo);
+    outEncoded->Timestamp = inData->Timestamp;
     memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
     return ODID_SUCCESS;
 }
@@ -827,6 +828,7 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
     outData->CategoryEU = (ODID_category_EU_t) inEncoded->CategoryEU;
     outData->ClassEU = (ODID_class_EU_t) inEncoded->ClassEU;
     outData->OperatorAltitudeGeo = decodeAltitude(inEncoded->OperatorAltitudeGeo);
+    outData->Timestamp = inEncoded->Timestamp;
     return ODID_SUCCESS;
 }
 
@@ -1443,14 +1445,14 @@ void printSystem_data(ODID_System_data *System_data)
     const char ODID_System_data_format[] = "Operator Location Type: %d\n"
         "Classification Type: %d\nLat/Lon: %.7f, %.7f\n"
         "Area Count, Radius, Ceiling, Floor: %d, %d, %.2f, %.2f\n"
-        "Category EU: %d, Class EU: %d, Altitude: %.2f\n";
+        "Category EU: %d, Class EU: %d, Altitude: %.2f, Timestamp: %u\n";
     printf(ODID_System_data_format, System_data->OperatorLocationType,
         System_data->ClassificationType,
         System_data->OperatorLatitude, System_data->OperatorLongitude,
         System_data->AreaCount, System_data->AreaRadius,
         (double) System_data->AreaCeiling, (double) System_data->AreaFloor,
         System_data->CategoryEU, System_data->ClassEU,
-        (double) System_data->OperatorAltitudeGeo);
+        (double) System_data->OperatorAltitudeGeo, System_data->Timestamp);
 }
 
 /**

@@ -160,6 +160,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             system_data.CategoryEU = ODID_CATEGORY_EU_SPECIFIC;
             system_data.ClassEU = ODID_CLASS_EU_CLASS_3;
             system_data.OperatorAltitudeGeo = 16.5f;
+            system_data.Timestamp = 23000000;
             encodeSystemMessage(&system_enc, &system_data);
             memcpy(message, &system_enc, ODID_MESSAGE_SIZE);
             break;

@@ -364,6 +364,7 @@ static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem
     system.CategoryEU = (ODID_category_EU_t) mavSystem->category_eu;
     system.ClassEU = (ODID_class_EU_t) mavSystem->class_eu;
     system.OperatorAltitudeGeo = mavSystem->operator_altitude_geo;
+    system.Timestamp = mavSystem->timestamp;
 
     if (encodeSystemMessage(&m2o->systemEnc, &system) != ODID_SUCCESS)
         return ODID_FAIL;
@@ -601,6 +602,7 @@ void m2o_system2Mavlink(mavlink_open_drone_id_system_t *mavSystem,
     mavSystem->category_eu = (ODID_category_EU_t) system->CategoryEU;
     mavSystem->class_eu = (ODID_class_EU_t) system->ClassEU;
     mavSystem->operator_altitude_geo = system->OperatorAltitudeGeo;
+    mavSystem->timestamp = system->Timestamp;
 }
 
 /**

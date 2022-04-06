@@ -27,14 +27,24 @@ extern "C" {
 /*
  * This implementation is compliant with the:
  *   - ASTM F3411 Specification for Remote ID and Tracking
- *   - ASD-STAN prEN 4709-002:2020 Direct Remote Identification
+ *   - ASD-STAN prEN 4709-002 Direct Remote Identification
+ * 
  * Since the strategy of the standardization for drone ID has been to not break
  * backwards compatibility when adding new functionality, no attempt in this
  * implementation is made to verify the version number when decoding messages.
  * It is assumed that newer versions can be decoded but some data elements
  * might be missing in the output.
+ * 
+ * The following protocol versions have been in use:
+ * 0: ASTM F3411-19. Published Feb 14, 2020. https://www.astm.org/f3411-19.html
+ * 1: ASD-STAN prEN 4709-002 P1. Published 31-Oct-2021. http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/
+ *    ASTM F3411 v1.1 draft sent for first ballot round autumn 2021
+ * 2: ASTM F3411-v1.1 draft sent for second ballot round Q1 2022. (ASTM F3411-22 ?)
+ *    The delta to protocol version 1 is small:
+ *    - New enum values ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE, ODID_DESC_TYPE_EMERGENCY and ODID_DESC_TYPE_EXTENDED_STATUS
+ *    - New Timestamp field in the System message
  */
-#define ODID_PROTOCOL_VERSION 1 // ASTM F3411 v1.1, ASD-STAN DRI
+#define ODID_PROTOCOL_VERSION 2
 
 /*
  * To save memory on implementations that do not need support for 16 pages of
@@ -145,6 +155,7 @@ typedef enum ODID_status {
     ODID_STATUS_GROUND = 1,
     ODID_STATUS_AIRBORNE = 2,
     ODID_STATUS_EMERGENCY = 3,
+    ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE = 4,
     // 3 to 15 reserved
 } ODID_status_t;
 
@@ -223,8 +234,10 @@ typedef enum ODID_authtype {
 } ODID_authtype_t;
 
 typedef enum ODID_desctype {
-    ODID_DESC_TYPE_TEXT = 0,
-    // 1 to 200 reserved
+    ODID_DESC_TYPE_TEXT = 0,            // General free-form information text
+    ODID_DESC_TYPE_EMERGENCY = 1,       // Additional clarification when ODID_status == EMERGENCY
+    ODID_DESC_TYPE_EXTENDED_STATUS = 2, // Additional clarification when ODID_status != EMERGENCY
+    // 3 to 200 reserved
     // 201 to 255 available for private use
 } ODID_desctype_t;
 
@@ -236,7 +249,7 @@ typedef enum ODID_operatorIdType {
 
 typedef enum ODID_operator_location_type {
     ODID_OPERATOR_LOCATION_TYPE_TAKEOFF = 0,   // Takeoff location and altitude
-    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1, // Live location and altitude
+    ODID_OPERATOR_LOCATION_TYPE_LIVE_GNSS = 1, // Dynamic/Live location and altitude
     ODID_OPERATOR_LOCATION_TYPE_FIXED = 2,     // Fixed location and altitude
     // 3 to 255 reserved
 } ODID_operator_location_type_t;
@@ -377,6 +390,7 @@ typedef struct ODID_System_data {
     ODID_category_EU_t CategoryEU; // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
     ODID_class_EU_t ClassEU;       // Only filled if ClassificationType = ODID_CLASSIFICATION_TYPE_EU
     float OperatorAltitudeGeo;// meter (WGS84-HAE). Invalid, No Value, or Unknown: -1000m
+    uint32_t Timestamp;       // Relative to 00:00:00 01/01/2019 UTC/Unix Time
 } ODID_System_data;
 
 typedef struct ODID_OperatorID_data {
@@ -542,11 +556,12 @@ typedef struct __attribute__((__packed__)) ODID_System_encoded {
     uint8_t ClassEU: 4;
     uint8_t CategoryEU: 4;
 
-    // Byte 18-19
+    // Byte 18-23
     uint16_t OperatorAltitudeGeo;
+    uint32_t Timestamp;
 
-    // Byte 20-24
-    char Reserved2[5];
+    // Byte 24
+    char Reserved2[1];
 } ODID_System_encoded;
 
 typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {
