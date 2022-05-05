@@ -17,6 +17,8 @@ https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-d
 
 MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
+If you want to contribute to the open source efforts for Remote ID, see [below](#contribution-suggestions).
+
 ## Receiver examples
 
 ### Android
@@ -32,6 +34,10 @@ Examples on how to use the WireShark PC application to pick up and dissect open 
 
 ### ESP32
 The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example code also contains code for receiving drone ID signals on ESP32 HW.
+
+### Smartphone receivers
+
+A list of smartphones that have been tested for receiving Remote ID signals is available [here](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
 
 ## Transmitter examples
 
@@ -55,6 +61,10 @@ This has tested to work reasonably okay on one CometLake motherboard and partly 
 Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exist, but so far none have been open sourced.
 Please open an issue if you have an implementation you are willing to share.
 A new repository under opendroneid can be made.
+
+### Transmitter devices
+
+A list of devices capable of transmitting Remote ID signals is available [here](https://github.com/opendroneid/receiver-android/blob/master/transmitter-devices.md).
 
 ## How to Build
 
@@ -177,6 +187,23 @@ The functions in `mav2odid.c` can be used to convert these MAVLink messages into
 Recommendations on how to utilize the MAVLink messages for UAS internal distribution of Open Drone ID data of an Unmanned Aircraft System (UAS) can be found here:
 https://mavlink.io/en/services/opendroneid.html
 
+## Contribution suggestions
+
+Any contribution to the open source efforts related to Remote ID will be very welcome.
+Below is a list of multiple topics that would be useful to get sorted out, but anything you feel you can help with, will certainly be appreciated.
+
+* Integration of Remote ID [MAVLink messages](https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID) into any of the open source flight controller implementations (Ardupilot, PX4, etc.), while following the [draft architecture documentation](https://mavlink.io/en/services/opendroneid.html).
+This is required in order to validate their use and get the Work In Progress marks removed from the drone ID MAVLink messages and the drafted architecture.
+* Provide open source transmitter implementations for the TI [CC2640](https://github.com/opendroneid/transmitter-cc2640R2) (and related) and/or the [nRF52480](https://github.com/opendroneid/transmitter-nrf) (and related) Bluetooth transmitter chips. Preferably implementations capable of feeding in data via MAVLink messages
+* Implement drone ID transmission examples on the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and/or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) in order to test and verify whether the Bluetooth 5 Long Range transmission mode works on those.
+This could also clarify if they can support simultaneous BT4 and BT5 transmission.
+* There are [multiple issues](https://github.com/opendroneid/receiver-android/issues) open for the Android Receiver example application.
+Some are new feature requests.
+Particularly the new feature requests from [issue 27](https://github.com/opendroneid/receiver-android/issues/27) would be good to get supported, since this will help the application be better compliant with the [ASTM Means of Compliance](#united-states) document
+* The ESP32 transmitter has an unexplained problem with the [Wi-Fi Beacon signals](https://github.com/sxjack/uav_electronic_ids/issues/9).
+For some Android phones it is close to impossible to pick up the signal, despite it being sent regularly and the phone easily picking up the signal from a RaspberryPi or other Linux transmitter.
+* Testing of additional (Android) smartphones for expanding the [receiver compatibility list](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
+* Information and updates to the [Transmitter Devices list](https://github.com/opendroneid/receiver-android/blob/master/transmitter-devices.md).
 
 ## Relevant specifications
 
@@ -208,6 +235,7 @@ See also the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-ST
 
 The continued development of the relevant standards is reflected in the remote ID protocol version number transmitted in the header of each drone ID message.
 The following protocol versions have been in use:
+
  0. ASTM F3411-19. Published Feb 14, 2020. https://www.astm.org/f3411-19.html
 
  1. ASD-STAN prEN 4709-002 P1. Published 31-Oct-2021. http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/
