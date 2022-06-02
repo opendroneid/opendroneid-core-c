@@ -54,6 +54,7 @@ void test_InOut()
     }
 
     printf("\n-------------------------------------Source Data-----------------------------------\n");
+    odid_initBasicIDData(&BasicID);
     BasicID.IDType = ODID_IDTYPE_CAA_REGISTRATION_ID;
     BasicID.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
     char id[] = "12345678901234567890";
@@ -62,6 +63,7 @@ void test_InOut()
     printBasicID_data(&BasicID);
     encodeBasicIDMessage(&BasicID_enc, &BasicID);
 
+    odid_initLocationData(&Location);
     Location.Status = ODID_STATUS_AIRBORNE;
     Location.Direction = 215.7f;
     Location.SpeedHorizontal = 5.4f;
@@ -82,6 +84,7 @@ void test_InOut()
     printLocation_data(&Location);
     encodeLocationMessage(&Location_enc, &Location);
 
+    odid_initAuthData(&Auth0);
     Auth0.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     Auth0.DataPage = 0;
     Auth0.LastPageIndex = 1;
@@ -93,6 +96,7 @@ void test_InOut()
     printAuth_data(&Auth0);
     encodeAuthMessage(&Auth0_enc, &Auth0);
 
+    odid_initAuthData(&Auth1);
     Auth1.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
     Auth1.DataPage = 1;
     char auth1_data[] = "12345678901234567890123";
@@ -101,6 +105,7 @@ void test_InOut()
     printAuth_data(&Auth1);
     encodeAuthMessage(&Auth1_enc, &Auth1);
 
+    odid_initSelfIDData(&SelfID);
     SelfID.DescType = ODID_DESC_TYPE_TEXT;
     char description[] = "DronesRUS: Real Estate";
     strncpy(SelfID.Desc, description, sizeof(SelfID.Desc));
@@ -108,6 +113,7 @@ void test_InOut()
     printSelfID_data(&SelfID);
     encodeSelfIDMessage(&SelfID_enc, &SelfID);
 
+    odid_initSystemData(&System_data);
     System_data.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
     System_data.ClassificationType = ODID_CLASSIFICATION_TYPE_EU;
     System_data.OperatorLatitude = Location.Latitude + 0.00001;
@@ -124,6 +130,7 @@ void test_InOut()
     printSystem_data(&System_data);
     encodeSystemMessage(&System_enc, &System_data);
 
+    odid_initOperatorIDData(&operatorID);
     operatorID.OperatorIdType = ODID_OPERATOR_ID;
     char operatorId[] = "98765432100123456789";
     strncpy(operatorID.OperatorId, operatorId, sizeof(operatorID.OperatorId));
@@ -131,7 +138,7 @@ void test_InOut()
     printOperatorID_data(&operatorID);
     encodeOperatorIDMessage(&OperatorID_enc, &operatorID);
 
-    pack.SingleMessageSize = ODID_MESSAGE_SIZE;
+    odid_initMessagePackData(&pack);
     pack.MsgPackSize = 7;
     memcpy(&pack.Messages[0], &BasicID_enc, ODID_MESSAGE_SIZE);
     memcpy(&pack.Messages[1], &Location_enc, ODID_MESSAGE_SIZE);

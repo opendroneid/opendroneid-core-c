@@ -94,6 +94,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 {
     switch (msgType) {
         case ODID_MESSAGETYPE_BASIC_ID:
+            odid_initBasicIDData(&basicID_data);
             basicID_data.IDType = ODID_IDTYPE_SERIAL_NUMBER;
             basicID_data.UAType = ODID_UATYPE_HELICOPTER_OR_MULTIROTOR;
             // 4 chr mfg code, 1chr Len, 15chr serial
@@ -106,6 +107,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
 
         case ODID_MESSAGETYPE_LOCATION:
             updateLocation();
+            odid_initLocationData(&location_data);
             location_data.Status = ODID_STATUS_AIRBORNE;
             location_data.Direction = simDirection;
             location_data.SpeedHorizontal = simSpeedHorizontal;
@@ -128,6 +130,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case ODID_MESSAGETYPE_AUTH:
+            odid_initAuthData(&auth_data);
             auth_data.AuthType = ODID_AUTH_UAS_ID_SIGNATURE;
             auth_data.DataPage = 0;
             auth_data.LastPageIndex = 0;
@@ -141,6 +144,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case ODID_MESSAGETYPE_SELF_ID:
+            odid_initSelfIDData(&selfID_data);
             selfID_data.DescType = ODID_DESC_TYPE_TEXT;
             char description[] = "Real Estate Photos";
             strncpy(selfID_data.Desc, description, sizeof(selfID_data.Desc));
@@ -149,6 +153,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case ODID_MESSAGETYPE_SYSTEM:
+            odid_initSystemData(&system_data);
             system_data.OperatorLocationType = ODID_OPERATOR_LOCATION_TYPE_TAKEOFF;
             system_data.ClassificationType = ODID_CLASSIFICATION_TYPE_EU;
             system_data.OperatorLatitude = simGndLat;
@@ -166,6 +171,7 @@ void ODID_getSimData(uint8_t *message, uint8_t msgType)
             break;
 
         case ODID_MESSAGETYPE_OPERATOR_ID:
+            odid_initOperatorIDData(&operatorID_data);
             operatorID_data.OperatorIdType = ODID_OPERATOR_ID;
             char operatorId[] = "98765432100123456789";
             strncpy(operatorID_data.OperatorId, operatorId, sizeof(operatorID_data.OperatorId));
