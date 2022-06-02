@@ -561,7 +561,7 @@ typedef struct __attribute__((__packed__)) ODID_System_encoded {
     uint32_t Timestamp;
 
     // Byte 24
-    char Reserved2[1];
+    char Reserved2;
 } ODID_System_encoded;
 
 typedef struct __attribute__((__packed__)) ODID_OperatorID_encoded {

@@ -91,8 +91,8 @@ void odid_initSystemData(ODID_System_data *data)
         return;
     memset(data, 0, sizeof(ODID_System_data));
     data->AreaCount = 1;
-    data->AreaCeiling = MIN_ALT;
-    data->AreaFloor = MIN_ALT;
+    data->AreaCeiling = INV_ALT;
+    data->AreaFloor = INV_ALT;
     data->OperatorAltitudeGeo = INV_ALT;
 }
 
@@ -287,6 +287,7 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
     outEncoded->IDType = inData->IDType;
     outEncoded->UAType = inData->UAType;
     strncpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
+    memset(outEncoded->Reserved, 0, sizeof(outEncoded->Reserved));
     return ODID_SUCCESS;
 }
 
@@ -471,7 +472,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
     outEncoded->ClassEU = inData->ClassEU;
     outEncoded->OperatorAltitudeGeo = encodeAltitude(inData->OperatorAltitudeGeo);
     outEncoded->Timestamp = inData->Timestamp;
-    memset(outEncoded->Reserved2, 0, sizeof(outEncoded->Reserved2));
+    outEncoded->Reserved2 = 0;
     return ODID_SUCCESS;
 }
 
@@ -491,6 +492,7 @@ int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID
     outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
     outEncoded->OperatorIdType = inData->OperatorIdType;
     strncpy(outEncoded->OperatorId, inData->OperatorId, sizeof(outEncoded->OperatorId));
+    memset(outEncoded->Reserved, 0, sizeof(outEncoded->Reserved));
     return ODID_SUCCESS;
 }
 
