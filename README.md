@@ -6,8 +6,8 @@ This repository provides a C-code function library for encoding and decoding (pa
 See further details in the [specifications](#relevant-specifications) section below.
 
 Please note that both specifications have been updated during the first half of 2021.
-The ASD-STAN specification has been published but the ASTM specification is still being finalized (March 2022).
-The code available in this repository is already compliant with these updates.
+Both of the updated standards have been published (May 2022).
+The code available in this repository is compliant with these updates.
 
 The opendroneid-core-c code is meant for implementations that will broadcast the Remote ID information via Bluetooth or Wi-Fi.
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
@@ -209,14 +209,13 @@ For some Android phones it is close to impossible to pick up the signal, despite
 
 ### United States
 
-The ASTM F3411 Specification for Remote ID and Tracking has been defined to specify how Unmanned Aircraft (UA) or Unmanned Aircraft Systems (UAS) can publish their ID, location, altitude etc., either via direct broadcast (Bluetooth or Wi-Fi), or via an internet connection to a Remote ID server.
+The [ASTM F3411](https://www.astm.org/Standards/F3411.htm) Specification for Remote ID and Tracking has been defined to specify how Unmanned Aircraft (UA) or Unmanned Aircraft Systems (UAS) can publish their ID, location, altitude etc., either via direct broadcast (Bluetooth or Wi-Fi), or via an internet connection to a Remote ID server.
 
 Version 1.0 (F3411-19) of the specification is available: https://www.astm.org/f3411-19.html
 
-Future updates will likely be available at this link: https://www.astm.org/Standards/F3411.htm.
+Version 1.1 (F3411-22) of the specification is available: https://www.astm.org/f3411-22.html
 
-An updated version 1.1 (F3411-22?) is currently in the second ballot round for adoption (March 2022).
-It contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
+The updated version F3411-22 contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
 
 Additionally, a Means of Compliance document (MoC) has been drafted by the ASTM and is undergoing ballot (March 2022).
 It contains further implementation requirements and test specifications.
@@ -236,13 +235,13 @@ See also the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-ST
 The continued development of the relevant standards is reflected in the remote ID protocol version number transmitted in the header of each drone ID message.
 The following protocol versions have been in use:
 
- 0. ASTM F3411-19. Published Feb 14, 2020. https://www.astm.org/f3411-19.html
+ 0. ASTM [F3411-19](https://www.astm.org/f3411-19.html). Published Feb 14, 2020.
 
- 1. ASD-STAN prEN 4709-002 P1. Published 31-Oct-2021. http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/
+ 1. ASD-STAN prEN [4709-002 P1](http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/). Published 31-Oct-2021.
 
     ASTM F3411 v1.1 draft sent for first ballot round autumn 2021.
 
- 2. ASTM F3411-v1.1 draft sent for second ballot round Q1 2022. (ASTM F3411-22 ?)
+ 2. ASTM F3411-v1.1 draft for second ballot round Q1 2022 and published May 25th 2022. (ASTM [F3411-22](https://www.astm.org/f3411-22.html))
 
       The delta to protocol version 1 is small:
       - New enum values ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE, ODID_DESC_TYPE_EMERGENCY and ODID_DESC_TYPE_EXTENDED_STATUS
@@ -255,6 +254,7 @@ Some information can be found behind the following links but please do your own 
 Remember that as a manufacturer or drone operator, you are personally responsible for being compliant with all relevant laws and standards applicable to the area of operation.
  * US: https://www.faa.gov/uas/getting_started/remote_id/
  * EU: https://eur-lex.europa.eu/eli/reg_impl/2022/425/
+ * Japan: https://www.mlit.go.jp/koku/drone/en/
 
 ### Comparison
 
