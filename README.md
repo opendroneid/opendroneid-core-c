@@ -47,7 +47,10 @@ The implementation supports simultaneous transmission via Bluetooth Legacy Adver
 
 Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported.
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying (most likely it is not. See [below](#relevant-specifications)).
-The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips will both support Long Range and Extended Advertising, but these have not yet been tested.
+
+The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips both support Long Range and Extended Advertising.
+External testing have confirmed that they are capable of simultaneously transmitting both BT4 Legacy advertising signals and BT5 Long Range advertising signals.
+No open-source implementation demonstrating this is known though.
 
 ### Linux
 A Wi-Fi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
@@ -194,12 +197,11 @@ Below is a list of multiple topics that would be useful to get sorted out, but a
 
 * Integration of Remote ID [MAVLink messages](https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID) into any of the open source flight controller implementations (Ardupilot, PX4, etc.), while following the [draft architecture documentation](https://mavlink.io/en/services/opendroneid.html).
 This is required in order to validate their use and get the Work In Progress marks removed from the drone ID MAVLink messages and the drafted architecture.
-* Provide open source transmitter implementations for the TI [CC2640](https://github.com/opendroneid/transmitter-cc2640R2) (and related) and/or the [nRF52480](https://github.com/opendroneid/transmitter-nrf) (and related) Bluetooth transmitter chips. Preferably implementations capable of feeding in data via MAVLink messages
-* Implement drone ID transmission examples on the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and/or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) in order to test and verify whether the Bluetooth 5 Long Range transmission mode works on those.
-This could also clarify if they can support simultaneous BT4 and BT5 transmission.
+* Provide open source transmitter implementations for the TI [CC2640](https://github.com/opendroneid/transmitter-cc2640R2) (and related) and/or the [nRF52480](https://github.com/opendroneid/transmitter-nrf) (and related) Bluetooth transmitter chips (also ST have various Bluetooth chips). Preferably implementations capable of feeding in data via MAVLink messages
+* Implement open source drone ID transmission examples on the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and/or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) showing how to do simultaneous BT4 and BT5 advertising
 * There are [multiple issues](https://github.com/opendroneid/receiver-android/issues) open for the Android Receiver example application.
 Some are new feature requests.
-Particularly the new feature requests from [issue 27](https://github.com/opendroneid/receiver-android/issues/27) would be good to get supported, since this will help the application be better compliant with the [ASTM Means of Compliance](#united-states) document
+Particularly the new feature request from [issue 27](https://github.com/opendroneid/receiver-android/issues/27) would be good to get supported, since this will help the application be better compliant with the [ASTM Means of Compliance](#united-states) document
 * The ESP32 transmitter has an unexplained problem with the [Wi-Fi Beacon signals](https://github.com/sxjack/uav_electronic_ids/issues/9).
 For some Android phones it is close to impossible to pick up the signal, despite it being sent regularly and the phone easily picking up the signal from a RaspberryPi or other Linux transmitter.
 * Testing of additional (Android) smartphones for expanding the [receiver compatibility list](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
