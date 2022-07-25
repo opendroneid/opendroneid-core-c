@@ -13,7 +13,7 @@ The opendroneid-core-c code is meant for implementations that will broadcast the
 If you are looking for code related to Network Remoted ID (via the internet), please take a look at https://github.com/interuss and https://github.com/uastech/standards.
 
 Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID specification:
-https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-drip.
+https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-drip and https://www.ida.liu.se/~andgu38/drip/.
 
 MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
 
@@ -215,7 +215,7 @@ The [ASTM F3411](https://www.astm.org/Standards/F3411.htm) Specification for Rem
 
 Version 1.0 (F3411-19) of the specification is available: https://www.astm.org/f3411-19.html
 
-Version 1.1 (F3411-22) of the specification is available: https://www.astm.org/f3411-22.html
+Version 1.1 (F3411-22) of the specification is available: https://www.astm.org/f3411-22a.html
 
 The updated version F3411-22 contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
 
@@ -243,7 +243,7 @@ The following protocol versions have been in use:
 
     ASTM F3411 v1.1 draft sent for first ballot round autumn 2021.
 
- 2. ASTM F3411-v1.1 draft for second ballot round Q1 2022 and published May 25th 2022. (ASTM [F3411-22](https://www.astm.org/f3411-22.html))
+ 2. ASTM F3411-v1.1 draft for second ballot round Q1 2022 and published May 25th 2022. (ASTM [F3411-22](https://www.astm.org/f3411-22a.html))
 
       The delta to protocol version 1 is small:
       - New enum values ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE, ODID_DESC_TYPE_EMERGENCY and ODID_DESC_TYPE_EXTENDED_STATUS
