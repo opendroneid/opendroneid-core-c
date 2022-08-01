@@ -215,12 +215,14 @@ The [ASTM F3411](https://www.astm.org/Standards/F3411.htm) Specification for Rem
 
 Version 1.0 (F3411-19) of the specification is available: https://www.astm.org/f3411-19.html
 
-Version 1.1 (F3411-22) of the specification is available: https://www.astm.org/f3411-22a.html
+Version 1.1 (F3411-22a) of the specification is available: https://www.astm.org/f3411-22a.html
 
-The updated version F3411-22 contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
+The updated version F3411-22a contains smaller changes/additions to make the message content etc. better suited to meet the [rule](https://www.regulations.gov/document/FAA-2019-1100-53264) defined by the [FAA](https://www.faa.gov/uas/getting_started/remote_id/) (Federal Aviation Administration) for [UAS flights](https://www.faa.gov/uas/commercial_operators/operations_over_people/) in the United States.
 
-Additionally, a Means of Compliance document (MoC) has been drafted by the ASTM and is undergoing ballot (March 2022).
-It contains further implementation requirements and test specifications.
+Additionally, a Means of Compliance document (MoC) has been created by the ASTM and published 26-Jul-2022: https://www.astm.org/f3586-22.html.
+
+It contains further implementation requirements and test specifications needed to be compliant with the FAA remote ID rule.
+Please note that the FAA most likely have not yet (July 2022) fully accepted the procedures specified by this document as sufficient to meet all of the rule requirements.
 
 Together, the two documents will allow manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
 
@@ -243,7 +245,7 @@ The following protocol versions have been in use:
 
     ASTM F3411 v1.1 draft sent for first ballot round autumn 2021.
 
- 2. ASTM F3411-v1.1 draft for second ballot round Q1 2022 and published May 25th 2022. (ASTM [F3411-22](https://www.astm.org/f3411-22a.html))
+ 2. ASTM F3411-v1.1 draft for second ballot round Q1 2022 and published May 25th 2022. (ASTM [F3411-22a](https://www.astm.org/f3411-22a.html))
 
       The delta to protocol version 1 is small:
       - New enum values ODID_STATUS_REMOTE_ID_SYSTEM_FAILURE, ODID_DESC_TYPE_EMERGENCY and ODID_DESC_TYPE_EXTENDED_STATUS
