@@ -15,7 +15,8 @@ If you are looking for code related to Network Remoted ID (via the internet), pl
 Work is ongoing by the IETF DRIP (Drone Remote ID Protocol) task force to define how security could be supported in the context of the ASTM Remote ID specification:
 https://datatracker.ietf.org/wg/drip/documents/ and https://github.com/ietf-wg-drip and https://www.ida.liu.se/~andgu38/drip/.
 
-MAVLink messages for drone ID are available at https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID and documentation on how to use them is available at https://mavlink.io/en/services/opendroneid.html.
+MAVLink messages for drone ID are [available](https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID) with [documentation](https://mavlink.io/en/services/opendroneid.html).
+A similar message set for DroneCAN has been [published](https://github.com/dronecan/DSDL/tree/master/dronecan/remoteid).
 
 If you want to contribute to the open source efforts for Remote ID, see [below](#contribution-suggestions).
 
@@ -51,6 +52,9 @@ Please check if this is sufficient to comply with the rules that apply in the ar
 The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips both support Long Range and Extended Advertising.
 External testing have confirmed that they are capable of simultaneously transmitting both BT4 Legacy advertising signals and BT5 Long Range advertising signals.
 No open-source implementation demonstrating this is known though.
+
+An implementation using the above EPS32 transmitter code and adding support for inputting data via either MAVLink or DroneCAN messages is available at https://github.com/ArduPilot/ArduRemoteID.
+This project is demonstrated on ESP32-S3 HW but since the underlying [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) code is written for the ESP32, most likely Bluetooth 5 long range is not yet supported in this implementation.
 
 ### Linux
 A Wi-Fi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
@@ -197,6 +201,8 @@ Below is a list of multiple topics that would be useful to get sorted out, but a
 
 * Integration of Remote ID [MAVLink messages](https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID) into any of the open source flight controller implementations (Ardupilot, PX4, etc.), while following the [draft architecture documentation](https://mavlink.io/en/services/opendroneid.html).
 This is required in order to validate their use and get the Work In Progress marks removed from the drone ID MAVLink messages and the drafted architecture.
+The first part of supporting remote ID in ArduPilot has been [merged](https://github.com/ArduPilot/ardupilot/pull/21075).
+It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
 * Provide open source transmitter implementations for the TI [CC2640](https://github.com/opendroneid/transmitter-cc2640R2) (and related) and/or the [nRF52480](https://github.com/opendroneid/transmitter-nrf) (and related) Bluetooth transmitter chips (also ST have various Bluetooth chips). Preferably implementations capable of feeding in data via MAVLink messages
 * Implement open source drone ID transmission examples on the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and/or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) showing how to do simultaneous BT4 and BT5 advertising
 * There are [multiple issues](https://github.com/opendroneid/receiver-android/issues) open for the Android Receiver example application.
@@ -204,6 +210,7 @@ Some are new feature requests.
 Particularly the new feature request from [issue 27](https://github.com/opendroneid/receiver-android/issues/27) would be good to get supported, since this will help the application be better compliant with the [ASTM Means of Compliance](#united-states) document
 * The ESP32 transmitter has an unexplained problem with the [Wi-Fi Beacon signals](https://github.com/sxjack/uav_electronic_ids/issues/9).
 For some Android phones it is close to impossible to pick up the signal, despite it being sent regularly and the phone easily picking up the signal from a RaspberryPi or other Linux transmitter.
+It is possible that this is related to missing support in the implementation for Wi-Fi probe request/response.
 * Testing of additional (Android) smartphones for expanding the [receiver compatibility list](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
 * Information and updates to the [Transmitter Devices list](https://github.com/opendroneid/receiver-android/blob/master/transmitter-devices.md).
 
@@ -221,10 +228,11 @@ The updated version F3411-22a contains smaller changes/additions to make the mes
 
 Additionally, a Means of Compliance document (MoC) has been created by the ASTM and published 26-Jul-2022: https://www.astm.org/f3586-22.html.
 
-It contains further implementation requirements and test specifications needed to be compliant with the FAA remote ID rule.
-Please note that the FAA most likely have not yet (July 2022) fully accepted the procedures specified by this document as sufficient to meet all of the rule requirements.
+The MoC contains further implementation requirements and test specifications needed to be compliant with the FAA remote ID [rule](https://www.regulations.gov/document/FAA-2019-1100-53264).
+With the addition of a notification of availability (NoA), the FAA has accepted (August 2022) the procedures specified by the F3586 MoC document ) as an acceptable means, but not the only means, of demonstrating compliance with the requirements for producing standard remote identification unmanned aircraft and remote identification broadcast modules.
+The NoA document has not yet been published by the FAA.
 
-Together, the two documents will allow manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
+Together, the three documents (F3411, F3586 and the NoA) allows manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
 
 ### European Union
 
