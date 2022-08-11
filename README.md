@@ -73,6 +73,19 @@ A new repository under opendroneid can be made.
 
 A list of devices capable of transmitting Remote ID signals is available [here](https://github.com/opendroneid/receiver-android/blob/master/transmitter-devices.md).
 
+## Flight controllers
+
+Integration of remote ID support in various flight controller SW is an ongoing effort.
+
+The first part of supporting remote ID in ArduPilot has been [merged](https://github.com/ArduPilot/ardupilot/pull/21075).
+It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
+Discussion related to remote ID support in ArduPilot can be followed on [Discord](https://discord.com/channels/674039678562861068/1006333959111712849).
+
+The first part of supporting remote ID in PX4 is being handled in this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20036).
+It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
+
+It is expected that the Work in Progress (WIP) markers currently used for the relevant MAVLink messages, will be removed once the full integration of remote ID is integrated in the flight controller stacks.
+
 ## How to Build
 
 To build the library and the sample app on Linux:
@@ -201,8 +214,6 @@ Below is a list of multiple topics that would be useful to get sorted out, but a
 
 * Integration of Remote ID [MAVLink messages](https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID) into any of the open source flight controller implementations (Ardupilot, PX4, etc.), while following the [draft architecture documentation](https://mavlink.io/en/services/opendroneid.html).
 This is required in order to validate their use and get the Work In Progress marks removed from the drone ID MAVLink messages and the drafted architecture.
-The first part of supporting remote ID in ArduPilot has been [merged](https://github.com/ArduPilot/ardupilot/pull/21075).
-It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
 * Provide open source transmitter implementations for the TI [CC2640](https://github.com/opendroneid/transmitter-cc2640R2) (and related) and/or the [nRF52480](https://github.com/opendroneid/transmitter-nrf) (and related) Bluetooth transmitter chips (also ST have various Bluetooth chips). Preferably implementations capable of feeding in data via MAVLink messages
 * Implement open source drone ID transmission examples on the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and/or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) showing how to do simultaneous BT4 and BT5 advertising
 * There are [multiple issues](https://github.com/opendroneid/receiver-android/issues) open for the Android Receiver example application.
@@ -215,6 +226,8 @@ It is possible that this is related to missing support in the implementation for
 * Information and updates to the [Transmitter Devices list](https://github.com/opendroneid/receiver-android/blob/master/transmitter-devices.md).
 
 ## Relevant specifications
+
+The standards below are referencing the [ANSI/CTA-2063-A](https://shop.cta.tech/products/small-unmanned-aerial-systems-serial-numbers) to specify the format of the UA serial number.
 
 ### United States
 
@@ -229,10 +242,10 @@ The updated version F3411-22a contains smaller changes/additions to make the mes
 Additionally, a Means of Compliance document (MoC) has been created by the ASTM and published 26-Jul-2022: https://www.astm.org/f3586-22.html.
 
 The MoC contains further implementation requirements and test specifications needed to be compliant with the FAA remote ID [rule](https://www.regulations.gov/document/FAA-2019-1100-53264).
-With the addition of a notification of availability (NoA), the FAA has accepted (August 2022) the procedures specified by the F3586 MoC document ) as an acceptable means, but not the only means, of demonstrating compliance with the requirements for producing standard remote identification unmanned aircraft and remote identification broadcast modules.
-The NoA document has not yet been published by the FAA.
 
-Together, the three documents (F3411, F3586 and the NoA) allows manufacturers of UAS and remote ID broadcast modules/Add-ons (for retro-fit on UAs without built-in remote ID support) to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
+Via the publication of a [Notification of Availability](https://www.federalregister.gov/documents/2022/08/11/2022-16997/accepted-means-of-compliance-remote-identification-of-unmanned-aircraft) (NoA), the FAA has accepted (11-Aug-2022) the procedures specified by the F3586 MoC document as an acceptable means, but not the only means, of demonstrating compliance with the requirements for producing standard remote identification unmanned aircraft and remote identification broadcast modules, when also the few additional requirements in the NoA are followed.
+
+Together, the three documents ([F3411](https://www.astm.org/f3411-22a.html), [F3586](https://www.astm.org/f3586-22.html) and the [NoA](https://www.federalregister.gov/documents/2022/08/11/2022-16997/accepted-means-of-compliance-remote-identification-of-unmanned-aircraft)) allows manufacturers of UAS and remote ID broadcast modules/Add-ons to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
 
 ### European Union
 
@@ -241,6 +254,23 @@ It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are comp
 
 The final version of the standard has been published [here](http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/).
 See also the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and the recording of this [webinar](https://www.cencenelec.eu/news-and-events/events/2021-02-09-european-workshop-on-uas-direct-remote-identification/).
+
+### Japan
+
+Japan has required the use of Broadcast remote ID since [20-June-2022](https://www.mlit.go.jp/koku/drone/en/).
+Most of the material is in Japanese, but some parts are available in [English](https://www.mlit.go.jp/koku/content/mlit_HB_web_en_2022.pdf ).
+
+The rule requirements appears to be available [here](https://www.mlit.go.jp/koku/content/001444589.pdf).
+It is unclear how much auto-translation can be trusted, but some speculative observations:
+* Compliance with ASTM F3411-19 is assumed.
+* Wi-Fi Beacon from F3211-22a has been added, as one of the possible mandatory transmit methods.
+* Bluetooth 5 Long Range has been changed from being optional, to being one of the possible mandatory transmit methods.
+* It is unclear in the auto-translated document whether transmitting Bluetooth 4 Legacy Advertising together with Bluetooth 5 Long Range is mandatory or not.
+* Two Basic ID messages must be transmitted.
+One containing the serial number of the UA and another containing a Civil Aviation Authority provisioned ID.
+* A signature over the relevant message set must be transmitted via Authentication messages.
+This signature is calculated using a signing key obtained during the registration process of the UAS (?).
+* Since the System message is optional, transmitting the operator location appears to be optional (?).
 
 ### Protocol versions
 
@@ -276,31 +306,34 @@ If a field is left blank, nothing specific is mentioned in the particular docume
 The rules are what is defined by law and must be followed (the FAA rule in the United States and the EU rule in the European Union).
 The ASTM Means of Compliance (MoC) document overrides certain parts of the ASTM specification to meet the FAA rule requirements.
 
-| | FAA rule | ASTM v1.1 | ASTM MoC | EU rule | ASD-STAN DRI |
-| --- | --- | --- | --- | --- | --- |
-| Serial ANSI/CTA-2063-A | M<sup>1</sup> |  M<sup>1</sup> | M<sup>1</sup> | M | M |
-| Session ID | M<sup>1</sup> | M<sup>1</sup> | M<sup>1</sup> |  | O |
-| UA dynamic position | M | M |  | M | M |
-| UA altitude WGS-84 | M | M |  |  | O |
-| UA altitude AGL/Take-off |  | O |  | M | M |
-| Timestamp (Location msg) | M | M |  | M | M |
-| Timestamp (System msg) | M | O | M |  |  |
-| Operational/Emergency status | M<sup>2</sup> | O | M<sup>2</sup> | M<sup>2</sup> | M<sup>2</sup> |
-| Track direction | M | M |  | M | M |
-| Horizontal speed | M | M |  | M | M |
-| Vertical speed | M | M |  |  | O |
-| Operator registration ID |  | O |  | M | M |
-| EU Category & Class |  | O |  |  | R |
-| Operator dynamic position | M<sup>3</sup> | O | M<sup>3</sup> | M<sup>3</sup> | M<sup>3</sup> |
-| Operator altitude WGS-84 | M | O | M |  | O |
-| Transmission interval<sup>4</sup> (seconds) | 1 | 1 or 3 | 1 |  | 1 or 3 |
-| Transmission time | Take-off to shutdown |  | Take-off to shutdown |  | When airborne |
-| BT4 Legacy Advertising |  | M<sup>5</sup> | M<sup>6, 7</sup> |  | O |
-| BT5 Long Range |  | O | M<sup>6, 7</sup> |  | M<sup>5</sup> |
-| Wi-Fi NaN 2.4 GHz |  | M<sup>5</sup> |  |  | M<sup>5</sup> |
-| Wi-Fi NaN 5 GHz |  | O |  |  | M<sup>5</sup> |
-| Wi-Fi Beacon 2.4 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> |
-| Wi-Fi Beacon 5 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> |
+| | FAA rule | ASTM v1.1 | ASTM MoC | EU rule | ASD-STAN DRI | Japan rule<sup>11</sup> |
+| --- | --- | --- | --- | --- | --- | --- |
+| Serial ANSI/CTA-2063-A | M<sup>1</sup> | M<sup>1</sup> | M<sup>1</sup> | M | M | M<sup>9</sup> |
+| CAA Registration ID |  | O |  |  | O | M<sup>9</sup> |
+| Session ID | M<sup>1</sup> | M<sup>1</sup> | M<sup>1</sup> |  | O | O |
+| UA dynamic position | M | M |  | M | M | M |
+| UA altitude Barometric |  | M |  | O |  | M |
+| UA altitude WGS-84 | M | M |  |  | O | M |
+| UA altitude AGL/Take-off |  | O |  | M | M | O |
+| Timestamp (Location msg) | M | M |  | M | M | M |
+| Timestamp (System msg) | M | O | M |  |  | O |
+| Operational/Emergency status | M<sup>2</sup> | O | M<sup>2</sup> | M<sup>2</sup> | M<sup>2</sup> | O |
+| Track direction | M | M |  | M | M | M |
+| Horizontal speed | M | M |  | M | M | M |
+| Vertical speed | M | M |  |  | O | M |
+| Authentication Signature |  | O |  |  |  | M |
+| Operator registration ID |  | O |  | M | M | O |
+| EU Category & Class |  | O |  |  | R |  |
+| Operator dynamic position | M<sup>3</sup> | O | M<sup>3</sup> | M<sup>3</sup> | M<sup>3</sup> | O (?) |
+| Operator altitude WGS-84 | M | O | M |  | O | O (?) |
+| Transmission interval<sup>4</sup> (seconds) | 1 | 1 or 3 | 1 |  | 1 or 3 | 1 |
+| Transmission time | Take-off to shutdown |  | Take-off to shutdown |  | When airborne | When airborne |
+| BT4 Legacy Advertising |  | M<sup>5</sup> | M<sup>6, 7</sup> |  | O | M?<sup>5, 6?</sup> |
+| BT5 Long Range |  | O | M<sup>6, 7</sup> |  | M<sup>5</sup> | M<sup>5, 6?</sup> |
+| Wi-Fi NaN 2.4 GHz |  | M<sup>5</sup> |  |  | M<sup>5</sup> | M<sup>5</sup> |
+| Wi-Fi NaN 5 GHz |  | O |  |  | M<sup>5</sup> | M<sup>5</sup> |
+| Wi-Fi Beacon 2.4 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> | M<sup>5, 10</sup> |
+| Wi-Fi Beacon 5 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> | M<sup>5, 10</sup> |
 
 M: Mandatory. O: Optional. R: Recommended
 
@@ -316,3 +349,6 @@ M: Mandatory. O: Optional. R: Recommended
 6. Both BT4 and BT5 must be transmitted simultaneously.
 7. Only Bluetooth (BT4 + BT5 simultaneously) or Wi-Fi Beacon (2.4 GHz or 5 GHz) are allowed.
 8. If any other channel than Channel 6 on 2.4 GHz or Channel 149 on 5 GHz is used, a faster transmission rate of 5 Hz is required.
+9. The Japanese rule mandates that both the Serial number and the Registration ID be broadcast in multiple Basic ID messages.
+10. Uses Wi-Fi Beacon transmission as defined in ASTM F3411-22a.
+11. Based on auto-translated document from Japanese to English. Can contain errors.
