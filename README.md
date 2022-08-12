@@ -245,7 +245,7 @@ The MoC contains further implementation requirements and test specifications nee
 
 Via the publication of a [Notification of Availability](https://www.federalregister.gov/documents/2022/08/11/2022-16997/accepted-means-of-compliance-remote-identification-of-unmanned-aircraft) (NoA), the FAA has accepted (11-Aug-2022) the procedures specified by the F3586 MoC document as an acceptable means, but not the only means, of demonstrating compliance with the requirements for producing standard remote identification unmanned aircraft and remote identification broadcast modules, when also the few additional requirements in the NoA are followed.
 
-Together, the three documents ([F3411](https://www.astm.org/f3411-22a.html), [F3586](https://www.astm.org/f3586-22.html) and the [NoA](https://www.federalregister.gov/documents/2022/08/11/2022-16997/accepted-means-of-compliance-remote-identification-of-unmanned-aircraft)) allows manufacturers of UAS and remote ID broadcast modules/Add-ons to implement remote ID support and create the necessary Declaration of Compliance (DoC) document, which must be submitted to the FAA for approval.
+Together, the three documents ([F3411](https://www.astm.org/f3411-22a.html), [F3586](https://www.astm.org/f3586-22.html) and the [NoA](https://www.federalregister.gov/documents/2022/08/11/2022-16997/accepted-means-of-compliance-remote-identification-of-unmanned-aircraft)) allows manufacturers of UAS and remote ID broadcast modules/Add-ons to implement remote ID support and create the necessary [Declaration of Compliance](https://uasdoc.faa.gov) (DoC) [document](https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_89-2.pdf), which must be submitted to the FAA for approval.
 
 ### European Union
 
