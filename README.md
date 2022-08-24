@@ -42,19 +42,20 @@ A list of smartphones that have been tested for receiving Remote ID signals is a
 
 ## Transmitter examples
 
+### ESP32-S3 and ESP32-C3
+
+An implementation for the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) HW supporting inputting data via either MAVLink or DroneCAN messages is available at https://github.com/ArduPilot/ArduRemoteID.
+
+This has been tested to work together with ArduPilot.
+Currently it supports transmitting Bluetooth 4 Legacy Advertising, Bluetooth 5 Long Range and Wi-Fi NaN.
+The target is to add Wi-Fi Beacon support also at some point.
+
 ### ESP32
 An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
 The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, Wi-Fi NaN and Wi-Fi Beacon.
 
-Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported.
+Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported (ESP32-S3 or ESP32-C3 HW is needed for that).
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying (most likely it is not. See [below](#relevant-specifications)).
-
-The [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) chips both support Long Range and Extended Advertising.
-External testing have confirmed that they are capable of simultaneously transmitting both BT4 Legacy advertising signals and BT5 Long Range advertising signals.
-No open-source implementation demonstrating this is known though.
-
-An implementation using the above EPS32 transmitter code and adding support for inputting data via either MAVLink or DroneCAN messages is available at https://github.com/ArduPilot/ArduRemoteID.
-This project is demonstrated on ESP32-S3 HW but since the underlying [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) code is written for the ESP32, most likely Bluetooth 5 long range is not yet supported in this implementation.
 
 ### Linux
 A Wi-Fi NaN transmitter implementation for Linux is available [here](https://github.com/opendroneid/opendroneid-core-c/blob/master/wifi/sender/main.c).
