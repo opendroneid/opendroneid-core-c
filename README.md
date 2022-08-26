@@ -275,12 +275,12 @@ It is unclear how much auto-translation can be trusted, but some speculative obs
 * Compliance with ASTM F3411-19 is assumed.
 * Wi-Fi Beacon from F3211-22a has been added, as one of the possible mandatory transmit methods.
 * Bluetooth 5 Long Range has been changed from being optional, to being one of the possible mandatory transmit methods.
-* It is unclear in the auto-translated document whether transmitting Bluetooth 4 Legacy Advertising together with Bluetooth 5 Long Range is mandatory or not.
+* Bluetooth 4 Legacy Advertising is optional (confirmed by the Japanese government).
 * Two Basic ID messages must be transmitted.
 One containing the serial number of the UA and another containing a Civil Aviation Authority provisioned ID.
 * A signature over the relevant message set must be transmitted via Authentication messages.
 This signature is calculated using a signing key obtained during the registration process of the UAS (?).
-* Since the System message is optional, transmitting the operator location appears to be optional (?).
+* Since the System message is optional, transmitting the operator location is optional (confirmed by the Japanese government).
 
 ### Protocol versions
 
@@ -334,12 +334,12 @@ The ASTM Means of Compliance (MoC) document overrides certain parts of the ASTM 
 | Authentication Signature |  | O |  |  |  | M |
 | Operator registration ID |  | O |  | M | M | O |
 | EU Category & Class |  | O |  |  | R |  |
-| Operator dynamic position | M<sup>3</sup> | O | M<sup>3</sup> | M<sup>3</sup> | M<sup>3</sup> | O (?) |
-| Operator altitude WGS-84 | M | O | M |  | O | O (?) |
+| Operator dynamic position | M<sup>3</sup> | O | M<sup>3</sup> | M<sup>3</sup> | M<sup>3</sup> | O |
+| Operator altitude WGS-84 | M | O | M |  | O | O |
 | Transmission interval<sup>4</sup> (seconds) | 1 | 1 or 3 | 1 |  | 1 or 3 | 1 |
 | Transmission time | Take-off to shutdown |  | Take-off to shutdown |  | When airborne | When airborne |
-| BT4 Legacy Advertising |  | M<sup>5</sup> | M<sup>6, 7</sup> |  | O | M?<sup>5, 6?</sup> |
-| BT5 Long Range |  | O | M<sup>6, 7</sup> |  | M<sup>5</sup> | M<sup>5, 6?</sup> |
+| BT4 Legacy Advertising |  | M<sup>5</sup> | M<sup>6, 7</sup> |  | O | O |
+| BT5 Long Range |  | O | M<sup>6, 7</sup> |  | M<sup>5</sup> | M<sup>5</sup> |
 | Wi-Fi NaN 2.4 GHz |  | M<sup>5</sup> |  |  | M<sup>5</sup> | M<sup>5</sup> |
 | Wi-Fi NaN 5 GHz |  | O |  |  | M<sup>5</sup> | M<sup>5</sup> |
 | Wi-Fi Beacon 2.4 GHz<sup>8</sup> |  | M<sup>5</sup> | M<sup>7</sup> |  | M<sup>5</sup> | M<sup>5, 10</sup> |
