@@ -24,11 +24,18 @@ If you want to contribute to the open source efforts for Remote ID, see [below](
 
 ### Android
 For an example Android receiver application supporting Bluetooth and Wi-Fi, see https://github.com/opendroneid/receiver-android.
+This app is available on the [Google PlayStore](https://play.google.com/store/apps/details?id=org.opendroneid.android_osm).
+
+The source codes for an alternative remote ID application are available at https://github.com/dronetag/drone-scanner.
+The DroneTag app can be built for both Android and iOS and is available on the [Google PlayStore](https://play.google.com/store/search?q=dronetag&c=apps).
 
 ### iOS
-Currently there is no open source iOS receiver application for Apple devices.
-However, reception of Bluetooth 4 Legacy Advertising drone ID signals have been demonstrated to work on iOS.
-Apple currently does not expose suitable APIs to receive any other transmission method for drone ID signals than BT4 legacy advertising. I.e. current versions of iOS (up to and including 15) do not support receiving BT5 Long Range + Extended Advertising, Wi-Fi NaN nor Wi-Fi Beacon.
+The DroneTag application for iOS can received Bluetooth 4 Legacy Advertising signals on iOS.
+It is available on the [AppStore](https://apps.apple.com/cz/app/dronetag/id1527565210).
+The source codes are available at https://github.com/dronetag/drone-scanner and can be built for both iOS and Android.
+
+Apple currently does not expose suitable APIs to receive any other transmission method for drone ID signals than BT4 legacy advertising.
+I.e. current versions of iOS (up to and including 15) do not support receiving BT5 Long Range + Extended Advertising, Wi-Fi NaN nor Wi-Fi Beacon.
 
 ### WireShark
 Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages are available here: https://github.com/opendroneid/wireshark-dissector.  
@@ -81,11 +88,13 @@ Integration of remote ID support in various flight controller SW is an ongoing e
 The first part of supporting remote ID in ArduPilot has been [merged](https://github.com/ArduPilot/ardupilot/pull/21075).
 It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
 Discussion related to remote ID support in ArduPilot can be followed on [Discord](https://discord.com/channels/674039678562861068/1006333959111712849).
+Some documentation is available [here](https://ardupilot.org/plane/docs/common-remoteid.html), [here](https://ardupilot.org/dev/docs/opendroneid.html) and [here](https://ardupilot.org/planner/docs/opendroneid.html).
+The ArduPilot changes are being tested against [this transmitter](https://github.com/ArduPilot/ArduRemoteID) implementation.
 
 The first part of supporting remote ID in PX4 is being handled in this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20036).
 It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
 
-It is expected that the Work in Progress (WIP) markers currently used for the relevant MAVLink messages, will be removed once the full integration of remote ID is integrated in the flight controller stacks.
+It is expected that the Work in Progress (WIP) markers currently used for the relevant MAVLink messages, [will be removed](https://github.com/mavlink/mavlink/pull/1882) once the full integration of remote ID is integrated in the flight controller stacks.
 
 ## How to Build
 
