@@ -34,6 +34,8 @@ The DroneTag application for iOS can received Bluetooth 4 Legacy Advertising sig
 It is available on the [AppStore](https://apps.apple.com/cz/app/dronetag/id1527565210).
 The source codes are available at https://github.com/dronetag/drone-scanner and can be built for both iOS and Android.
 
+Another receiver application for iOS is being Beta tested here: https://testflight.apple.com/join/HA3EL4zw.
+
 Apple currently does not expose suitable APIs to receive any other transmission method for drone ID signals than BT4 legacy advertising.
 I.e. current versions of iOS (up to and including 15) do not support receiving BT5 Long Range + Extended Advertising, Wi-Fi NaN nor Wi-Fi Beacon.
 
@@ -304,7 +306,7 @@ The following protocol versions have been in use:
 The timelines for the rules requiring manufacturers and drone operators to be compliant have been fluctuating.
 Some information can be found behind the following links but please do your own research, since this is not necessarily the most up-to-date information.
 Remember that as a manufacturer or drone operator, you are personally responsible for being compliant with all relevant laws and standards applicable to the area of operation.
- * US: https://www.faa.gov/uas/getting_started/remote_id/
+ * US: https://www.faa.gov/uas/getting_started/remote_id/ and the [addition](https://www.federalregister.gov/documents/2022/09/12/2022-19644/enforcement-policy-regarding-production-requirements-for-standard-remote-identification-unmanned)
  * EU: https://eur-lex.europa.eu/eli/reg_impl/2022/425/
  * Japan: https://www.mlit.go.jp/koku/drone/en/
 
