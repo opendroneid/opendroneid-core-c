@@ -40,7 +40,12 @@ Apple currently does not expose suitable APIs to receive any other transmission 
 I.e. current versions of iOS (up to and including 15) do not support receiving BT5 Long Range + Extended Advertising, Wi-Fi NaN nor Wi-Fi Beacon.
 
 ### WireShark
-Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages are available here: https://github.com/opendroneid/wireshark-dissector.  
+Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages (both WiFi and Bluetooth) are available here: https://github.com/opendroneid/wireshark-dissector.  
+
+### Bluetooth sniffing
+Using Texas Instruments Bluetooth boards, it should be possible to use this SW to pick up all Bluetooth advertisements from a transmitter: https://github.com/nccgroup/Sniffle
+
+Keep in mind that for both WireShark and for this approach, if the goal is to do rule compliance testing, the setup most likely needs to be placed in a radio shielded room, to avoid disturbance from other Bluetooth/Wi-Fi transmitters in the neighborhood.
 
 ### ESP32
 The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example code also contains code for receiving drone ID signals on ESP32 HW.
@@ -95,8 +100,6 @@ The ArduPilot changes are being tested against [this transmitter](https://github
 
 The first part of supporting remote ID in PX4 is being handled in this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20036).
 It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
-
-It is expected that the Work in Progress (WIP) markers currently used for the relevant MAVLink messages, [will be removed](https://github.com/mavlink/mavlink/pull/1882) once the full integration of remote ID is integrated in the flight controller stacks.
 
 ## How to Build
 
@@ -224,10 +227,7 @@ https://mavlink.io/en/services/opendroneid.html
 Any contribution to the open source efforts related to Remote ID will be very welcome.
 Below is a list of multiple topics that would be useful to get sorted out, but anything you feel you can help with, will certainly be appreciated.
 
-* Integration of Remote ID [MAVLink messages](https://mavlink.io/en/messages/common.html#OPEN_DRONE_ID_BASIC_ID) into any of the open source flight controller implementations (Ardupilot, PX4, etc.), while following the [draft architecture documentation](https://mavlink.io/en/services/opendroneid.html).
-This is required in order to validate their use and get the Work In Progress marks removed from the drone ID MAVLink messages and the drafted architecture.
 * Provide open source transmitter implementations for the TI [CC2640](https://github.com/opendroneid/transmitter-cc2640R2) (and related) and/or the [nRF52480](https://github.com/opendroneid/transmitter-nrf) (and related) Bluetooth transmitter chips (also ST have various Bluetooth chips). Preferably implementations capable of feeding in data via MAVLink messages
-* Implement open source drone ID transmission examples on the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3) and/or [ESP32-S3](https://www.espressif.com/en/news/ESP32_S3) showing how to do simultaneous BT4 and BT5 advertising
 * There are [multiple issues](https://github.com/opendroneid/receiver-android/issues) open for the Android Receiver example application.
 Some are new feature requests.
 Particularly the new feature request from [issue 27](https://github.com/opendroneid/receiver-android/issues/27) would be good to get supported, since this will help the application be better compliant with the [ASTM Means of Compliance](#united-states) document
@@ -259,10 +259,12 @@ Via the publication of a [Notification of Availability](https://www.federalregis
 
 Together, the three documents ([F3411](https://www.astm.org/f3411-22a.html), [F3586](https://www.astm.org/f3586-22.html) and the [NoA](https://www.federalregister.gov/documents/2022/08/11/2022-16997/accepted-means-of-compliance-remote-identification-of-unmanned-aircraft)) allows manufacturers of UAS and remote ID broadcast modules/Add-ons to implement remote ID support and create the necessary [Declaration of Compliance](https://uasdoc.faa.gov) (DoC) [document](https://www.faa.gov/documentLibrary/media/Advisory_Circular/AC_89-2.pdf), which must be submitted to the FAA for approval.
 
+A list of UAs that have an approved DoC is available from the FAA [here](https://uasdoc.faa.gov/listDocs).
+
 ### European Union
 
 To meet the European Commission Delegated Regulation [2019/945](https://eur-lex.europa.eu/eli/reg_del/2019/945/2020-08-09) and the Commission Implementing Regulation [2019/947](https://eur-lex.europa.eu/eli/reg_impl/2019/947/2021-08-05), ASD-STAN has developed the prEN 4709-002 Direct Remote Identification specification.
-It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 v1.1 specification (first ballot round).
+It specifies broadcast methods for Remote ID (Bluetooth and Wi-Fi) that are compliant with the ASTM F3411 v1.1 specification (first ballot round, see the [Protocol versions](#protocol-versions) below).
 
 The final version of the standard has been published [here](http://asd-stan.org/downloads/asd-stan-pren-4709-002-p1/).
 See also the summary [whitepaper](https://asd-stan.org/wp-content/uploads/ASD-STAN_DRI_Introduction_to_the_European_digital_RID_UAS_Standard.pdf) and the recording of this [webinar](https://www.cencenelec.eu/news-and-events/events/2021-02-09-european-workshop-on-uas-direct-remote-identification/).
@@ -315,7 +317,7 @@ Remember that as a manufacturer or drone operator, you are personally responsibl
 A comparison of some of the more detailed parts of each specification and rule is given in the table below.
 If a field is left blank, nothing specific is mentioned in the particular document related to that part.
 
-The rules are what is defined by law and must be followed (the FAA rule in the United States and the EU rule in the European Union).
+The rules are what is defined by law and must be followed (the FAA rule in the United States, the EU rule in the European Union and the Japan rule in Japan).
 The ASTM Means of Compliance (MoC) document overrides certain parts of the ASTM specification to meet the FAA rule requirements.
 
 | | FAA rule | ASTM v1.1 | ASTM MoC | EU rule | ASD-STAN DRI | Japan rule<sup>11</sup> |
