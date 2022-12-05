@@ -50,6 +50,9 @@ Keep in mind that for both WireShark and for this approach, if the goal is to do
 ### ESP32
 The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example code also contains code for receiving drone ID signals on ESP32 HW.
 
+### Linux
+A simple scanner application for Wi-Fi NaN/Beacon frames is available [here](https://github.com/sxjack/unix_rid_capture).
+
 ### Smartphone receivers
 
 A list of smartphones that have been tested for receiving Remote ID signals is available [here](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
@@ -63,11 +66,12 @@ An implementation for the [ESP32-C3](https://www.espressif.com/en/news/ESP32_C3)
 This has been tested to work together with ArduPilot.
 Currently it supports transmitting Bluetooth 4 Legacy Advertising, Bluetooth 5 Long Range, Wi-Fi Beacon and Wi-Fi NaN.
 
-### ESP32
-An example library for transmitting Open Drone ID signals from ESP32 HW can be found at https://github.com/sxjack/uav_electronic_ids.
-The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, Wi-Fi NaN and Wi-Fi Beacon.
+### ESP32/ESP8266
+An example library for transmitting Open Drone ID signals from ESP32/ESP8266 HW can be found at https://github.com/sxjack/uav_electronic_ids.
+The implementation supports simultaneous transmission via Bluetooth Legacy Advertising, Wi-Fi NaN and Wi-Fi Beacon (ESP32) or Wi-Fi NaN/Beacon (ESP8266).
 
-Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals. Bluetooth Long Range and Extended Advertising are not supported (ESP32-S3 or ESP32-C3 HW is needed for that).
+Please note that the ESP32 HW only supports transmitting Bluetooth Legacy Advertising signals.
+Bluetooth Long Range and Extended Advertising are not supported (ESP32-S3 or ESP32-C3 HW is needed for that).
 Please check if this is sufficient to comply with the rules that apply in the area in which you are flying (most likely it is not. See [below](#relevant-specifications)).
 
 ### Linux
@@ -97,7 +101,9 @@ Discussion related to remote ID support in ArduPilot can be followed on [Discord
 Some documentation is available [here](https://ardupilot.org/plane/docs/common-remoteid.html), [here](https://ardupilot.org/dev/docs/opendroneid.html) and [here](https://ardupilot.org/planner/docs/opendroneid.html).
 The ArduPilot changes are being tested against [this transmitter](https://github.com/ArduPilot/ArduRemoteID) implementation.
 
-The first part of supporting remote ID in PX4 is being handled in this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20036) and this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20563). It is expected that additional changes are needed in order to be fully compliant with the rules and standards. Discussion related to remote ID support in PX4 can be followed on [Discord](https://discord.com/channels/1022170275984457759/1038284900081614879).
+The first part of supporting remote ID in PX4 is being handled in this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20036) and this [Pull Request](https://github.com/PX4/PX4-Autopilot/pull/20563).
+It is expected that additional changes are needed in order to be fully compliant with the rules and standards.
+Discussion related to remote ID support in PX4 can be followed on [Discord](https://discord.com/channels/1022170275984457759/1038284900081614879).
 
 ## How to Build
 
