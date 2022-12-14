@@ -234,7 +234,7 @@ int m2o_collectMessagePack(mav2odid_t *m2o)
 /**
 * Convert a basic ID Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_basicId(mav2odid_t *m2o, mavlink_open_drone_id_basic_id_t *mavBasicId)
+int m2o_basicId(mav2odid_t *m2o, mavlink_open_drone_id_basic_id_t *mavBasicId)
 {
     if (!mavBasicId)
         return ODID_FAIL;
@@ -262,7 +262,7 @@ static int m2o_basicId(mav2odid_t *m2o, mavlink_open_drone_id_basic_id_t *mavBas
 /**
 * Convert a location Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *mavLocation)
+int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *mavLocation)
 {
     if (!mavLocation)
         return ODID_FAIL;
@@ -294,7 +294,7 @@ static int m2o_location(mav2odid_t *m2o, mavlink_open_drone_id_location_t *mavLo
 /**
 * Convert an authentication Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authentication_t *mavAuthentication)
+int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authentication_t *mavAuthentication)
 {
     if (!mavAuthentication ||
         mavAuthentication->data_page >= ODID_AUTH_MAX_PAGES)
@@ -326,7 +326,7 @@ static int m2o_authentication(mav2odid_t *m2o, mavlink_open_drone_id_authenticat
 /**
 * Convert a self ID Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *mavSelfId)
+int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *mavSelfId)
 {
     if (!mavSelfId)
         return ODID_FAIL;
@@ -345,7 +345,7 @@ static int m2o_selfId(mav2odid_t *m2o, mavlink_open_drone_id_self_id_t *mavSelfI
 /**
 * Convert a system Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem)
+int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem)
 {
     if (!mavSystem)
         return ODID_FAIL;
@@ -375,7 +375,7 @@ static int m2o_system(mav2odid_t *m2o, mavlink_open_drone_id_system_t *mavSystem
 /**
 * Convert an operator ID Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_operatorId(mav2odid_t *m2o, mavlink_open_drone_id_operator_id_t *mavOperatorId)
+int m2o_operatorId(mav2odid_t *m2o, mavlink_open_drone_id_operator_id_t *mavOperatorId)
 {
     if (!mavOperatorId)
         return ODID_FAIL;
@@ -394,7 +394,7 @@ static int m2o_operatorId(mav2odid_t *m2o, mavlink_open_drone_id_operator_id_t *
 /**
 * Convert a message pack Mavlink message to an encoded Open Drone ID structure
 */
-static int m2o_messagePack(mav2odid_t *m2o, mavlink_open_drone_id_message_pack_t *mavMessagePack)
+int m2o_messagePack(mav2odid_t *m2o, mavlink_open_drone_id_message_pack_t *mavMessagePack)
 {
     if (!mavMessagePack)
         return ODID_FAIL;
