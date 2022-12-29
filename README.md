@@ -51,7 +51,7 @@ Keep in mind that for both WireShark and for this approach, if the goal is to do
 The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example code also contains code for receiving drone ID signals on ESP32 HW.
 
 ### Linux
-A simple scanner application for Wi-Fi NaN/Beacon frames is available [here](https://github.com/sxjack/unix_rid_capture).
+A basic scanner application for Wi-Fi NaN/Beacon frames and Bluetooth is available [here](https://github.com/sxjack/unix_rid_capture).
 
 ### Smartphone receivers
 
