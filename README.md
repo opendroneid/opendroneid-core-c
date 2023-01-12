@@ -290,6 +290,8 @@ One containing the serial number of the UA and another containing a Civil Aviati
 This signature is calculated using a signing key obtained during the registration process of the UAS (?).
 * Since the System message is optional, transmitting the operator location is optional (confirmed by the Japanese government).
 
+Update Jan 2023: There now appears to be a version of the rule available in [English](https://www.mlit.go.jp/koku/content/001582250.pdf).
+
 ### Protocol versions
 
 The continued development of the relevant standards is reflected in the remote ID protocol version number transmitted in the header of each drone ID message.
