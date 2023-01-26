@@ -82,8 +82,11 @@ Functions for creating suitable Wi-Fi Beacon frames have been added to wifi.c, b
 A simple application for sending static drone ID data via Bluetooth 4 and 5 and via Wi-Fi Beacon is available [here](https://github.com/opendroneid/transmitter-linux).
 This has tested to work reasonably okay on one CometLake motherboard and partly okay on RaspberryPi 3B and 4B HW.
 
-### nRF and TI Bluetooth chipsets
-Transmitter implementations for Bluetooth 4 and 5, based on either the TI CC2640 or the nRF52480 SoCs are known to exist, but so far none have been open sourced.
+### nRF Bluetooth chipsets
+An example transmitter implementation for the nRF52840 Bluetooth chip can be found [here](https://github.com/sxjack/remote_id_bt5).
+
+### TI Bluetooth chipsets
+Transmitter implementations for Bluetooth 4 and 5, based on the TI CC2640 SoCs are known to exist, but so far none have been open sourced.
 Please open an issue if you have an implementation you are willing to share.
 A new repository under opendroneid can be made.
 
