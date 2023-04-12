@@ -219,42 +219,42 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
         if (UAS_Data->BasicIDValid[i]) {
             if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
                 return -EINVAL;
-            encodeBasicIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->BasicID[i]);
-            msg_pack.MsgPackSize++;
+            if (encodeBasicIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->BasicID[i]) == ODID_SUCCESS)
+                msg_pack.MsgPackSize++;
         }
     }
     if (UAS_Data->LocationValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
-        encodeLocationMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Location);
-        msg_pack.MsgPackSize++;
+        if (encodeLocationMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Location) == ODID_SUCCESS)
+            msg_pack.MsgPackSize++;
     }
     for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++)
     {
         if (UAS_Data->AuthValid[i]) {
             if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
                 return -EINVAL;
-            encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[i]);
-            msg_pack.MsgPackSize++;
+            if (encodeAuthMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->Auth[i]) == ODID_SUCCESS)
+                msg_pack.MsgPackSize++;
         }
     }
     if (UAS_Data->SelfIDValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
-        encodeSelfIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->SelfID);
-        msg_pack.MsgPackSize++;
+        if (encodeSelfIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->SelfID) == ODID_SUCCESS)
+            msg_pack.MsgPackSize++;
     }
     if (UAS_Data->SystemValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
-        encodeSystemMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->System);
-        msg_pack.MsgPackSize++;
+        if (encodeSystemMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->System) == ODID_SUCCESS)
+            msg_pack.MsgPackSize++;
     }
     if (UAS_Data->OperatorIDValid) {
         if (msg_pack.MsgPackSize >= ODID_PACK_MAX_MESSAGES)
             return -EINVAL;
-        encodeOperatorIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->OperatorID);
-        msg_pack.MsgPackSize++;
+        if (encodeOperatorIDMessage((void *)&msg_pack.Messages[msg_pack.MsgPackSize], &UAS_Data->OperatorID) == ODID_SUCCESS)
+            msg_pack.MsgPackSize++;
     }
 
     /* check that there is at least one message to send. */
