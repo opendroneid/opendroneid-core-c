@@ -145,7 +145,7 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
             continue;
         mprintf("\t\t\t\"UAType%d\": %d,\n", i, UAS_Data->BasicID[i].UAType);
         mprintf("\t\t\t\"IDType%d\": %d,\n", i, UAS_Data->BasicID[i].IDType);
-        mprintf("\t\t\t\"UASID%d\": %s,\n", i, UAS_Data->BasicID[i].UASID);
+        mprintf("\t\t\t\"UASID%d\": \"%s\",\n", i, UAS_Data->BasicID[i].UASID);
     }
     mprintf("\t\t},\n");
 
@@ -174,13 +174,13 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
     mprintf("\t\t\t\"Length\": %d,\n", UAS_Data->Auth[0].Length);
     mprintf("\t\t\t\"Timestamp\": %u,\n", UAS_Data->Auth[0].Timestamp);
     for (int i = 0; i <= UAS_Data->Auth[0].LastPageIndex; i++) {
-        mprintf("\t\t\t\"AuthData Page %d,\": %s\n", i, UAS_Data->Auth[i].AuthData);
+        mprintf("\t\t\t\"AuthData Page %d,\": \"%s\"\n", i, UAS_Data->Auth[i].AuthData);
     }
     mprintf("\t\t},\n");
 
     mprintf("\t\t\"SelfID\": {\n");
     mprintf("\t\t\t\"Description Type\": %d,\n", UAS_Data->SelfID.DescType);
-    mprintf("\t\t\t\"Description\": %s,\n", UAS_Data->SelfID.Desc);
+    mprintf("\t\t\t\"Description\": \"%s\",\n", UAS_Data->SelfID.Desc);
     mprintf("\t\t},\n");
 
     mprintf("\t\t\"Operator\": {\n");
