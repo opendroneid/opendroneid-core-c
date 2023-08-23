@@ -1368,7 +1368,7 @@ void printBasicID_data(ODID_BasicID_data *BasicID)
 
     const char ODID_BasicID_data_format[] =
         "UAType: %d\nIDType: %d\nUASID: %s\n";
-    printf(ODID_BasicID_data_format, BasicID->IDType, BasicID->UAType, buf);
+    printf(ODID_BasicID_data_format, BasicID->UAType, BasicID->IDType, buf);
 }
 
 /**
