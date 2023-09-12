@@ -755,6 +755,24 @@ void printOperatorID_data(ODID_OperatorID_data *OperatorID);
 void printSystem_data(ODID_System_data *System_data);
 #endif // ODID_DISABLE_PRINTF
 
+typedef struct FRDID_UAS_Data {
+  const char* Identifier;
+  const char* ANSICTA2063Identifier;
+  double Latitude;
+  double Longitude;
+  int Altitude;
+  int Height;
+  double TakeoffLatitude;
+  double TakeoffLongitude;
+  int HorizontalSpeed;
+  int TrueCourse;
+} FRDID_UAS_Data;
+
+int frdid_wifi_build_beacon_frame(const FRDID_UAS_Data* UAS_Data, const char* mac, const char* SSID, size_t SSID_len,
+                                  uint16_t interval_tu, uint8_t* buf, size_t buf_size);
+
+int frdid_build(const FRDID_UAS_Data* UAS_Data, uint8_t* buf, size_t buf_size);
+
 #ifdef __cplusplus
 }
 #endif
