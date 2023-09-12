@@ -286,7 +286,17 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
     outEncoded->ProtoVersion = ODID_PROTOCOL_VERSION;
     outEncoded->IDType = inData->IDType;
     outEncoded->UAType = inData->UAType;
-    strncpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
+    switch (inData->IDType)
+    {
+    case ODID_IDTYPE_SERIAL_NUMBER:
+    case ODID_IDTYPE_CAA_REGISTRATION_ID:
+        memset(outEncoded->UASID, 0, sizeof(outEncoded->UASID));
+        strncpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
+        break;
+    default:
+        memcpy(outEncoded->UASID, inData->UASID, sizeof(outEncoded->UASID));
+        break;
+    }
     memset(outEncoded->Reserved, 0, sizeof(outEncoded->Reserved));
     return ODID_SUCCESS;
 }
@@ -682,7 +692,16 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
 
     outData->IDType = (ODID_idtype_t) inEncoded->IDType;
     outData->UAType = (ODID_uatype_t) inEncoded->UAType;
-    safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
+    switch (inEncoded->IDType)
+    {
+    case ODID_IDTYPE_SERIAL_NUMBER:
+    case ODID_IDTYPE_CAA_REGISTRATION_ID:
+        safe_dec_copyfill(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
+        break;
+    default:
+        memcpy(outData->UASID, inEncoded->UASID, sizeof(outData->UASID));
+        break;
+    }
     return ODID_SUCCESS;
 }
 
