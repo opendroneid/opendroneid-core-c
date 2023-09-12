@@ -27,9 +27,20 @@ int clock_gettime(clockid_t, struct timespec *);
 #include "odid_wifi.h"
 
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if defined(IDF_VER)
+#include <endian.h>
+#define cpu_to_be16(x)  (bswap16(x))
+#define cpu_to_be32(x)  (bswap32(x))
+#else
+#include <byteswap.h>
+#define cpu_to_be16(x)  (bswap_16(x))
+#define cpu_to_be32(x)  (bswap_32(x))
+#endif
 #define cpu_to_le16(x)  (x)
 #define cpu_to_le64(x)  (x)
 #else
+#define cpu_to_be16(x)      (x)
+#define cpu_to_be32(x)      (x)
 #define cpu_to_le16(x)      (bswap_16(x))
 #define cpu_to_le64(x)      (bswap_64(x))
 #endif
@@ -615,4 +626,147 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
         return -EINVAL;
 
     return 0;
+}
+
+int frdid_wifi_build_beacon_frame(const FRDID_UAS_Data* UAS_Data, const char* mac, const char* SSID, size_t SSID_len,
+                                  uint16_t interval_tu, uint8_t* buf, size_t buf_size) {
+  /* Broadcast address */
+  uint8_t target_addr[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+  uint8_t asd_stan_oui[3] = {0x6A, 0x5C, 0x35};
+  /* Mgmt Beacon frame mandatory fields + IE 221 */
+  struct ieee80211_ssid* ssid_s;
+  struct ieee80211_supported_rates* rates;
+  struct ieee80211_vendor_specific* vendor;
+
+  int ret;
+  size_t len = 0;
+
+  /* IEEE 802.11 Management Header */
+  ret = buf_fill_ieee80211_mgmt(buf, &len, buf_size, IEEE80211_STYPE_BEACON, target_addr, (uint8_t*)mac, (uint8_t*)mac);
+  if (ret < 0)
+    return ret;
+
+  /* Mandatory Beacon as of 802.11-2016 Part 11 */
+  ret = buf_fill_ieee80211_beacon(buf, &len, buf_size, interval_tu);
+  if (ret < 0)
+    return ret;
+
+  /* SSID: 1-32 bytes */
+  if (len + sizeof(*ssid_s) > buf_size)
+    return -ENOMEM;
+
+  ssid_s = (struct ieee80211_ssid*)(buf + len);
+  if (!SSID || (SSID_len == 0) || (SSID_len > 32))
+    return -EINVAL;
+  ssid_s->element_id = IEEE80211_ELEMID_SSID;
+  ssid_s->length = (uint8_t)SSID_len;
+  memcpy(ssid_s->ssid, SSID, ssid_s->length);
+  len += sizeof(*ssid_s) + SSID_len;
+
+  /* Supported Rates: 1 record at minimum */
+  if (len + sizeof(*rates) > buf_size)
+    return -ENOMEM;
+
+  rates = (struct ieee80211_supported_rates*)(buf + len);
+  rates->element_id = IEEE80211_ELEMID_RATES;
+  rates->length = 1;              // One rate only
+  rates->supported_rates = 0x8C;  // 6 Mbps
+  len += sizeof(*rates);
+
+  /* Vendor Specific Information Element (IE 221) */
+  if (len + sizeof(*vendor) > buf_size)
+    return -ENOMEM;
+
+  vendor = (struct ieee80211_vendor_specific*)(buf + len);
+  vendor->element_id = IEEE80211_ELEMID_VENDOR;
+  vendor->length = 0x00;  // Length updated at end of function
+  memcpy(vendor->oui, asd_stan_oui, sizeof(vendor->oui));
+  vendor->oui_type = 0x01;
+  len += sizeof(*vendor);
+
+  ret = frdid_build(UAS_Data, buf + len, buf_size - len);
+  if (ret < 0)
+    return ret;
+  len += ret;
+
+  /* set the lengths according to the message pack lengths */
+  vendor->length = sizeof(vendor->oui) + sizeof(vendor->oui_type) + ret;
+
+  return (int)len;
+}
+
+/* append_tlv - appends a one byte type, a one byte length, and length bytes of
+ * value to p and returns the new p
+ *
+ * Returns the new p on success, or NULL on error
+ */
+static uint8_t* append_tlv(uint8_t* p, uint8_t* limit, uint8_t type, uint8_t length, const void* value) {
+  if (p == NULL) {
+    return NULL;
+  }
+  if (p + 2 + length > limit) {
+    return NULL;
+  }
+  *p++ = type;
+  *p++ = length;
+  memcpy(p, value, length);
+  p += length;
+  return p;
+}
+
+int frdid_build(const FRDID_UAS_Data* UAS_Data, uint8_t* buf, size_t buf_size) {
+  uint8_t* p = buf;
+  uint8_t* limit = buf + buf_size;
+
+  if (p + 6 > limit) {
+    return -ENOMEM;
+  }
+
+  uint8_t version = 1;
+  p = append_tlv(p, limit, 0x01, 1, &version);
+  if (UAS_Data->Identifier != NULL) {
+    char identifier_value[30] = {0};
+    strncpy(identifier_value, UAS_Data->Identifier, sizeof(identifier_value));
+    p = append_tlv(p, limit, 0x02, 30, identifier_value);
+  }
+  if (UAS_Data->ANSICTA2063Identifier != NULL) {
+    size_t ansi_cta_2063_identifier_length = strlen(UAS_Data->ANSICTA2063Identifier);
+    if (ansi_cta_2063_identifier_length > 255) {
+      ansi_cta_2063_identifier_length = 255;
+    }
+    p = append_tlv(p, limit, 0x03, ansi_cta_2063_identifier_length, UAS_Data->ANSICTA2063Identifier);
+  }
+  if (UAS_Data->Latitude != 0 || UAS_Data->Longitude != 0) {
+    int32_t latitude = cpu_to_be32(1e5 * UAS_Data->Latitude + 0.5);
+    p = append_tlv(p, limit, 0x04, 4, &latitude);
+    int32_t longitude = cpu_to_be32(1e5 * UAS_Data->Longitude + 0.5);
+    p = append_tlv(p, limit, 0x05, 4, &longitude);
+  }
+  if (UAS_Data->Altitude != INV_ALT) {
+    int16_t altitude = cpu_to_be16(UAS_Data->Altitude);
+    p = append_tlv(p, limit, 0x06, 2, &altitude);
+  }
+  if (UAS_Data->Height != INV_ALT) {
+    int16_t height = cpu_to_be16(UAS_Data->Height);
+    p = append_tlv(p, limit, 0x07, 2, &height);
+  }
+  if (UAS_Data->TakeoffLatitude != 0 || UAS_Data->TakeoffLongitude != 0) {
+    int32_t takeoff_latitude = cpu_to_be32(1e5 * UAS_Data->TakeoffLatitude + 0.5);
+    p = append_tlv(p, limit, 0x08, 4, &takeoff_latitude);
+    int32_t takeoff_longitude = cpu_to_be32(1e5 * UAS_Data->TakeoffLongitude + 0.5);
+    p = append_tlv(p, limit, 0x09, 4, &takeoff_longitude);
+  }
+  if (UAS_Data->HorizontalSpeed != INV_SPEED_H) {
+    int8_t horizontal_speed = UAS_Data->HorizontalSpeed + 0.5;
+    p = append_tlv(p, limit, 0x0a, 1, &horizontal_speed);
+  }
+  if (UAS_Data->TrueCourse != INV_DIR) {
+    int16_t true_course = cpu_to_be16(UAS_Data->TrueCourse + 0.5);
+    p = append_tlv(p, limit, 0x0b, 2, &true_course);
+  }
+
+  if (p == NULL) {
+    return -ENOMEM;
+  }
+  return p - buf;
 }
