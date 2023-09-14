@@ -317,7 +317,7 @@ The following protocol versions have been in use:
 The timelines for the rules requiring manufacturers and drone operators to be compliant have been fluctuating.
 Some information can be found behind the following links but please do your own research, since this is not necessarily the most up-to-date information.
 Remember that as a manufacturer or drone operator, you are personally responsible for being compliant with all relevant laws and standards applicable to the area of operation.
- * US: https://www.faa.gov/uas/getting_started/remote_id/ and the [addition](https://www.federalregister.gov/documents/2022/09/12/2022-19644/enforcement-policy-regarding-production-requirements-for-standard-remote-identification-unmanned)
+ * US: https://www.faa.gov/uas/getting_started/remote_id/, [addition](https://www.federalregister.gov/documents/2022/09/12/2022-19644/enforcement-policy-regarding-production-requirements-for-standard-remote-identification-unmanned), [extension](https://www.faa.gov/newsroom/faa-extends-remote-id-enforcement-date-six-months)
  * EU: https://eur-lex.europa.eu/eli/reg_impl/2022/425/
  * Japan: https://www.mlit.go.jp/koku/drone/en/
 
