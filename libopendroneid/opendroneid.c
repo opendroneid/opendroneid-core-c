@@ -165,6 +165,8 @@ void odid_initUasData(ODID_UAS_Data *data)
 static uint8_t encodeDirection(float Direction, uint8_t *EWDirection)
 {
     unsigned int direction_int = (unsigned int) roundf(Direction);
+    if (direction_int == 360)
+        direction_int = 0;
     if (direction_int < 180) {
         *EWDirection = 0;
     } else {
