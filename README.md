@@ -133,7 +133,7 @@ The intended architecture is to take whatever input you wish, and to put it into
 Some embedded systems might require a smaller memory footprint than what by default is used by opendroneid-core-c.
 The following compile time options exists for reducing the memory consumption:
 - ODID_AUTH_MAX_PAGES is by default configured to support 16 pages/messages of authentication data.
-  See the beginning of [opedroneid.h](libopendroneid/opendroneid.h).
+  See the beginning of [opendroneid.h](libopendroneid/opendroneid.h).
   If authentication messages are not used, this value can be configured between 1 and 16, e.g. by adding `-DODID_AUTH_MAX_PAGES=1` when calling cmake.
 
 
