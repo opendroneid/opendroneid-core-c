@@ -110,21 +110,29 @@ Discussion related to remote ID support in PX4 can be followed on [Discord](http
 
 ## How to Build
 
-To build the library and the sample app on Linux:
+To build the library, the sample app and the unit tests on Linux:
 
 ```
-sudo apt-get install libgps-dev libnl-genl-3-dev
+sudo apt-get install libgps-dev libnl-genl-3-dev libgtest-dev
 git submodule update --init
 mkdir build && cd build
 cmake ../.
 make
 ```
 
-The outputs will be `libopendroneid/libopendroneid.so` and the `test/odidtest` sample application.
+You can then run tests from with:
+
+```
+ctest .
+```
+
+The outputs will be `libopendroneid/libopendroneid.so`, the `test/odidtest` sample application, and the `test/unit_odid_wifi_beacon` test.
 
 The sample application will do a test encode/decode, then continuously generate sample messages.
 
 The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in `libopendroneid/opendroneid.h`.
+
+The `unit_odid_wifi_beacon` checks that a sample input data structure produces the expected Beacon header.
 
 ## Build Options
 
@@ -169,6 +177,12 @@ sudo apt-get install libgps-dev libnl-genl-3-dev
 ```
 
 If available, the Wi-Fi reference implementation will link against libnl-tiny instead of libnl*-3 if available.
+
+## Continuous Integration
+
+Regressions can be checked against by running tests provided in the `test` subdirectory.
+
+An example is given in the form of a GitHub workflow in the `.github` subdirectory.
 
 ## Architecture
 
