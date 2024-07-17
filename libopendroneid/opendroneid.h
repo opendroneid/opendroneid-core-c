@@ -603,7 +603,7 @@ typedef struct __attribute__((__packed__)) ODID_MessagePack_encoded {
 
     // Byte 1 - 2
     uint8_t SingleMessageSize;
-    uint8_t MsgPackSize;
+    uint8_t MsgPackSize; // no of messages in pack
 
     // Byte 3 - 227
     ODID_Message_encoded Messages[ODID_PACK_MAX_MESSAGES];
@@ -729,7 +729,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
  * @pack: buffer space to read from
  * @buflen: length of buffer space
  *
- * Returns 0 on success
+ * Returns message pack length on success, or < 0 on error.
  */
 int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen);
 
