@@ -254,7 +254,7 @@ static uint16_t encodeTimeStamp(float Seconds_data)
     if (Seconds_data == INV_TIMESTAMP)
         return INV_TIMESTAMP;
     else
-        return (uint16_t) intRangeMax((int64_t) roundf(Seconds_data*10), 0, MAX_TIMESTAMP);
+        return (uint16_t) intRangeMax((int64_t) roundf(Seconds_data*10), 0, MAX_TIMESTAMP * 10);
 }
 
 /**
