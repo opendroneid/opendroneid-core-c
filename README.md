@@ -113,22 +113,23 @@ Discussion related to remote ID support in PX4 can be followed on [Discord](http
 To build the library, the sample app and the unit tests on Linux:
 
 ```
-sudo apt-get install libgps-dev libnl-genl-3-dev libgtest-dev
+sudo apt-get install libgps-dev libnl-genl-3-dev libgtest-dev cmake
 git submodule update --init
 mkdir build && cd build
 cmake ../.
-make
+make -j
 ```
 
-You can then run tests from with:
+Two types of simple test systems are availabe:
 
 ```
+test/odidtest
 ctest .
 ```
 
 The outputs will be `libopendroneid/libopendroneid.so`, the `test/odidtest` sample application, and the `test/unit_odid_wifi_beacon` test.
 
-The sample application will do a test encode/decode, then continuously generate sample messages.
+The sample `odidtest` application will do a test encode/decode, then continuously generate sample messages.
 
 The intended architecture is to take whatever input you wish, and to put it into the nominal structures as defined in `libopendroneid/opendroneid.h`.
 
@@ -143,7 +144,6 @@ The following compile time options exists for reducing the memory consumption:
 - ODID_AUTH_MAX_PAGES is by default configured to support 16 pages/messages of authentication data.
   See the beginning of [opendroneid.h](libopendroneid/opendroneid.h).
   If authentication messages are not used, this value can be configured between 1 and 16, e.g. by adding `-DODID_AUTH_MAX_PAGES=1` when calling cmake.
-
 
 - When including MAVLink in the build (see below), if MAVLink's virtual channel functionality is not used, some memory can be saved by defining MAVLINK_COMM_NUM_BUFFERS to be equal to 1, before including mavlink_types.h
   See further details in the beginning of [mav2odid.c](libmav2odid/mav2odid.c).
@@ -180,7 +180,7 @@ If available, the Wi-Fi reference implementation will link against libnl-tiny in
 
 ## Continuous Integration
 
-Regressions can be checked against by running tests provided in the `test` subdirectory.
+Regressions can be checked by running the tests provided in the `test` subdirectory.
 
 An example is given in the form of a GitHub workflow in the `.github` subdirectory.
 
