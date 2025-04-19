@@ -626,26 +626,26 @@ void odid_initOperatorIDData(ODID_OperatorID_data *data);
 void odid_initMessagePackData(ODID_MessagePack_data *data);
 void odid_initUasData(ODID_UAS_Data *data);
 
-int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
-int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);
-int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
-int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
-int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
-int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData);
-int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_data *inData);
+int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, const ODID_BasicID_data *inData);
+int encodeLocationMessage(ODID_Location_encoded *outEncoded, const ODID_Location_data *inData);
+int encodeAuthMessage(ODID_Auth_encoded *outEncoded, const ODID_Auth_data *inData);
+int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, const ODID_SelfID_data *inData);
+int encodeSystemMessage(ODID_System_encoded *outEncoded, const ODID_System_data *inData);
+int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, const ODID_OperatorID_data *inData);
+int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, const ODID_MessagePack_data *inData);
 
-int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
-int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
-int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
-int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
-int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
-int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded);
-int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
+int decodeBasicIDMessage(ODID_BasicID_data *outData, const ODID_BasicID_encoded *inEncoded);
+int decodeLocationMessage(ODID_Location_data *outData, const ODID_Location_encoded *inEncoded);
+int decodeAuthMessage(ODID_Auth_data *outData, const ODID_Auth_encoded *inEncoded);
+int decodeSelfIDMessage(ODID_SelfID_data *outData, const ODID_SelfID_encoded *inEncoded);
+int decodeSystemMessage(ODID_System_data *outData, const ODID_System_encoded *inEncoded);
+int decodeOperatorIDMessage(ODID_OperatorID_data *outData, const ODID_OperatorID_encoded *inEncoded);
+int decodeMessagePack(ODID_UAS_Data *uasData, const ODID_MessagePack_encoded *pack);
 
 int getBasicIDType(ODID_BasicID_encoded *inEncoded, enum ODID_idtype *idType);
 int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum);
 ODID_messagetype_t decodeMessageType(uint8_t byte);
-ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, uint8_t *msg_data);
+ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uas_data, const uint8_t *msg_data);
 
 // Helper Functions
 ODID_Horizontal_accuracy_t createEnumHorizontalAccuracy(float Accuracy);
@@ -669,7 +669,7 @@ float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy);
  *
  * Returns pointer to gps_data string on success, otherwise returns NULL
  */
-void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size);
+void drone_export_gps_data(const ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size);
 
 /**
  * odid_message_build_pack - combines the messages and encodes the odid pack
@@ -680,7 +680,7 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size);
  * Returns length on success, < 0 on failure. @buf only contains a valid message
  * if the return code is >0
  */
-int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen);
+int odid_message_build_pack(const ODID_UAS_Data *UAS_Data, void *pack, size_t buflen);
 
 /* odid_wifi_build_nan_sync_beacon_frame - creates a NAN sync beacon frame
  * that shall be send just before the NAN action frame.
@@ -690,7 +690,7 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen);
  *
  * Returns the packet length on success, or < 0 on error.
  */
-int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size);
+int odid_wifi_build_nan_sync_beacon_frame(const char *mac, uint8_t *buf, size_t buf_size);
 
 /* odid_wifi_build_message_pack_nan_action_frame - creates a message pack
  * with each type of message from the drone information into an NAN action frame.
@@ -702,7 +702,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
  *
  * Returns the packet length on success, or < 0 on error.
  */
-int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
+int odid_wifi_build_message_pack_nan_action_frame(const ODID_UAS_Data *UAS_Data, const char *mac,
                                                   uint8_t send_counter,
                                                   uint8_t *buf, size_t buf_size);
 
@@ -719,7 +719,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
  *
  * Returns the packet length on success, or < 0 on error.
  */
-int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
+int odid_wifi_build_message_pack_beacon_frame(const ODID_UAS_Data *UAS_Data, const char *mac,
                                               const char *SSID, size_t SSID_len,
                                               uint16_t interval_tu, uint8_t send_counter,
                                               uint8_t *buf, size_t buf_size);
@@ -731,7 +731,7 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
  *
  * Returns message pack length on success, or < 0 on error.
  */
-int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen);
+int odid_message_process_pack(ODID_UAS_Data *UAS_Data, const uint8_t *pack, size_t buflen);
 
 /* odid_wifi_receive_message_pack_nan_action_frame - processes a received message pack
  * with each type of message from the drone information into an NAN action frame
@@ -743,10 +743,10 @@ int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buf
  * Returns 0 on success, or < 0 on error. Will fill 6 bytes into @mac.
  */
 int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
-                                                    char *mac, uint8_t *buf, size_t buf_size);
+                                                    char *mac, const uint8_t *buf, size_t buf_size);
 
 #ifndef ODID_DISABLE_PRINTF
-void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced);
+void printByteArray(const uint8_t *byteArray, uint16_t asize, int spaced);
 void printBasicID_data(ODID_BasicID_data *BasicID);
 void printLocation_data(ODID_Location_data *Location);
 void printAuth_data(ODID_Auth_data *Auth);

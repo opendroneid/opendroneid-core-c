@@ -138,7 +138,7 @@ static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size,
     return 0;
 }
 
-void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
+void drone_export_gps_data(const ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 {
     ptrdiff_t len = 0;
 
@@ -217,7 +217,7 @@ void drone_export_gps_data(ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
     mprintf("\t}\n}");
 }
 
-int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
+int odid_message_build_pack(const ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
 {
     ODID_MessagePack_data msg_pack;
     ODID_MessagePack_encoded *msg_pack_enc;
@@ -286,7 +286,7 @@ int odid_message_build_pack(ODID_UAS_Data *UAS_Data, void *pack, size_t buflen)
     return (int) len;
 }
 
-int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_size)
+int odid_wifi_build_nan_sync_beacon_frame(const char *mac, uint8_t *buf, size_t buf_size)
 {
     /* Broadcast address */
     uint8_t target_addr[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -369,7 +369,7 @@ int odid_wifi_build_nan_sync_beacon_frame(char *mac, uint8_t *buf, size_t buf_si
     return (int) len;
 }
 
-int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char *mac,
+int odid_wifi_build_message_pack_nan_action_frame(const ODID_UAS_Data *UAS_Data, const char *mac,
                                                   uint8_t send_counter,
                                                   uint8_t *buf, size_t buf_size)
 {
@@ -450,7 +450,7 @@ int odid_wifi_build_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data, char 
     return (int) len;
 }
 
-int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac,
+int odid_wifi_build_message_pack_beacon_frame(const ODID_UAS_Data *UAS_Data, const char *mac,
                                               const char *SSID, size_t SSID_len,
                                               uint16_t interval_tu, uint8_t send_counter,
                                               uint8_t *buf, size_t buf_size)
@@ -532,9 +532,9 @@ int odid_wifi_build_message_pack_beacon_frame(ODID_UAS_Data *UAS_Data, char *mac
     return (int) len;
 }
 
-int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buflen)
+int odid_message_process_pack(ODID_UAS_Data *UAS_Data, const uint8_t *pack, size_t buflen)
 {
-    ODID_MessagePack_encoded *msg_pack_enc = (ODID_MessagePack_encoded *) pack;
+    const ODID_MessagePack_encoded *msg_pack_enc = (const ODID_MessagePack_encoded *) pack;
     size_t size = sizeof(*msg_pack_enc) - ODID_MESSAGE_SIZE * (ODID_PACK_MAX_MESSAGES - msg_pack_enc->MsgPackSize);
     if (size > buflen)
         return -ENOMEM;
@@ -548,7 +548,7 @@ int odid_message_process_pack(ODID_UAS_Data *UAS_Data, uint8_t *pack, size_t buf
 }
 
 int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
-                                                    char *mac, uint8_t *buf, size_t buf_size)
+                                                    char *mac, const uint8_t *buf, size_t buf_size)
 {
     struct ieee80211_mgmt *mgmt;
     struct nan_service_discovery *nsd;

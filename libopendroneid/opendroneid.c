@@ -277,7 +277,7 @@ static uint8_t encodeAreaRadius(uint16_t Radius)
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData)
+int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, const ODID_BasicID_data *inData)
 {
     if (!outEncoded || !inData ||
         !intInRange(inData->IDType, 0, 15) ||
@@ -310,7 +310,7 @@ int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *in
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData)
+int encodeLocationMessage(ODID_Location_encoded *outEncoded, const ODID_Location_data *inData)
 {
     uint8_t bitflag;
     if (!outEncoded || !inData ||
@@ -381,7 +381,7 @@ int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data 
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
+int encodeAuthMessage(ODID_Auth_encoded *outEncoded, const ODID_Auth_data *inData)
 {
     if (!outEncoded || !inData || !intInRange(inData->AuthType, 0, 15))
         return ODID_FAIL;
@@ -429,7 +429,7 @@ int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData)
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData)
+int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, const ODID_SelfID_data *inData)
 {
     if (!outEncoded || !inData || !intInRange(inData->DescType, 0, 255))
         return ODID_FAIL;
@@ -448,7 +448,7 @@ int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inDat
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData)
+int encodeSystemMessage(ODID_System_encoded *outEncoded, const ODID_System_data *inData)
 {
     if (!outEncoded || !inData ||
         !intInRange(inData->OperatorLocationType, 0, 3) ||
@@ -495,7 +495,7 @@ int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inDat
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData)
+int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, const ODID_OperatorID_data *inData)
 {
     if (!outEncoded || !inData || !intInRange(inData->OperatorIdType, 0, 255))
         return ODID_FAIL;
@@ -515,7 +515,7 @@ int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID
 * @param amount The amount of messages in the pack
 * @return       ODID_SUCCESS or ODID_FAIL;
 */
-static int checkPackContent(ODID_Message_encoded *msgs, int amount)
+static int checkPackContent(const ODID_Message_encoded *msgs, int amount)
 {
     if (amount <= 0 || amount > ODID_PACK_MAX_MESSAGES)
         return ODID_FAIL;
@@ -551,7 +551,7 @@ static int checkPackContent(ODID_Message_encoded *msgs, int amount)
 * @param inData     Input data (non encoded/packed) structure
 * @return           ODID_SUCCESS or ODID_FAIL;
 */
-int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_data *inData)
+int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, const ODID_MessagePack_data *inData)
 {
     if (!outEncoded || !inData || inData->SingleMessageSize != ODID_MESSAGE_SIZE)
         return ODID_FAIL;
@@ -684,7 +684,7 @@ int getBasicIDType(ODID_BasicID_encoded *inEncoded, enum ODID_idtype *idType)
 * @param inEncoded Input message (encoded/packed) structure
 * @return          ODID_SUCCESS or ODID_FAIL;
 */
-int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded)
+int decodeBasicIDMessage(ODID_BasicID_data *outData, const ODID_BasicID_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         inEncoded->MessageType != ODID_MESSAGETYPE_BASIC_ID ||
@@ -714,7 +714,7 @@ int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEnc
 * @param inEncoded Input message (encoded/packed) structure
 * @return          ODID_SUCCESS or ODID_FAIL;
 */
-int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded)
+int decodeLocationMessage(ODID_Location_data *outData, const ODID_Location_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         inEncoded->MessageType != ODID_MESSAGETYPE_LOCATION ||
@@ -766,7 +766,7 @@ int getAuthPageNum(ODID_Auth_encoded *inEncoded, int *pageNum)
 * @param inEncoded Input message (encoded/packed) structure
 * @return          ODID_SUCCESS or ODID_FAIL;
 */
-int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
+int decodeAuthMessage(ODID_Auth_data *outData, const ODID_Auth_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         inEncoded->page_zero.MessageType != ODID_MESSAGETYPE_AUTH ||
@@ -814,7 +814,7 @@ int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded)
 * @param inEncoded Input message (encoded/packed) structure
 * @return          ODID_SUCCESS or ODID_FAIL;
 */
-int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded)
+int decodeSelfIDMessage(ODID_SelfID_data *outData, const ODID_SelfID_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         inEncoded->MessageType != ODID_MESSAGETYPE_SELF_ID)
@@ -832,7 +832,7 @@ int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncode
 * @param inEncoded Input message (encoded/packed) structure
 * @return          ODID_SUCCESS or ODID_FAIL;
 */
-int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded)
+int decodeSystemMessage(ODID_System_data *outData, const ODID_System_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         inEncoded->MessageType != ODID_MESSAGETYPE_SYSTEM)
@@ -862,7 +862,7 @@ int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncode
 * @param inEncoded Input message (encoded/packed) structure
 * @return          ODID_SUCCESS or ODID_FAIL;
 */
-int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded)
+int decodeOperatorIDMessage(ODID_OperatorID_data *outData, const ODID_OperatorID_encoded *inEncoded)
 {
     if (!outData || !inEncoded ||
         inEncoded->MessageType != ODID_MESSAGETYPE_OPERATOR_ID)
@@ -884,7 +884,7 @@ int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encod
 * @param pack    Pointer to an encoded packed message
 * @return        ODID_SUCCESS or ODID_FAIL;
 */
-int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack)
+int decodeMessagePack(ODID_UAS_Data *uasData, const ODID_MessagePack_encoded *pack)
 {
     if (!uasData || !pack || pack->MessageType != ODID_MESSAGETYPE_PACKED)
         return ODID_FAIL;
@@ -946,7 +946,7 @@ ODID_messagetype_t decodeMessageType(uint8_t byte)
 *                   message
 * @return           The message type: ODID_messagetype_t
 */
-ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, uint8_t *msgData)
+ODID_messagetype_t decodeOpenDroneID(ODID_UAS_Data *uasData, const uint8_t *msgData)
 {
     if (!uasData || !msgData)
         return ODID_MESSAGETYPE_INVALID;
@@ -1362,7 +1362,7 @@ float decodeTimestampAccuracy(ODID_Timestamp_accuracy_t Accuracy)
 * @param asize Size of array of bytes to be printed
 */
 
-void printByteArray(uint8_t *byteArray, uint16_t asize, int spaced)
+void printByteArray(const uint8_t *byteArray, uint16_t asize, int spaced)
 {
     if (ENABLE_DEBUG) {
         int x;

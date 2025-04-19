@@ -217,21 +217,21 @@ Once you have the encoded data, then you are ready to assemble and transmit over
 The primary SDK calls are the following:
 
 ```
-int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, ODID_BasicID_data *inData);
-int encodeLocationMessage(ODID_Location_encoded *outEncoded, ODID_Location_data *inData);
-int encodeAuthMessage(ODID_Auth_encoded *outEncoded, ODID_Auth_data *inData);
-int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, ODID_SelfID_data *inData);
-int encodeSystemMessage(ODID_System_encoded *outEncoded, ODID_System_data *inData);
-int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, ODID_OperatorID_data *inData);
-int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, ODID_MessagePack_data *inData);
+int encodeBasicIDMessage(ODID_BasicID_encoded *outEncoded, const ODID_BasicID_data *inData);
+int encodeLocationMessage(ODID_Location_encoded *outEncoded, const ODID_Location_data *inData);
+int encodeAuthMessage(ODID_Auth_encoded *outEncoded, const ODID_Auth_data *inData);
+int encodeSelfIDMessage(ODID_SelfID_encoded *outEncoded, const ODID_SelfID_data *inData);
+int encodeSystemMessage(ODID_System_encoded *outEncoded, const ODID_System_data *inData);
+int encodeOperatorIDMessage(ODID_OperatorID_encoded *outEncoded, const ODID_OperatorID_data *inData);
+int encodeMessagePack(ODID_MessagePack_encoded *outEncoded, const ODID_MessagePack_data *inData);
 
-int decodeBasicIDMessage(ODID_BasicID_data *outData, ODID_BasicID_encoded *inEncoded);
-int decodeLocationMessage(ODID_Location_data *outData, ODID_Location_encoded *inEncoded);
-int decodeAuthMessage(ODID_Auth_data *outData, ODID_Auth_encoded *inEncoded);
-int decodeSelfIDMessage(ODID_SelfID_data *outData, ODID_SelfID_encoded *inEncoded);
-int decodeSystemMessage(ODID_System_data *outData, ODID_System_encoded *inEncoded);
-int decodeOperatorIDMessage(ODID_OperatorID_data *outData, ODID_OperatorID_encoded *inEncoded);
-int decodeMessagePack(ODID_UAS_Data *uasData, ODID_MessagePack_encoded *pack);
+int decodeBasicIDMessage(ODID_BasicID_data *outData, const ODID_BasicID_encoded *inEncoded);
+int decodeLocationMessage(ODID_Location_data *outData, const ODID_Location_encoded *inEncoded);
+int decodeAuthMessage(ODID_Auth_data *outData, const ODID_Auth_encoded *inEncoded);
+int decodeSelfIDMessage(ODID_SelfID_data *outData, const ODID_SelfID_encoded *inEncoded);
+int decodeSystemMessage(ODID_System_data *outData, const ODID_System_encoded *inEncoded);
+int decodeOperatorIDMessage(ODID_OperatorID_data *outData, const ODID_OperatorID_encoded *inEncoded);
+int decodeMessagePack(ODID_UAS_Data *uasData, const ODID_MessagePack_encoded *pack);
 ```
 
 Specific messages have been added to the MAVLink message set to accommodate data for Open Drone ID implementations:
