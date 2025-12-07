@@ -223,7 +223,8 @@ static int8_t encodeSpeedVertical(float SpeedVertical_data)
 */
 static int32_t encodeLatLon(double LatLon_data)
 {
-    return (int32_t) intRangeMax((int64_t) (LatLon_data * LATLON_MULT), -180 * LATLON_MULT, 180 * LATLON_MULT);
+    int64_t encoded = (int64_t) round(LatLon_data * LATLON_MULT);
+    return (int32_t) intRangeMax(encoded, -180 * LATLON_MULT, 180 * LATLON_MULT);
 }
 
 /**
