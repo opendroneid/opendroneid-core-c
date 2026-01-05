@@ -39,6 +39,27 @@ Another receiver application for iOS is being Beta tested here: https://testflig
 Apple currently does not expose suitable APIs to receive any other transmission method for drone ID signals than BT4 legacy advertising.
 I.e. current versions of iOS (up to and including 15) do not support receiving BT5 Long Range + Extended Advertising, Wi-Fi NaN nor Wi-Fi Beacon.
 
+#### iOS Framework for Parsing Drone ID Data
+
+This repository now includes build scripts to create an iOS framework (XCFramework) from the core C library.
+The framework can be integrated into iOS applications to decode Open Drone ID messages received via Bluetooth.
+
+**Build the framework:**
+```bash
+./build_ios_framework.sh
+```
+
+**Features:**
+- Parses all Open Drone ID message types (Basic ID, Location, System, etc.)
+- Supports both device (arm64) and simulator (arm64, x86_64) architectures
+- Includes complete Swift example code with Bluetooth scanning
+- Comprehensive documentation in English and Chinese
+
+**Documentation:**
+- [README_iOS.md](README_iOS.md) - Complete guide with Swift/Objective-C examples
+- [QUICKSTART_iOS_CN.md](QUICKSTART_iOS_CN.md) - 中文快速开始指南
+- [Swift Example Code](examples/ios/DroneIDParser.swift)
+
 ### WireShark
 Examples on how to use the WireShark PC application to pick up and dissect open drone ID messages (both WiFi and Bluetooth) are available here: https://github.com/opendroneid/wireshark-dissector.  
 
@@ -109,6 +130,24 @@ It is expected that additional changes are needed in order to be fully compliant
 Discussion related to remote ID support in PX4 can be followed on [Discord](https://discord.com/channels/1022170275984457759/1038284900081614879).
 
 ## How to Build
+
+### iOS Framework
+
+To build the library as an iOS framework (XCFramework) for use in iOS applications:
+
+```bash
+./build_ios_framework.sh
+```
+
+This will create `output/OpenDroneID.xcframework` that can be integrated into Xcode projects.
+
+For detailed instructions on using the iOS framework, see:
+- [README_iOS.md](README_iOS.md) - Comprehensive English documentation with code examples
+- [QUICKSTART_iOS_CN.md](QUICKSTART_iOS_CN.md) - Quick start guide in Chinese (中文快速开始指南)
+
+The iOS framework allows you to parse Open Drone ID messages received via Bluetooth or Wi-Fi on iOS devices.
+
+### Linux
 
 To build the library, the sample app and the unit tests on Linux:
 
