@@ -25,3 +25,11 @@ wifi/sender/sender
 .idea/
 cmake-build*
 build
+
+# iOS build artifacts
+build_ios/
+build_ios_cmake/
+output/
+*.xcframework
+*.framework
+*.a
