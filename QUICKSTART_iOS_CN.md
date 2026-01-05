@@ -20,12 +20,19 @@
 cd opendroneid-core-c
 ```
 
-4. 运行构建脚本：
+4. (可选) 检查构建环境：
+```bash
+./check_ios_env.sh
+```
+
+此脚本会验证你是否已安装所有必需的工具。
+
+5. 运行构建脚本：
 ```bash
 ./build_ios_framework.sh
 ```
 
-5. 构建完成后，框架会生成在 `output/OpenDroneID.xcframework` 目录中
+6. 构建完成后，框架会生成在 `output/OpenDroneID.xcframework` 目录中
 
 ## 集成到你的 iOS 项目 (Integration)
 

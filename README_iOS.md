@@ -22,12 +22,19 @@ git clone https://github.com/honghen28hshyan/opendroneid-core-c.git
 cd opendroneid-core-c
 ```
 
-2. Run the build script:
+2. (Optional) Check your build environment:
+```bash
+./check_ios_env.sh
+```
+
+This script will verify that you have all required tools installed.
+
+3. Run the build script:
 ```bash
 ./build_ios_framework.sh
 ```
 
-3. The script will create an XCFramework at `output/OpenDroneID.xcframework`
+4. The script will create an XCFramework at `output/OpenDroneID.xcframework`
 
 The build script:
 - Compiles the library for iOS devices (arm64)
