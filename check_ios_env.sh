@@ -75,17 +75,14 @@ echo ""
 
 # Check available architectures
 echo "6. Checking available architectures..."
-echo "   Device architectures:"
-DEVICE_ARCH=$(xcodebuild -showsdks 2>/dev/null | grep iphoneos | tail -n1)
-echo "     • arm64 (required)"
-
+echo "   Device architectures: arm64"
 echo "   Simulator architectures:"
 HOST_ARCH=$(uname -m)
 if [[ "$HOST_ARCH" == "arm64" ]]; then
     echo "     • arm64 (Apple Silicon Mac detected)"
-    echo "     • x86_64 (Rosetta 2 for Intel Macs)"
+    echo "     • x86_64 (via Rosetta 2 for Intel compatibility)"
 else
-    echo "     • x86_64 (Intel Mac detected)"
+    echo "     • x86_64 (Intel Mac detected)"  
     echo "     • arm64 (for Apple Silicon Macs)"
 fi
 echo ""

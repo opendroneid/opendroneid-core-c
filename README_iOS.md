@@ -18,7 +18,7 @@ The OpenDroneID library provides encoding and decoding functions for Open Drone 
 
 1. Clone the repository and navigate to the project directory:
 ```bash
-git clone https://github.com/honghen28hshyan/opendroneid-core-c.git
+git clone https://github.com/opendroneid/opendroneid-core-c.git
 cd opendroneid-core-c
 ```
 
