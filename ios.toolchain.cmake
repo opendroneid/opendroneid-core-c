@@ -45,9 +45,8 @@ set(CMAKE_CXX_FLAGS_INIT "-fno-common")
 set(CMAKE_C_COMPILER_WORKS TRUE)
 set(CMAKE_CXX_COMPILER_WORKS TRUE)
 
-# Enable bitcode (optional, can be disabled)
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fembed-bitcode")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fembed-bitcode")
+# Note: Bitcode is no longer required or recommended for iOS as of Xcode 14
+# It has been deprecated by Apple and removed from the toolchain
 
 # Search paths
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

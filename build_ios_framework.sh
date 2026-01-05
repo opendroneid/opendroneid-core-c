@@ -45,16 +45,17 @@ build_for_platform() {
     # Get SDK path
     local SDK_PATH=$(xcrun --sdk ${SDK} --show-sdk-path)
     
-    # Compile
+    # Compile opendroneid.c
     clang \
         -arch ${ARCH} \
         -isysroot ${SDK_PATH} \
         -mios-version-min=12.0 \
         ${COMMON_FLAGS} \
-        -c ${SOURCE_FILES} \
+        -c ${PROJECT_DIR}/libopendroneid/opendroneid.c \
         -o "${BUILD_DIR}/${PLATFORM}_${ARCH}_opendroneid.o" \
         -I"${PROJECT_DIR}/libopendroneid"
     
+    # Compile wifi.c
     clang \
         -arch ${ARCH} \
         -isysroot ${SDK_PATH} \

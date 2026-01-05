@@ -292,43 +292,43 @@ struct UASData {
         
         // Extract valid Basic IDs
         for i in 0..<Int(ODID_BASIC_ID_MAX_MESSAGES) {
-            if data.BasicIDValid.pointee & (1 << i) != 0 {
-                if let basicIDPtr = data.BasicID {
-                    let basicIDData = basicIDPtr[i]
-                    basicIDs.append(BasicIDInfo(from: basicIDData))
-                }
+            if data.BasicIDValid[i] != 0 {
+                let basicIDData = data.BasicID[i]
+                basicIDs.append(BasicIDInfo(from: basicIDData))
             }
         }
         
         self.basicID = basicIDs
         
         // Extract Location if valid
-        if data.LocationValid != 0, let locationPtr = data.Location {
-            self.location = LocationInfo(from: locationPtr.pointee)
+        if data.LocationValid != 0 {
+            self.location = LocationInfo(from: data.Location)
         } else {
             self.location = nil
         }
         
         // Extract System if valid
-        if data.SystemValid != 0, let systemPtr = data.System {
-            self.system = SystemInfo(from: systemPtr.pointee)
+        if data.SystemValid != 0 {
+            self.system = SystemInfo(from: data.System)
         } else {
             self.system = nil
         }
         
         // Extract Self ID if valid
-        if data.SelfIDValid != 0, let selfIDPtr = data.SelfID {
-            let descData = Data(bytes: &selfIDPtr.pointee.Desc, count: Int(ODID_STR_SIZE))
-            self.selfID = String(data: descData, encoding: .utf8)?
+        if data.SelfIDValid != 0 {
+            var descData = data.SelfID.Desc
+            let dataObj = Data(bytes: &descData, count: Int(ODID_STR_SIZE))
+            self.selfID = String(data: dataObj, encoding: .utf8)?
                 .trimmingCharacters(in: .controlCharacters.union(.whitespaces))
         } else {
             self.selfID = nil
         }
         
         // Extract Operator ID if valid
-        if data.OperatorIDValid != 0, let operatorIDPtr = data.OperatorID {
-            let idData = Data(bytes: &operatorIDPtr.pointee.OperatorId, count: Int(ODID_ID_SIZE))
-            self.operatorID = String(data: idData, encoding: .utf8)?
+        if data.OperatorIDValid != 0 {
+            var operatorIdData = data.OperatorID.OperatorId
+            let dataObj = Data(bytes: &operatorIdData, count: Int(ODID_ID_SIZE))
+            self.operatorID = String(data: dataObj, encoding: .utf8)?
                 .trimmingCharacters(in: .controlCharacters.union(.whitespaces))
         } else {
             self.operatorID = nil

@@ -48,8 +48,7 @@ build_cmake_platform() {
         -DCMAKE_INSTALL_PREFIX="${BUILD_SUBDIR}/install" \
         -DBUILD_WIFI=OFF \
         -DBUILD_MAVLINK=OFF \
-        -DBUILD_TESTS=OFF \
-        -DCMAKE_C_FLAGS="-fembed-bitcode"
+        -DBUILD_TESTS=OFF
     
     # Build
     cmake --build . --config Release
