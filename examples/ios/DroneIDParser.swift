@@ -225,8 +225,9 @@ struct BasicIDInfo {
         
         // Safely extract UASID using withUnsafeBytes
         var uasidCopy = data.UASID
-        let idData = withUnsafeBytes(of: &uasidCopy) { bytes in
-            Data(bytes: bytes.baseAddress!, count: Int(ODID_ID_SIZE))
+        let idData = withUnsafeBytes(of: &uasidCopy) { bytes -> Data in
+            guard let baseAddress = bytes.baseAddress else { return Data() }
+            return Data(bytes: baseAddress, count: Int(ODID_ID_SIZE))
         }
         self.uasID = String(data: idData, encoding: .utf8)?
             .trimmingCharacters(in: .controlCharacters.union(.whitespaces)) ?? ""
@@ -321,8 +322,9 @@ struct UASData {
         // Extract Self ID if valid
         if data.SelfIDValid != 0 {
             var descCopy = data.SelfID.Desc
-            let dataObj = withUnsafeBytes(of: &descCopy) { bytes in
-                Data(bytes: bytes.baseAddress!, count: Int(ODID_STR_SIZE))
+            let dataObj = withUnsafeBytes(of: &descCopy) { bytes -> Data in
+                guard let baseAddress = bytes.baseAddress else { return Data() }
+                return Data(bytes: baseAddress, count: Int(ODID_STR_SIZE))
             }
             self.selfID = String(data: dataObj, encoding: .utf8)?
                 .trimmingCharacters(in: .controlCharacters.union(.whitespaces))
@@ -333,8 +335,9 @@ struct UASData {
         // Extract Operator ID if valid
         if data.OperatorIDValid != 0 {
             var operatorIdCopy = data.OperatorID.OperatorId
-            let dataObj = withUnsafeBytes(of: &operatorIdCopy) { bytes in
-                Data(bytes: bytes.baseAddress!, count: Int(ODID_ID_SIZE))
+            let dataObj = withUnsafeBytes(of: &operatorIdCopy) { bytes -> Data in
+                guard let baseAddress = bytes.baseAddress else { return Data() }
+                return Data(bytes: baseAddress, count: Int(ODID_ID_SIZE))
             }
             self.operatorID = String(data: dataObj, encoding: .utf8)?
                 .trimmingCharacters(in: .controlCharacters.union(.whitespaces))

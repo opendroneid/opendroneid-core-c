@@ -82,7 +82,7 @@ create_framework() {
     mkdir -p "${FRAMEWORK_PATH}/Modules"
     
     # Copy library
-    cp "${LIB_FILE}" "${FRAMEWORK_PATH}/${FRAMEWORK_NAME}"
+    cp "${LIB_PATH}" "${FRAMEWORK_PATH}/${FRAMEWORK_NAME}"
     
     # Copy headers
     cp "${PROJECT_DIR}/libopendroneid/opendroneid.h" "${FRAMEWORK_PATH}/Headers/"
