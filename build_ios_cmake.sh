@@ -82,34 +82,34 @@ create_framework() {
     mkdir -p "${FRAMEWORK_PATH}/Modules"
     
     # Copy library
-    cp "${LIB_PATH}" "${FRAMEWORK_PATH}/${FRAMEWORK_NAME}"
+    cp "${LIB_FILE}" "${FRAMEWORK_PATH}/${FRAMEWORK_NAME}"
     
     # Copy headers
     cp "${PROJECT_DIR}/libopendroneid/opendroneid.h" "${FRAMEWORK_PATH}/Headers/"
     cp "${PROJECT_DIR}/libopendroneid/odid_wifi.h" "${FRAMEWORK_PATH}/Headers/"
     
     # Create umbrella header
-    cat > "${FRAMEWORK_PATH}/Headers/${FRAMEWORK_NAME}.h" << 'EOF'
+    cat > "${FRAMEWORK_PATH}/Headers/${FRAMEWORK_NAME}.h" << EOF
 //
-//  OpenDroneID.h
-//  OpenDroneID Framework
+//  ${FRAMEWORK_NAME}.h
+//  ${FRAMEWORK_NAME} Framework
 //
 //  Open Drone ID Core C Library
 //
 
-#ifndef OpenDroneID_h
-#define OpenDroneID_h
+#ifndef ${FRAMEWORK_NAME}_h
+#define ${FRAMEWORK_NAME}_h
 
 #include "opendroneid.h"
 #include "odid_wifi.h"
 
-#endif /* OpenDroneID_h */
+#endif /* ${FRAMEWORK_NAME}_h */
 EOF
     
     # Create module map
-    cat > "${FRAMEWORK_PATH}/Modules/module.modulemap" << 'EOF'
-framework module OpenDroneID {
-    umbrella header "OpenDroneID.h"
+    cat > "${FRAMEWORK_PATH}/Modules/module.modulemap" << EOF
+framework module ${FRAMEWORK_NAME} {
+    umbrella header "${FRAMEWORK_NAME}.h"
     export *
     module * { export * }
 }

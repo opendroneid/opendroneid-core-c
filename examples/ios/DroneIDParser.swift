@@ -223,7 +223,11 @@ struct BasicIDInfo {
         self.uaType = data.UAType
         self.idType = data.IDType
         
-        let idData = Data(bytes: UnsafeRawPointer(&data.UASID), count: Int(ODID_ID_SIZE))
+        // Safely extract UASID using withUnsafeBytes
+        var uasidCopy = data.UASID
+        let idData = withUnsafeBytes(of: &uasidCopy) { bytes in
+            Data(bytes: bytes.baseAddress!, count: Int(ODID_ID_SIZE))
+        }
         self.uasID = String(data: idData, encoding: .utf8)?
             .trimmingCharacters(in: .controlCharacters.union(.whitespaces)) ?? ""
     }
@@ -316,8 +320,10 @@ struct UASData {
         
         // Extract Self ID if valid
         if data.SelfIDValid != 0 {
-            var descData = data.SelfID.Desc
-            let dataObj = Data(bytes: &descData, count: Int(ODID_STR_SIZE))
+            var descCopy = data.SelfID.Desc
+            let dataObj = withUnsafeBytes(of: &descCopy) { bytes in
+                Data(bytes: bytes.baseAddress!, count: Int(ODID_STR_SIZE))
+            }
             self.selfID = String(data: dataObj, encoding: .utf8)?
                 .trimmingCharacters(in: .controlCharacters.union(.whitespaces))
         } else {
@@ -326,8 +332,10 @@ struct UASData {
         
         // Extract Operator ID if valid
         if data.OperatorIDValid != 0 {
-            var operatorIdData = data.OperatorID.OperatorId
-            let dataObj = Data(bytes: &operatorIdData, count: Int(ODID_ID_SIZE))
+            var operatorIdCopy = data.OperatorID.OperatorId
+            let dataObj = withUnsafeBytes(of: &operatorIdCopy) { bytes in
+                Data(bytes: bytes.baseAddress!, count: Int(ODID_ID_SIZE))
+            }
             self.operatorID = String(data: dataObj, encoding: .utf8)?
                 .trimmingCharacters(in: .controlCharacters.union(.whitespaces))
         } else {

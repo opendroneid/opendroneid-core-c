@@ -13,10 +13,6 @@ BUILD_DIR="${PROJECT_DIR}/build_ios"
 FRAMEWORK_DIR="${BUILD_DIR}/frameworks"
 OUTPUT_DIR="${PROJECT_DIR}/output"
 
-# Source files
-SOURCE_FILES="${PROJECT_DIR}/libopendroneid/opendroneid.c ${PROJECT_DIR}/libopendroneid/wifi.c"
-HEADER_FILES="${PROJECT_DIR}/libopendroneid/opendroneid.h ${PROJECT_DIR}/libopendroneid/odid_wifi.h"
-
 # Compiler flags
 COMMON_FLAGS="-D_FORTIFY_SOURCE=2 -fstack-protector -fno-delete-null-pointer-checks -fwrapv -O2 -Wall -Wdouble-promotion -Wno-address-of-packed-member -Wextra"
 
@@ -104,7 +100,8 @@ create_framework() {
     cp "${LIB_FILE}" "${FRAMEWORK_PATH}/${FRAMEWORK_NAME}"
     
     # Copy headers
-    cp ${HEADER_FILES} "${FRAMEWORK_PATH}/Headers/"
+    cp "${PROJECT_DIR}/libopendroneid/opendroneid.h" "${FRAMEWORK_PATH}/Headers/"
+    cp "${PROJECT_DIR}/libopendroneid/odid_wifi.h" "${FRAMEWORK_PATH}/Headers/"
     
     # Create module map
     cat > "${FRAMEWORK_PATH}/Modules/module.modulemap" << EOF
