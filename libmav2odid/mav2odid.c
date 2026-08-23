@@ -399,12 +399,21 @@ int m2o_messagePack(mav2odid_t *m2o, mavlink_open_drone_id_message_pack_t *mavMe
     if (!mavMessagePack)
         return ODID_FAIL;
 
+    /* Validate fields from untrusted MAVLink input */
+    if (mavMessagePack->single_message_size != ODID_MESSAGE_SIZE)
+        return ODID_FAIL;
+    if (mavMessagePack->msg_pack_size < 1 || mavMessagePack->msg_pack_size > ODID_PACK_MAX_MESSAGES)
+        return ODID_FAIL;
+
     ODID_MessagePack_data messagePack;
     messagePack.SingleMessageSize = mavMessagePack->single_message_size;
     messagePack.MsgPackSize = mavMessagePack->msg_pack_size;
-    for (int i = 0; i < mavMessagePack->msg_pack_size; i++)
-        for (int j = 0; j < ODID_MESSAGE_SIZE; j++)
-            messagePack.Messages[i].rawData[j] = mavMessagePack->messages[i*ODID_MESSAGE_SIZE + j];
+
+    for (int i = 0; i < messagePack.MsgPackSize; i++) {
+        for (int j = 0; j < ODID_MESSAGE_SIZE; j++) {
+            messagePack.Messages[i].rawData[j] = mavMessagePack->messages[i * ODID_MESSAGE_SIZE + j];
+        }
+    }
 
     if (encodeMessagePack(&m2o->messagePackEnc, &messagePack) != ODID_SUCCESS)
         return ODID_FAIL;
