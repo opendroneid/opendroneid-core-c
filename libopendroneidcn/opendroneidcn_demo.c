@@ -3,7 +3,7 @@ Copyright (C) 2026 Jun Zhang
 
 SPDX-License-Identifier: Apache-2.0
 
-Open Drone ID C Library — CN 46750-2025
+Open Drone ID C Library — GB 46750-2025
 
 Maintainer:
 Jun Zhang

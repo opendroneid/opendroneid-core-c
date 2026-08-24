@@ -5,7 +5,7 @@ includedir=@INCLUDE_INSTALL_DIR@
 
 Name: libopendroneidcn
 Version: @VERSION@
-Description: OpenDroneID CN 46750-2025 reference library
+Description: OpenDroneID GB 46750-2025 reference library
 Requires.private:
 Libs: -L${libdir} -lopendroneidcn
 Cflags: -I${includedir}

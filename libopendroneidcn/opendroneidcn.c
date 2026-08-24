@@ -3,13 +3,13 @@ Copyright (C) 2026 Jun Zhang
 
 SPDX-License-Identifier: Apache-2.0
 
-Open Drone ID C Library — CN 46750-2025
+Open Drone ID C Library — GB 46750-2025
 
 Maintainer:
 Jun Zhang
 zhangjun.sole@qq.com
 
-CN 46750-2025 — Civil Unmanned Aircraft System Operational Identification
+GB 46750-2025 — Civil Unmanned Aircraft System Operational Identification
 (中华人民共和国民用无人驾驶航空器系统运营识别规范)
 
 Parses the broadcast-mode RID packet as defined in section 5.2 of the standard.
@@ -22,7 +22,7 @@ The chain is open-ended per §5.2.2; currently 3 bytes defined.
 
 All multi-byte fields are little-endian per the spec.
 
-Reference: CN 46750-2025 (published 2025-10-31, effective 2026-05-01)
+Reference: GB 46750-2025 (published 2025-10-31, effective 2026-05-01)
 */
 
 #include "opendroneidcn.h"
@@ -31,7 +31,7 @@ Reference: CN 46750-2025 (published 2025-10-31, effective 2026-05-01)
 
 /* ===================== Endianness Helpers ===================== */
 /*
- * CN 46750-2025 specifies all multi-byte numeric fields as little-endian.
+ * GB 46750-2025 specifies all multi-byte numeric fields as little-endian.
  * Byte-shift macros work on any CPU regardless of host endianness — no
  * runtime detection needed, and the compiler optimizes them to single
  * load+rev instructions on big-endian targets.
@@ -68,7 +68,7 @@ static inline void h_to_le32(uint8_t p[4], uint32_t v)
  * Validate that an ASCII field contains only printable characters
  * (0x20–0x7E) or null padding (0x00). Returns false if any byte is
  * non-printable, non-null — used to reject garbage data from
- * false-positive CN46750 packet matches.
+ * false-positive GB46750 packet matches.
  */
 static bool is_valid_ascii_field(const uint8_t *buf, int len) {
     for (int i = 0; i < len; i++) {

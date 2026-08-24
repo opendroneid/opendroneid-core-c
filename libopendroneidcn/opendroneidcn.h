@@ -3,19 +3,19 @@ Copyright (C) 2026 Jun Zhang
 
 SPDX-License-Identifier: Apache-2.0
 
-Open Drone ID C Library — CN 46750-2025
+Open Drone ID C Library — GB 46750-2025
 
 Maintainer:
 Jun Zhang
 zhangjun.sole@qq.com
 
-CN 46750-2025 — Civil Unmanned Aircraft System Operational Identification
+GB 46750-2025 — Civil Unmanned Aircraft System Operational Identification
 (中华人民共和国民用无人驾驶航空器系统运营识别规范)
 
 Broadcast-mode RID packet parser for the Chinese national standard.
 See opendroneidcn.c for the encoding details.
 
-Reference: CN 46750-2025 (published 2025-10-31, effective 2026-05-01)
+Reference: GB 46750-2025 (published 2025-10-31, effective 2026-05-01)
 */
 
 #ifndef OPENDRONEID_CN46750_H
@@ -156,7 +156,7 @@ typedef struct {
 /* ===================== Encode / Decode API ===================== */
 
 /**
- * @brief  Decode CN 46750-2025 byte stream into physical value structure
+ * @brief  Decode GB 46750-2025 byte stream into physical value structure
  * @param  buf      [IN]  Raw byte stream
  * @param  buf_len  [IN]  Length of byte stream
  * @param  data     [OUT] Parsed RID data
@@ -169,7 +169,7 @@ RID_Status_t CN46750_RID_Decode(const uint8_t *buf,
                                 uint8_t *version);
 
 /**
- * @brief  Encode DroneRIDData_t structure into CN 46750-2025 byte stream
+ * @brief  Encode DroneRIDData_t structure into GB 46750-2025 byte stream
  * @param  data      [IN]  RID data structure to encode
  * @param  buf       [OUT] Output buffer for encoded byte stream
  * @param  buf_size  [IN]  Size of output buffer (recommend >= 128 bytes)
@@ -183,12 +183,12 @@ RID_Status_t CN46750_RID_Encode(const DroneRIDData_t *data,
 /* ===================== Beacon Scanner ===================== */
 
 /**
- * @brief  Locate a CN 46750-2025 RID packet inside raw beacon frame data
+ * @brief  Locate a GB 46750-2025 RID packet inside raw beacon frame data
  * @param  beacon_data [IN]  Raw 802.11 beacon frame body (after radiotap header)
  * @param  beacon_len  [IN]  Length of beacon data in bytes
  * @param  rid_offset  [OUT] Byte offset where the RID packet starts (may be NULL)
  * @param  rid_len     [OUT] Total byte length of the RID packet (may be NULL)
- * @return true if a valid CN46750 packet header was found
+ * @return true if a valid GB46750 packet header was found
  */
 bool CN46750_FindPacket(const uint8_t *beacon_data, size_t beacon_len,
                         size_t *rid_offset, size_t *rid_len);
