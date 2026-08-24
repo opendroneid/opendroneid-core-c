@@ -16,11 +16,11 @@ sw@simonwunderlich.de
 int clock_gettime(clockid_t, struct timespec *);
 #else
 #include <string.h>
-#include <stddef.h>
 #include <stdio.h>
 #endif
 
 #include <errno.h>
+#include <stddef.h>
 #include <time.h>
 
 #include "opendroneid.h"
@@ -535,6 +535,13 @@ int odid_wifi_build_message_pack_beacon_frame(const ODID_UAS_Data *UAS_Data, con
 int odid_message_process_pack(ODID_UAS_Data *UAS_Data, const uint8_t *pack, size_t buflen)
 {
     const ODID_MessagePack_encoded *msg_pack_enc = (const ODID_MessagePack_encoded *) pack;
+
+    /* The fixed header must be fully present before MsgPackSize can be read */
+    if (buflen < offsetof(ODID_MessagePack_encoded, Messages))
+        return -ENOMEM;
+    if (msg_pack_enc->MsgPackSize > ODID_PACK_MAX_MESSAGES)
+        return -EINVAL;
+
     size_t size = sizeof(*msg_pack_enc) - ODID_MESSAGE_SIZE * (ODID_PACK_MAX_MESSAGES - msg_pack_enc->MsgPackSize);
     if (size > buflen)
         return -ENOMEM;
@@ -602,15 +609,26 @@ int odid_wifi_receive_message_pack_nan_action_frame(ODID_UAS_Data *UAS_Data,
         return -EINVAL;
     len += sizeof(*nsda);
 
-    si = (struct ODID_service_info *)(buf + len);
-    ret = odid_message_process_pack(UAS_Data, buf + len + sizeof(*si), buf_size - len - sizeof(*nsdea));
-    if (ret < 0)
+    /* Validate service_info_length from the preceding descriptor */
+    size_t service_info_len = (size_t) nsda->service_info_length;
+    if (service_info_len < sizeof(*si))
         return -EINVAL;
-    if (nsda->service_info_length != (sizeof(*si) + ret))
+    if (len + service_info_len > buf_size)
         return -EINVAL;
     if (nsda->header.length != (cpu_to_le16(sizeof(*nsda) - sizeof(struct nan_attribute_header) + nsda->service_info_length)))
         return -EINVAL;
-    len += sizeof(*si) + ret;
+
+    si = (struct ODID_service_info *)(buf + len);
+
+    /* Message pack follows the service info header */
+    size_t pack_len = service_info_len - sizeof(*si);
+
+    ret = odid_message_process_pack(UAS_Data, buf + len + sizeof(*si), pack_len);
+    if (ret < 0)
+        return -EINVAL;
+    if ((size_t)ret != pack_len)
+        return -EINVAL;
+    len += service_info_len;
 
     /* NAN Attribute for Service Descriptor extension header */
     if (len + sizeof(*nsdea) > buf_size)
