@@ -311,9 +311,9 @@ Update Jan 2023: There now appears to be a version of the rule available in [Eng
 
 ### China
 
-China has published [CN 46750-2025](https://openstd.samr.gov.cn/) (中华人民共和国民用无人驾驶航空器系统运营识别规范) — a national standard for civil UAS operational identification, effective 2026-05-01.
+China has published [GB 46750-2025](https://openstd.samr.gov.cn/) (中华人民共和国民用无人驾驶航空器系统运营识别规范) — a national standard for civil UAS operational identification, effective 2026-05-01.
 
-CN 46750-2025 defines an **independent protocol** that is not wire-compatible with ASTM F3411. Key differences include:
+GB 46750-2025 defines an **independent protocol** that is not wire-compatible with ASTM F3411. Key differences include:
 
 * A separate broadcast-mode wire format (flag-bitmask chain instead of fixed 25-byte message types).
 * Both a 20-character serial number **and** an 8-character real-name registration ID (UIN) are mandatory.
@@ -324,7 +324,7 @@ CN 46750-2025 defines an **independent protocol** that is not wire-compatible wi
 * Supports both WGS-84 and CGCS2000 coordinate systems.
 * Drone class (Micro through Large) is mandatory.
 
-The library implementation is in [`libopendroneidcn/`](libopendroneidcn/). See the [CN 46750-2025(China Civil Unmanned Aerial System Operation Identification Specifications) README](libopendroneidcn/README.md) for the complete field specification and protocol format.
+The library implementation is in [`libopendroneidcn/`](libopendroneidcn/). See the [GB 46750-2025(China Civil Unmanned Aerial System Operation Identification Specifications) README](libopendroneidcn/README.md) for the complete field specification and protocol format.
 
 ### Protocol versions
 
@@ -406,4 +406,5 @@ M: Mandatory. O: Optional. R: Recommended
 9. The Japanese rule mandates that both the Serial number and the Registration ID be broadcast in multiple Basic ID messages.
 10. Uses Wi-Fi Beacon transmission as defined in ASTM F3411-22a.
 11. Based on auto-translated document from Japanese to English. Can contain errors.
-12. **China Civil Unmanned Aerial System Operation Identification Specifications(CN 46750-2025):** Uses an independent wire format that is not compatible with ASTM F3411. See the [CN 46750-2025 section](#china) above and [`libopendroneidcn/README.md`](libopendroneidcn/README.md) for details.
+
+**China Civil Unmanned Aerial System Operation Identification Specifications(GB 46750-2025):** Uses an independent wire format that is not compatible with ASTM F3411. See the [GB 46750-2025 section](#china) above and [`libopendroneidcn/README.md`](libopendroneidcn/README.md) for details.
