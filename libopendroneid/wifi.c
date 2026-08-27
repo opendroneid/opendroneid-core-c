@@ -141,6 +141,7 @@ static int buf_fill_ieee80211_beacon(uint8_t *buf, size_t *len, size_t buf_size,
 void drone_export_gps_data(const ODID_UAS_Data *UAS_Data, char *buf, size_t buf_size)
 {
     ptrdiff_t len = 0;
+    const char *sep = "";
 
 #define mprintf(...) {\
     len += snprintf(buf + len, buf_size - (size_t)len, __VA_ARGS__); \
@@ -150,15 +151,16 @@ void drone_export_gps_data(const ODID_UAS_Data *UAS_Data, char *buf, size_t buf_
 
     mprintf("{\n\t\"Version\": \"1.1\",\n\t\"Response\": {\n");
 
-    mprintf("\t\t\"BasicID\": {\n");
+    mprintf("\t\t\"BasicID\": {");
     for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {
         if (!UAS_Data->BasicIDValid[i])
             continue;
-        mprintf("\t\t\t\"UAType%d\": %d,\n", i, UAS_Data->BasicID[i].UAType);
-        mprintf("\t\t\t\"IDType%d\": %d,\n", i, UAS_Data->BasicID[i].IDType);
-        mprintf("\t\t\t\"UASID%d\": \"%s\",\n", i, UAS_Data->BasicID[i].UASID);
+        mprintf("%s\n\t\t\t\"UAType%d\": %d,", sep, i, UAS_Data->BasicID[i].UAType);
+        mprintf("\n\t\t\t\"IDType%d\": %d,", i, UAS_Data->BasicID[i].IDType);
+        mprintf("\n\t\t\t\"UASID%d\": \"%s\"", i, UAS_Data->BasicID[i].UASID);
+        sep = ",";
     }
-    mprintf("\t\t},\n");
+    mprintf("\n\t\t},\n");
 
     mprintf("\t\t\"Location\": {\n");
     mprintf("\t\t\t\"Status\": %d,\n", (int)UAS_Data->Location.Status);
@@ -176,22 +178,24 @@ void drone_export_gps_data(const ODID_UAS_Data *UAS_Data, char *buf, size_t buf_
     mprintf("\t\t\t\"BaroAccuracy\": %d,\n", UAS_Data->Location.BaroAccuracy);
     mprintf("\t\t\t\"SpeedAccuracy\": %d,\n", UAS_Data->Location.SpeedAccuracy);
     mprintf("\t\t\t\"TSAccuracy\": %d,\n", UAS_Data->Location.TSAccuracy);
-    mprintf("\t\t\t\"TimeStamp\": %f,\n", (double) UAS_Data->Location.TimeStamp);
+    mprintf("\t\t\t\"TimeStamp\": %f\n", (double) UAS_Data->Location.TimeStamp);
     mprintf("\t\t},\n");
 
     mprintf("\t\t\"Authentication\": {\n");
     mprintf("\t\t\t\"AuthType\": %d,\n", UAS_Data->Auth[0].AuthType);
     mprintf("\t\t\t\"LastPageIndex\": %d,\n", UAS_Data->Auth[0].LastPageIndex);
     mprintf("\t\t\t\"Length\": %d,\n", UAS_Data->Auth[0].Length);
-    mprintf("\t\t\t\"Timestamp\": %u,\n", UAS_Data->Auth[0].Timestamp);
-    for (int i = 0; i <= UAS_Data->Auth[0].LastPageIndex; i++) {
-        mprintf("\t\t\t\"AuthData Page %d,\": \"%s\"\n", i, UAS_Data->Auth[i].AuthData);
+    mprintf("\t\t\t\"Timestamp\": %u", UAS_Data->Auth[0].Timestamp);
+    for (int i = 0; i < ODID_AUTH_MAX_PAGES; i++) {
+        if (!UAS_Data->AuthValid[i] || (i > UAS_Data->Auth[0].LastPageIndex))
+            continue;
+        mprintf(",\n\t\t\t\"AuthData Page %d\": \"%s\"", i, UAS_Data->Auth[i].AuthData);
     }
-    mprintf("\t\t},\n");
+    mprintf("\n\t\t},\n");
 
     mprintf("\t\t\"SelfID\": {\n");
     mprintf("\t\t\t\"Description Type\": %d,\n", UAS_Data->SelfID.DescType);
-    mprintf("\t\t\t\"Description\": \"%s\",\n", UAS_Data->SelfID.Desc);
+    mprintf("\t\t\t\"Description\": \"%s\"\n", UAS_Data->SelfID.Desc);
     mprintf("\t\t},\n");
 
     mprintf("\t\t\"Operator\": {\n");
@@ -206,13 +210,13 @@ void drone_export_gps_data(const ODID_UAS_Data *UAS_Data, char *buf, size_t buf_
     mprintf("\t\t\t\"CategoryEU\": %d,\n", UAS_Data->System.CategoryEU);
     mprintf("\t\t\t\"ClassEU\": %d,\n", UAS_Data->System.ClassEU);
     mprintf("\t\t\t\"OperatorAltitudeGeo\": %f,\n", (double) UAS_Data->System.OperatorAltitudeGeo);
-    mprintf("\t\t\t\"Timestamp\": %u,\n", UAS_Data->System.Timestamp);
-    mprintf("\t\t}\n");
+    mprintf("\t\t\t\"Timestamp\": %u\n", UAS_Data->System.Timestamp);
+    mprintf("\t\t},\n");
 
     mprintf("\t\t\"OperatorID\": {\n");
     mprintf("\t\t\t\"OperatorIdType\": %d,\n", UAS_Data->OperatorID.OperatorIdType);
-    mprintf("\t\t\t\"OperatorId\": \"%s\",\n", UAS_Data->OperatorID.OperatorId);
-    mprintf("\t\t},\n");
+    mprintf("\t\t\t\"OperatorId\": \"%s\"\n", UAS_Data->OperatorID.OperatorId);
+    mprintf("\t\t}\n");
 
     mprintf("\t}\n}");
 }
