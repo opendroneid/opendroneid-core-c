@@ -354,6 +354,42 @@ static void test_operatorID(mav2odid_t *m2o, ODID_UAS_Data *uas_data)
     print_mavlink_operatorID(&operatorID2);
 }
 
+static void test_cycleMessages(mav2odid_t *m2o)
+{
+    printf("\n\n---------------------Cycle Messages---------------------\n\n");
+    mavlink_open_drone_id_basic_id_t basic_id1 = {
+        .ua_type = MAV_ODID_UA_TYPE_HELICOPTER_OR_MULTIROTOR,
+        .id_type = MAV_ODID_ID_TYPE_SERIAL_NUMBER };
+    uint8_t uas_id1[] = "11111111111111111111";
+    memcpy(basic_id1.uas_id, uas_id1, sizeof(basic_id1.uas_id));
+    m2o_basicId(m2o, &basic_id1);
+
+    mavlink_open_drone_id_basic_id_t basic_id2 = {
+        .ua_type = MAV_ODID_UA_TYPE_AEROPLANE,
+        .id_type = MAV_ODID_ID_TYPE_CAA_REGISTRATION_ID };
+    uint8_t uas_id2[] = "22222222222222222222";
+    memcpy(basic_id2.uas_id, uas_id2, sizeof(basic_id2.uas_id));
+    m2o_basicId(m2o, &basic_id2);
+
+    uint8_t data[ODID_MESSAGE_SIZE];
+    int found_serial = 0, found_caa = 0;
+    for (int i = 0; i < DRONEID_SCHEDULER_SIZE * 2; i++) {
+        if (m2o_cycleMessages(m2o, data) == ODID_SUCCESS) {
+            ODID_BasicID_encoded *enc = (ODID_BasicID_encoded *) data;
+            if (enc->MessageType == ODID_MESSAGETYPE_BASIC_ID) {
+                if (enc->IDType == ODID_IDTYPE_SERIAL_NUMBER)
+                    found_serial = 1;
+                else if (enc->IDType == ODID_IDTYPE_CAA_REGISTRATION_ID)
+                    found_caa = 1;
+            }
+        }
+    }
+    if (!found_serial || !found_caa)
+        printf("ERROR: Cycling Basic ID messages failed to alternate both messages\n");
+    else
+        printf("Cycling messages test passed: both Basic ID types alternated successfully\n");
+}
+
 void test_mav2odid()
 {
     mav2odid_t m2o;
@@ -369,6 +405,7 @@ void test_mav2odid()
     test_selfID(&m2o, &uas_data);
     test_system(&m2o, &uas_data);
     test_operatorID(&m2o, &uas_data);
+    test_cycleMessages(&m2o);
 
     printf("\n-------------------------------------------------------------------------------\n");
     printf("-------------------------------------  End  -----------------------------------\n");

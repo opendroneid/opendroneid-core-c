@@ -132,7 +132,7 @@ int m2o_cycleMessages(mav2odid_t *m2o, uint8_t *data)
         for (int i = 0; i < ODID_BASIC_ID_MAX_MESSAGES; i++) {
             basicIDIndex = (uint8_t) ((basicIDIndex + 1) % ODID_BASIC_ID_MAX_MESSAGES);
             if (m2o->basicIDEncValid[basicIDIndex]) {
-                memcpy(data, &m2o->basicIdEnc, sizeof(ODID_BasicID_encoded));
+                memcpy(data, &m2o->basicIdEnc[basicIDIndex], sizeof(ODID_BasicID_encoded));
                 break;
             }
         }
