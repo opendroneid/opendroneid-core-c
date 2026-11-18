@@ -53,6 +53,12 @@ The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example co
 ### Linux
 A basic scanner application for Wi-Fi NaN/Beacon frames and Bluetooth is available [here](https://github.com/sxjack/unix_rid_capture).
 
+### Rust
+A Rust library for decoding (and encoding) drone ID messages is available at https://github.com/Mattbusel/remoteid ([crates.io](https://crates.io/crates/remoteid)).
+It extracts the messages from Bluetooth 4 Legacy Advertising, Bluetooth 5 Long Range + Extended Advertising, Wi-Fi Beacon and Wi-Fi NaN frames, and can check DRIP authentication signatures (RFC 9575).
+It is `no_std` and builds for microcontrollers and WebAssembly.
+Its decoder is tested against reference output generated with this library.
+
 ### Smartphone receivers
 
 A list of smartphones that have been tested for receiving Remote ID signals is available [here](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
