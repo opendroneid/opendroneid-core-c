@@ -59,6 +59,8 @@ It extracts the messages from Bluetooth 4 Legacy Advertising, Bluetooth 5 Long R
 It is `no_std` and builds for microcontrollers and WebAssembly.
 Its decoder is tested against reference output generated with this library.
 
+A companion Rust tool, [uas-cot](https://github.com/Mattbusel/uas-cot) ([crates.io](https://crates.io/crates/uas-cot)), converts decoded Remote ID into TAK Cursor-on-Target (CoT) messages and streams them to a TAK server over TLS.
+
 ### Smartphone receivers
 
 A list of smartphones that have been tested for receiving Remote ID signals is available [here](https://github.com/opendroneid/receiver-android/blob/master/supported-smartphones.md).
