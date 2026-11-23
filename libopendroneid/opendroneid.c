@@ -1227,7 +1227,7 @@ float decodeHorizontalAccuracy(ODID_Horizontal_accuracy_t Accuracy)
     case ODID_HOR_ACC_10NM:
         return 18520;
     case ODID_HOR_ACC_4NM:
-        return 7808;
+        return 7408;
     case ODID_HOR_ACC_2NM:
         return 3704;
     case ODID_HOR_ACC_1NM:
