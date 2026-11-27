@@ -50,6 +50,10 @@ Keep in mind that for both WireShark and for this approach, if the goal is to do
 ### ESP32
 The [ESP32 transmitter](https://github.com/sxjack/uav_electronic_ids) example code also contains code for receiving drone ID signals on ESP32 HW.
 
+### nRF
+
+The [nRF RID scanner](https://github.com/tuupola/nrf_rid_scanner) example dumps received Remote ID messages either as JSON or as CSV and also supports DRIP.
+
 ### Linux
 A basic scanner application for Wi-Fi NaN/Beacon frames and Bluetooth is available [here](https://github.com/sxjack/unix_rid_capture).
 
